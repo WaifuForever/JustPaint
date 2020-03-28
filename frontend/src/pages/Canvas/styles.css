@@ -1,0 +1,14 @@
+.canvas-container{
+    margin-top: 80px;
+}
+
+canvas{
+   
+    padding: 10px;
+    border: 2px solid black;
+}
+
+.icon{
+    width: 20px;
+    height: 20px;
+}
