@@ -1,24 +1,22 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { NavBtn, ProfileButton, Logo, HorizontalNavBar, VerticalNavBar, Options, Contacts } from './styles.js';
+import { NavBtn, ProfileButton, Logo, HorizontalNavBar, VerticalNavBar, Options, Contact } from './styles.js';
 
+import profile from '../../assets/profile.jfif';
 
 export default function Menu(){
-    const [currentNav, setCurrentNav] = useState({ name: "" },);  
+    const [currentNav, setCurrentNav] = useState("");  
     const [isMenuVisible, setIsMenuVisible] = useState(false);  
-    var currentChat = '';
-
+    const [currentChat, setCurrentChat] = useState("");  
     
-  /*  const states = [{ name: 'a'},
-                    { name: 'b'},
-                    { name: 'c'},
-                    { name: 'd'},
-                    { name: 'e'}];
+   const states = [{ name: 'a'},
+                    
+                    { name: 'b'}];
 
     function load(value){
-        setCurrentNav({name : value});
-        console.log("CurrentNav: " + JSON.stringify(currentNav));
+        setCurrentChat(value);
+        console.log("CurrentChat: " + JSON.stringify(currentChat));
 
         states.map((state, index) => {                
             state.isActive = true;
@@ -26,7 +24,6 @@ export default function Menu(){
            
         } 
     )}
-*/
 
     return (
         <>
@@ -39,40 +36,50 @@ export default function Menu(){
                 <li className="item">item2</li>
                 <li className="item">item3</li>
                 <li >
-                    <Contacts>
+                    <div>
                         
-                        <div className="bloc-1">
+                        <Contact isActive={currentChat === 'a'}>
                             <div className="contact">
-                                <span >Friend 1 </span>
+                                <div onClick={() => load('a')} >    
+                                    <ul>
+                                        <li><img src={profile} /> </li>
+                                        <li>Friend 1</li>
+                                    </ul>
+                                </div>
                             </div>
                        
-                            <div className="chat" isActive={'a' === currentChat}>
+                            <div className="chat">
                                 <h3>Card 1</h3>
+                                <div className="exit" onClick={() => load('')}>X</div>
                                 <p>Some text</p>
                                 <p>Some text</p>
                                 
                                 <input type="text"/>
                             </div>    
-                        </div>
-                        <div className="bloc-2">
+                        </Contact>
+                        <Contact isActive={currentChat === 'b'}>
                             <div className="contact">
-                                <span >Friend 2 </span>
+                                <div onClick={() => load('b')}>
+                                    
+                                    <ul>
+                                        <li><img src={profile} /> </li>
+                                        <li>Friend 2</li>
+                                    </ul>
+                                </div>
                             </div>
-                            <div className="chat"isActive={'b' === currentChat}>
-                                <h3>Card 2</h3>
+                            <div className="chat" >
+                                <h3>Card 2</h3>  
+                                <div className="exit" onClick={() => load('')}>X</div>                              
                                 <p>Some text</p>
                                 <p>Some text</p>
                                 
                                 <input type="text"/>
                             </div>    
+                        </Contact>
+
+                        
+                       
                         </div>
-
-                       
-
-                        
-                        
-                       
-                    </Contacts>
                 </li>
 
             </ul>
@@ -86,43 +93,39 @@ export default function Menu(){
                 </Link> 
 
                 <Link to='/mainfeed' >
-                    <NavBtn isActive={currentNav.name === "a"} onClick={() => setCurrentNav({name: 'a'})}>
+                    <NavBtn isActive={currentNav === "a"} onClick={() => setCurrentNav('a')}>
                         Find out
                     </NavBtn>
                 </Link> 
 
                 <Link to='/'>
-                    <NavBtn isActive={currentNav.name === "b"} onClick={() => setCurrentNav({name: 'b'})}>
+                    <NavBtn isActive={currentNav === "b"} onClick={() => setCurrentNav('b')}>
                         Game
                     </NavBtn>                       
                 </Link> 
 
                 <Link to='/draw'>
-                    <NavBtn isActive={currentNav.name === "c"} onClick={() => setCurrentNav({name: 'c'})}>
+                    <NavBtn isActive={currentNav === "c"} onClick={() => setCurrentNav( 'c')}>
                         Draw
                     </NavBtn>
                 </Link> 
 
                 <Link to='/About'>
-                    <NavBtn isActive={currentNav.name === "d"} onClick={() => setCurrentNav({name: 'd'})}>
+                    <NavBtn isActive={currentNav === "d"} onClick={() => setCurrentNav( 'd')}>
                         About
                     </NavBtn>                   
                 </Link> 
 
                 <Link to='/'>
-                    <NavBtn isActive={currentNav.name === "e"} onClick={() => setCurrentNav({name: 'e'})}>
+                    <NavBtn isActive={currentNav === "e"} onClick={() => setCurrentNav( 'e')}>
                         Home
                     </NavBtn>                       
                 </Link>             
                
             </Options>           
             
-        </HorizontalNavBar>
-       
-       
-      
+        </HorizontalNavBar>       
        
         </>
     )
-
 };

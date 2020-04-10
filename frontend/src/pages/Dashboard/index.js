@@ -5,7 +5,7 @@ import './styles.css';
 export default function Dashboard(){
     return(
         <>  
-            <div className="body">
+            <div className="dashboard-container">
                 <h1>Dashboard</h1>
             </div>
             

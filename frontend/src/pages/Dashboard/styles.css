@@ -1,8 +1,9 @@
-.body{
+.dashboard-container{
     height: 3000px;
+    margin-top: 80px;
    
 }
 
-.body h1{
+.dashboard-container h1{
     color: sienna;
 }

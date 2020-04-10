@@ -2,6 +2,7 @@ import styled from 'styled-components';
 
 import profile from '../../assets/profile.jfif'
 import logo from '../../assets/logo.png';
+import camera from '../../assets/camera.svg';
 
 
 export const Options = styled.div `
@@ -34,7 +35,7 @@ export const Logo = styled.button`
     background-size: cover;
     
     
-   margin: 10px;
+    margin: 10px;
     
 `;
 
@@ -69,6 +70,8 @@ export const VerticalNavBar = styled.div`
         background-color: #463883;
         width: 210px;
         height: 100vh;
+        transition: right 0.6s cubic-bezier(1, 0,.1,.89);
+        
         margin: 0px;
         top:0;
         padding-top: 98px;
@@ -126,10 +129,13 @@ export const ProfileButton = styled.button`
     border: none;
     position: fixed;
     
+    transition: width 0.6s ease 0.1s, height 0.75s ease 0.1s, margin-right 1.27s linear;
+    
+
     background-image: ${`url(${profile})`};
     cursor: pointer;
     margin:6px;
-    margin-right:  ${props => props.isVisible ? "60px" : "20px"};;
+    margin-right:  ${props => props.isVisible ? "60px" : "20px"};
     z-index:150;
     
     &:focus {
@@ -138,66 +144,78 @@ export const ProfileButton = styled.button`
     
 `;
 
-export const Chat = styled.div`
-       
-
-   
-`;
-
-export const Contacts = styled.div`
-    
-    list-style: none; 
-    
+export const Contact = styled.div`
     .contact{
         text-align: center;
         margin-bottom: 20px;
         margin-top: 20px;
-    }   
-   
-  
+        
 
-    li {
-        font-size: 20px;
-    } 
+        img {
+          
+            z-index: 210;
+          
+            width: 40px;
+            height: 40px;
+            margin-right: 5px; 
+            margin-left: -30px;
+
+           
+           
+        }
+
+        ul {
+            padding: 0;
+        }
+        li {
+            display: inline;
+            list-style: none;
+            vertical-align: top;
+            color: #222222;
+        }
+
+      
+    }   
+       
 
     .contact:hover {
         background-color: #463665;
-    }
-
-    .contact:hover + div{         
-        display: block;
        
     }
+
+    .contact:hover li{
+        color: #ffffff;
+    }
+   
+
+ 
+
 
     .chat{
         border-radius: 15px;
         position: fixed;
+        
         right: 220px;
         width: 150px;
         height: 210px;      
         background-color: #363553;
-        display:none;
-    }
-    
-    .chat:hover{
-        display: block;
+        display: ${props => props.isActive ? "block" : "none"};
 
-    }
-
-    ul{     
-          
+        .exit{
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color:#444555;
         
+        }
+    }
+   
+    
+    
 
-          /*
-          margin: 0px;
-          top:0;
-          z-index: 200;
-          padding-left: 0px;
-         */
-      } 
-     
-  
-      input{
+   
+
+    input{
           position: absolute;
           bottom: 0px;
           margin-top: 10px;
