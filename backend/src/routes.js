@@ -15,13 +15,18 @@ routes.get('/', (req, res) => {
 
 });
 
-routes.post('/sessions', SessionController.store);
+routes.post('/sessions', function(req, res){
+    SessionController.store
+  });
+routes.get('/sessions/login', SessionController.show);
+
 
 routes.get('/tools/get', (req, res) => {
     return res.json({ message: "Hello World"});
 });
 
 routes.post('/tools/add', upload.single('icon'), ToolController.store);
+
 
 
 

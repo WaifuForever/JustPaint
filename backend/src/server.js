@@ -15,7 +15,7 @@ const app = express();
 
 //const connectedUsers = {};
 
-mongoose.connect("mongodb+srv://WaifuOmnistack:oDiaGNH3GPGf2TrM@cluster0-c09yq.mongodb.net/test?retryWrites=true&w=majority", {
+mongoose.connect("mongodb+srv://WaifuOmnistack:oDiaGNH3GPGf2TrM@cluster0-c09yq.mongodb.net/JustPaint?retryWrites=true&w=majority", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 });
