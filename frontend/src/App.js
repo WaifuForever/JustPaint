@@ -3,7 +3,7 @@ import React from 'react';
 
 import Routes from './routes';
 
-import './App.css'
+import GlobalStyle from './styles/global';
 
 
 function App() {
@@ -13,10 +13,9 @@ function App() {
       <div className="body">
       
 
-        <div className="body-content">
           <Routes />
-          
-        </div>
+          <GlobalStyle/>
+      
       </div> 
       
      

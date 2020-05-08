@@ -3,7 +3,8 @@ import { BrowserRouter, Switch, Route } from 'react-router-dom';
 
 
 
-import Menu from './Components/Menu';
+import HorizontalMenu from './components/Menu/HorizontalMenu';
+import VerticalMenu from './components/Menu/VerticalMenu';
 
 import Canvas from './pages/Canvas';
 import Dashboard from './pages/Dashboard';
@@ -13,11 +14,9 @@ import MainFeed from './pages/MainFeed';
 
 export default function Routes(){
     return (
-        
-       <div className='container'>
+       <div className='routes-container'>
         
         <BrowserRouter>
-            <Menu/>
             <Switch>
                 <Route path="/" exact component ={Dashboard}/>
                 <Route path="/draw" exact component ={Canvas}/>
@@ -25,8 +24,10 @@ export default function Routes(){
                 <Route path="/about" exact component ={About}/>
                 <Route path="/mainfeed" exact component ={MainFeed}/>
                 
-               
             </Switch>
+            <HorizontalMenu />
+            <VerticalMenu />
+
         </BrowserRouter>
        </div>
        

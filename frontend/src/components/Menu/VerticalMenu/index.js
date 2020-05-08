@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { NavBtn, ProfileButton, Logo, HorizontalNavBar, VerticalNavBar, Options, Contact } from './styles.js';
+import {  ProfileButton, VerticalNavBar, Contact } from './styles.js';
 
-import profile from '../../assets/profile.jfif';
+import profile from '../../../assets/profile.jfif';
 
 export default function Menu(){
-    const [currentNav, setCurrentNav] = useState("");  
+  
     const [isMenuVisible, setIsMenuVisible] = useState(false);  
     const [currentChat, setCurrentChat] = useState("");  
     
@@ -26,11 +26,12 @@ export default function Menu(){
     )}
 
     return (
-        <>
-        <VerticalNavBar isVisible={isMenuVisible}>
+        
+        <VerticalNavBar className="vertical_navbar" isVisible={isMenuVisible}>
             <ProfileButton isVisible={isMenuVisible} onClick={() => setIsMenuVisible(!isMenuVisible)}/>
-            <ul className='menu-container'>               
-                <li className="username"> <Link to='/profile'>
+            <ul className='menu-container'>  
+                       
+            <li className="username"> <Link to='/profile'>
                     Usuario            
                 </Link> </li>
                 <li className="item">item2</li>
@@ -81,51 +82,11 @@ export default function Menu(){
                        
                         </div>
                 </li>
-
+               
             </ul>
-
+            <div className='rest'></div>
         </VerticalNavBar>
 
-        <HorizontalNavBar>           
-            <Options>
-                <Link to='/'>
-                    <Logo/>            
-                </Link> 
-
-                <Link to='/mainfeed' >
-                    <NavBtn isActive={currentNav === "a"} onClick={() => setCurrentNav('a')}>
-                        Find out
-                    </NavBtn>
-                </Link> 
-
-                <Link to='/'>
-                    <NavBtn isActive={currentNav === "b"} onClick={() => setCurrentNav('b')}>
-                        Game
-                    </NavBtn>                       
-                </Link> 
-
-                <Link to='/draw'>
-                    <NavBtn isActive={currentNav === "c"} onClick={() => setCurrentNav( 'c')}>
-                        Draw
-                    </NavBtn>
-                </Link> 
-
-                <Link to='/About'>
-                    <NavBtn isActive={currentNav === "d"} onClick={() => setCurrentNav( 'd')}>
-                        About
-                    </NavBtn>                   
-                </Link> 
-
-                <Link to='/'>
-                    <NavBtn isActive={currentNav === "e"} onClick={() => setCurrentNav( 'e')}>
-                        Home
-                    </NavBtn>                       
-                </Link>             
-               
-            </Options>           
-            
-        </HorizontalNavBar>       
        
-        </>
     )
 };
