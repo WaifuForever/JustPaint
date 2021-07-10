@@ -2,7 +2,11 @@
 # Created by https://www.gitignore.io/api/react,windows
 # Edit at https://www.gitignore.io/?templates=react,windows
 
-### react ###
+src/uploads/
+yarn.lock
+.env
+
+## react ###
 .DS_*
 *.log
 logs
