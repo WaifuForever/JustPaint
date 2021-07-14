@@ -6,7 +6,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 
 import routes from './routes';
-//import {response} from './middlewares/response'
+import {response} from './middlewares/response'
 
 dotenv.config();
 
@@ -42,7 +42,7 @@ const options: cors.CorsOptions = {
 app.use(bodyParser.json());
 app.use(cors());
 
-//app.use(response);
+app.use(response);
 
 app.use(routes);
 
