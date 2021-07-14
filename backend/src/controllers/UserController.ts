@@ -16,19 +16,17 @@ async function store(req: Request, res: Response) {
 
           p1.save().then(result => {
 
-              return res.json(        
-                 "User added"             
-              );                              
+              return res.jsonOK(null, "User added!", null);                              
 
           }).catch(err => {
               
               console.log(err)
-              if (err.name === 'MongoError' && err.code === 11000) {
-                  //next(new Error('There was a duplicate key error'));
-                  return res.json("There was a duplicate key error");  
+              if (err) {
+               
+                  return res.jsonBadRequest(null, "Duplicate key error.", err);  
               
               } else {
-                  return res.json("Bad request")
+                  return res.jsonBadRequest(null, "Bad request.", err)
               
               }       
                   
