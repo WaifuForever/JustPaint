@@ -8,7 +8,7 @@
   
     }
     export interface Resquest {
-       user_id?: any
-  
+       user_id?: any,
+       headers?: any  
     }
   }
