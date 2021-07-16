@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 
 import User, { IUser } from '../models/User';
 
+
 async function store(req: Request, res: Response) {
 
     const { email, description, gender }: IUser = req.body;
@@ -36,23 +37,44 @@ async function store(req: Request, res: Response) {
 }
     
 
+async function list(req: Request, res: Response){
+  const { country, email  } = req.query;
+  
+  let docs: Array<IUser> = [];
 
-async function show (req: Request, res: Response){
-        
-    const { email, password} = req.body;
-    
-    await User.findOne({ email: email, password: password }, function(err: any, result: any) {
-        if (err) {
-          res.send(err);
-        } else {
-          res.send(result);
-        }
+  if (country){
+      (await User.find({country: country})).forEach(function (doc: IUser){
+          docs.push(doc)
       });
-   
+  }
 
+  else if(email){
+      (await User.find({email: email as string})).forEach(function (doc: IUser){
+        docs.push(doc)
+          
+      })
+      
+  }
+  else{
+      (await User.find()).forEach(function (doc: IUser){
+          docs.push(doc)
+      });
+  }  
+          
+  
+         
+  if (docs.length === 0){
+      return res.jsonNotFound(docs, "No users found", null)
+  } else{
+      /*docs.forEach(function(doc: <IUser>){
+          
 
-    
+      });*/
+      return res.jsonOK(docs, "User list retrieved successfuly: " + docs.length, null)
+  }
+                  
 }
+
 export default {
-  store
+  store, list
 };

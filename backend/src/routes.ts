@@ -12,6 +12,6 @@ routes.get('/', (req: express.Request, res: express.Response) => {
 
 
 routes.post('/user/create', UserController.store);
-
+routes.get('/user/list', UserController.list);
 
 export default routes;
