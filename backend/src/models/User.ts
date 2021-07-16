@@ -29,6 +29,12 @@ const UserSchema: Schema = new Schema({
     ref: 'User'
 
   }],
+  posts: [{ //a array fill with the user ids
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Post'
+
+  }],
+
   country: {type: String}
 });
 
