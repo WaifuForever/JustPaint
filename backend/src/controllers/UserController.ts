@@ -1,37 +1,42 @@
 import { Request, Response, NextFunction } from 'express';
-
+import bcrypt from "bcrypt"
 import User, { IUser } from '../models/User';
 
 
 async function store(req: Request, res: Response) {
 
-    const { email, description, gender }: IUser = req.body;
+    const { email, description, gender, password }: IUser = req.body;
   
-                  
-          const p1 = new User ({
-              email: email,
-              description: description,
-              gender: gender
-              
-          });
+        
+        let _hash : string|null = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
+                
+        const p1 = new User ({
+            email: email,
+            password: _hash,
+            description: description,
+            gender: gender
+            
+        });
 
-          p1.save().then(result => {
+        _hash = null;
+       
+        p1.save().then((result: any) => {
+            result.password = null
+            return res.jsonOK(null, "User added!", null);                              
 
-              return res.jsonOK(null, "User added!", null);                              
-
-          }).catch(err => {
-              
-              console.log(err)
-              if (err) {
-               
-                  return res.jsonBadRequest(null, "Duplicate key error.", err);  
-              
-              } else {
-                  return res.jsonBadRequest(null, "Bad request.", err)
-              
-              }       
-                  
-          });     
+        }).catch(err => {
+            
+            console.log(err)
+            if (err) {
+            
+                return res.jsonBadRequest(null, "Duplicate key error.", err);  
+            
+            } else {
+                return res.jsonBadRequest(null, "Bad request.", err)
+            
+            }       
+                
+        });     
       
                                                                       
 }

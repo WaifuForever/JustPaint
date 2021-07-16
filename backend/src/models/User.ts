@@ -8,13 +8,15 @@ export enum Gender {
 
 export interface IUser extends Document {
   email: string;
-  description: string;  
+  description: string; 
+  password: string;   
   gender?: Gender;
 
 }
 
 const UserSchema: Schema = new Schema({
   email: { type: String, required: true, unique: true }, 
+  password: { type: String, required:true, select: false },
   // Gets the Mongoose enum from the TypeScript enum
   gender: { type: String, enum: Object.values(Gender) },
   photo: {type: String},
