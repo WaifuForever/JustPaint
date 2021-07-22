@@ -80,6 +80,24 @@ async function list(req: Request, res: Response){
                   
 }
 
+async function index(req: Request, res: Response){
+    const { user_id  } = req.query;
+    
+    User.findById(user_id).then((user : (IUser|null)) => {
+        if(user === null){
+            return res.jsonNotFound(user, "No users found", null)
+        }
+        return res.jsonOK(user, "User retrieved successfully", null)
+
+    }).catch(err =>{
+        return res.jsonNotFound(err, "No users found", null)
+    })
+                
+           
+    
+                    
+  }
+
 export default {
-  store, list
+  store, list, index
 };
