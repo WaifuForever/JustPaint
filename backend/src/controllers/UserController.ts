@@ -98,7 +98,28 @@ async function read(req: Request, res: Response){
                     
 }
 
+async function update(req: Request, res: Response){
+    const { user_id  } = req.query;
+    
+    User.findByIdAndUpdate(user_id, req.body).then(doc => {
+        if(!doc){
+            return res.jsonNotFound(null, "user.notfound", null)
+        }
+       
+        else{   
+                   
+            
+            return res.jsonOK(doc, "user.update.success", null)
+        }
+    }).catch(err => {       
+        return res.jsonServerError(err, null, null)
+    })
+             
+           
+    
+                    
+}
 
 export default {
-  store, list, read
+  store, list, read, update
 };
