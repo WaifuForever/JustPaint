@@ -114,12 +114,28 @@ async function update(req: Request, res: Response){
     }).catch(err => {       
         return res.jsonServerError(err, null, null)
     })
-             
-           
-    
-                    
+                                           
 }
 
+async function remove(req: Request, res: Response){
+
+    const { user_id  } = req.query;
+    
+    User.deleteOne({ _id: user_id }, function (err) {
+        if (err){
+            return res.jsonNotFound(null, "user.delete.fail", err.message);              
+                
+        } else {
+            return res.jsonOK(null, "user.delete.success", null);              
+                
+        }
+            
+        // deleted at most one tank document
+    });              
+                                           
+}
+
+
 export default {
-  store, list, read, update
+  store, list, read, update, remove
 };
