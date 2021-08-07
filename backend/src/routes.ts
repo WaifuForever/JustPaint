@@ -14,7 +14,7 @@ routes.get('/', (req: express.Request, res: express.Response) => {
 
 routes.post('/user/create', UserController.store);
 routes.get('/user/list', UserController.list);
-routes.get('/user/index', UserController.index);
+routes.get('/user/read', UserController.read);
 
 routes.get('/sign-in', AuthController.sign_in)
 

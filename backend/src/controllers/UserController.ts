@@ -80,7 +80,7 @@ async function list(req: Request, res: Response){
                   
 }
 
-async function index(req: Request, res: Response){
+async function read(req: Request, res: Response){
     const { user_id  } = req.query;
     
     User.findById(user_id).then((user : (IUser|null)) => {
@@ -96,8 +96,9 @@ async function index(req: Request, res: Response){
            
     
                     
-  }
+}
+
 
 export default {
-  store, list, index
+  store, list, read
 };
