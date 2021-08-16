@@ -9,8 +9,19 @@ export enum Gender {
 export interface IUser extends Document {
   email: string;
   description: string; 
-  password: string;   
+  password: string;  
+  following:  [{ //a array fill with the user ids
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+
+  }];
+  followers:  [{ //a array fill with the user ids
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+
+  }];
   gender?: Gender;
+  updatedAt: Date;
 
 }
 
@@ -37,7 +48,19 @@ const UserSchema: Schema = new Schema({
 
   }],
 
-  country: {type: String}
+  country: {
+    type: String
+  },
+
+  token_version: {
+    type: Number,
+    default: 0
+  },
+
+  updatedAt: {
+    type: Date,
+    default: Date.now()
+  }
 });
 
 // Export the model and return your IUser interface

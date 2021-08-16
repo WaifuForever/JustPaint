@@ -7,8 +7,9 @@
        jsonServerError?: any,
   
     }
-    export interface Resquest {
-       user_id?: any,
-       headers?: any  
+    export interface Request {
+       auth?: any,
+       headers? : any,
+       new_token?: any
     }
   }
