@@ -5,6 +5,7 @@
 src/uploads/
 yarn.lock
 .env
+.prettierrc
 .vscode/
 ## react ###
 .DS_*

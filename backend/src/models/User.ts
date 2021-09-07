@@ -32,17 +32,17 @@ const UserSchema: Schema = new Schema({
   gender: { type: String, enum: Object.values(Gender) },
   photo: {type: String},
   description: {type: String},
-  followers: [{ //a array fill with the user ids
+  followers: [{ //an array to fill with the user ids
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
 
   }],
-  following: [{ //a array fill with the user ids
+  following: [{ //an array to fill with the user ids
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
 
   }],
-  posts: [{ //a array fill with the user ids
+  posts: [{ //an array to fill with the post ids
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Post'
 
