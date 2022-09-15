@@ -22,6 +22,10 @@ export const useOnDraw = (onDraw) => {
                 return null;
             }
             const boundingRect = canvasRef.current.getBoundingClientRect();
+            console.log(
+                `${clientX} - ${boundingRect.left}`,
+                `${clientY} - ${boundingRect.top}`
+            );
             return {
                 x: clientX - boundingRect.left,
                 y: clientY - boundingRect.top,
@@ -35,7 +39,7 @@ export const useOnDraw = (onDraw) => {
                 const ctx = canvasRef.current.getContext('2d');
                 if (onDraw) onDraw(ctx, point, prevPointRef.current);
                 prevPointRef.current = point;
-                console.log({ x: point.x, y: point.y });
+                console.log(point);
             };
             mouseMoveListenerRef.current = listener;
             window.addEventListener('mousemove', listener);
