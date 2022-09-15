@@ -1,8 +1,15 @@
-import { useOnDraw } from "../hooks/OnDraw";
+import { useOnDraw } from '../hooks/Canvas';
 
 const DrawScreen = () => {
+    const onDraw = (ctx, point) => {
+        ctx.fillStyle = '#000000';
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, 2, 0, 2 * Math.PI);
+        ctx.fill();
+    };
 
-    const setCanvasRef = useOnDraw();
+    const setCanvasRef = useOnDraw(onDraw);
+
     return (
         <div className="h-full w-full">
             <div className="flex h-full justify-center p-5">
