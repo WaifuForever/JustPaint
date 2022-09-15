@@ -1,17 +1,37 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 export const useOnDraw = (onDraw) => {
     const canvasRef = useRef(null);
 
     const isDrawingRef = useRef(false);
 
+    const mouseMoveListenerRef = useRef(null);
+    const mouseDownListenerRef = useRef(null);
+    const mouseUpListenerRef = useRef(null);
+
+    const prevPointRef = useRef(null);
+
+    useEffect(() => {
+        return () => {
+            if (mouseMoveListenerRef.current)
+                window.removeEventListener('mousemove', mouseMoveListenerRef);
+            if (mouseUpListenerRef.current)
+                window.removeEventListener('mouseup', mouseUpListenerRef);
+        };
+    }, []);
+
     const setCanvasRef = (ref) => {
         if (!ref) return;
+        if (canvasRef.current)
+            canvasRef.current.removeEventListener(
+                'mousedown',
+                mouseDownListenerRef
+            );
+
         canvasRef.current = ref;
         initMouveMoveListener();
         initMouseDownListener();
         initMouseUpListener();
-        return canvasRef;
     };
 
     const initMouveMoveListener = () => {
@@ -19,9 +39,11 @@ export const useOnDraw = (onDraw) => {
             if (!isDrawingRef.current) return;
             const point = computePointInCanvas(e.clientX, e.clientY);
             const ctx = canvasRef.current.getContext('2d');
-            if (onDraw) onDraw(ctx, point);
+            if (onDraw) onDraw(ctx, point, prevPointRef.current);
+            prevPointRef.current = point;
             //console.log({ x: point.x, y: point.y });
         };
+        mouseMoveListenerRef.current = listener;
 
         window.addEventListener('mousemove', listener);
     };
@@ -31,7 +53,7 @@ export const useOnDraw = (onDraw) => {
         const listener = () => {
             isDrawingRef.current = true;
         };
-
+        mouseDownListenerRef.current = listener;
         canvasRef.current.addEventListener('mousedown', listener);
     };
 
@@ -39,8 +61,9 @@ export const useOnDraw = (onDraw) => {
         if (!canvasRef.current) return;
         const listener = () => {
             isDrawingRef.current = false;
+            prevPointRef.current = null;
         };
-
+        mouseUpListenerRef.current = listener;
         canvasRef.current.addEventListener('mouseup', listener);
     };
 

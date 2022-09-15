@@ -1,10 +1,22 @@
 import { useOnDraw } from '../hooks/Canvas';
 
 const DrawScreen = () => {
-    const onDraw = (ctx, point) => {
-        ctx.fillStyle = '#000000';
+    const onDraw = (ctx, point, prevPoint) => {
+        drawLine(prevPoint, point, ctx, '#000000', 5);
+    };
+
+    const drawLine = (start, end, ctx, colour, width) => {
+        start = start ?? end;
         ctx.beginPath();
-        ctx.arc(point.x, point.y, 2, 0, 2 * Math.PI);
+        ctx.lineWidth = width;
+        ctx.strokeStyle = colour;
+        ctx.moveTo(start.x, start.y);
+        ctx.lineTo(end.x, end.y);
+        ctx.stroke();
+
+        ctx.fillStyle = colour;
+        ctx.beginPath();
+        ctx.arc(start.x, start.y, 2, 0, 2 * Math.PI);
         ctx.fill();
     };
 
