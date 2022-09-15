@@ -1,9 +1,13 @@
 import { useOnDraw } from '../hooks/Canvas';
 
 const DrawScreen = () => {
+
+   
+
     const onDraw = (ctx, point, prevPoint) => {
-        drawLine(prevPoint, point, ctx, '#000000', 5);
+        drawLine(prevPoint, point, ctx, '#000000', 2);
     };
+    const { onMouseDown, setCanvasRef } = useOnDraw(onDraw);
 
     const drawLine = (start, end, ctx, colour, width) => {
         start = start ?? end;
@@ -16,11 +20,9 @@ const DrawScreen = () => {
 
         ctx.fillStyle = colour;
         ctx.beginPath();
-        ctx.arc(start.x, start.y, 2, 0, 2 * Math.PI);
+        ctx.arc(start.x, start.y, width/2, 0, 2 * Math.PI);
         ctx.fill();
     };
-
-    const setCanvasRef = useOnDraw(onDraw);
 
     return (
         <div className="h-full w-full">
@@ -35,6 +37,7 @@ const DrawScreen = () => {
                     width={768}
                     height={576}
                     ref={setCanvasRef}
+                    onMouseDown={onMouseDown}
                 ></canvas>
 
                 <div className="flex flex-col">
