@@ -1,10 +1,14 @@
-import { useOnDraw } from '../hooks/Canvas';
+import { FaPencilAlt } from 'react-icons/fa';
+import { GiStraightPipe } from 'react-icons/gi';
+import ToolButton from '../components/ToolButton';
+
+import { usePencil } from '../hooks/ToolHooks';
 
 const DrawScreen = () => {
     const onDraw = (ctx, point, prevPoint) => {
         drawLine(prevPoint, point, ctx, '#000000', 2);
     };
-    const { onMouseDown, setCanvasRef } = useOnDraw(onDraw);
+    const { setCanvasRef } = usePencil(onDraw);
 
     const drawLine = (start, end, ctx, colour, width) => {
         start = start ?? end;
@@ -24,8 +28,8 @@ const DrawScreen = () => {
     return (
         <div className="flex h-full w-full justify-center p-5">
             <div className="flex justify-center items-center">
-                <span>a</span>
-                <span>b</span>
+                <ToolButton icon={<FaPencilAlt />} onClick={() => onDraw} />
+                <ToolButton icon={<GiStraightPipe />} onClick={() => onDraw} />
             </div>
             <div>
                 <canvas
@@ -33,7 +37,6 @@ const DrawScreen = () => {
                     width={768}
                     height={576}
                     ref={setCanvasRef}
-                    onMouseDown={onMouseDown}
                 ></canvas>
             </div>
 
