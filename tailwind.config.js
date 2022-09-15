@@ -1,4 +1,11 @@
 /** @type {import('tailwindcss').Config} */
+const withOpacity = (variableName) => {
+    return ({ opacityValue }) => {
+        if (opacityValue)
+            return `rgba(var(--${variableName}), ${opacityValue})`;
+        return `rgba(var(--${variableName}))`;
+    };
+};
 module.exports = {
     content: ['./src/**/*.{js,jsx,ts,tsx}'],
     theme: {
@@ -16,6 +23,11 @@ module.exports = {
                 lg: '1024px',
                 xl: '1280px',
                 '2xl': '1536px',
+            },
+            backgroundColor: {
+                skin: {
+                    default: 'var(--color-bg-default)',
+                },
             },
         },
     },

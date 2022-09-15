@@ -26,12 +26,12 @@ const DrawScreen = () => {
     };
 
     return (
-        <div className="flex h-full w-full justify-center p-5">
-            <div className="flex justify-center items-center">
+        <div className="flex h-full w-full justify-center p-5 bg-skin-default">
+            <div className="flex justify-center items-center ">
                 <ToolButton icon={<FaPencilAlt />} onClick={() => onDraw} />
                 <ToolButton icon={<GiStraightPipe />} onClick={() => onDraw} />
             </div>
-            <div>
+            <div className=' overflow-y-auto'>
                 <canvas
                     className={`bg-red-900 border border-black`}
                     width={768}

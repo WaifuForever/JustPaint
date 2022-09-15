@@ -2,8 +2,30 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-
 body {
     margin: 0;
     padding: 0;
+}
+
+@layer base {
+    :root {
+        --color-text-solid: #2d3748;
+        --color-text-detail: #313860;
+        --color-text-medium: #718096;
+        --color-text-mild: #a0aec0;
+        --color-icon-image-1: #ffffff;
+        --color-icon-image-2: #1fab89;
+
+        --color-bg-default: #f8f9fa;
+        --color-bg-dark: 126, 134, 158;
+        --color-bg-darker: 45, 55, 72;
+        --color-bg-inverted: #000000;
+        --color-bg-mild-white: 224, 225, 226;
+        --color-bg-white: 255, 255, 255;
+        --color-bg-detail-1: 31, 171, 137;
+        --color-bg-warning: 236, 178, 46;
+
+        //--width-simple-button: calc(50000vw / width + 20px);
+        --text-size-base: 12px;
+    }
 }
