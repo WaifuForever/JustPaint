@@ -1,4 +1,8 @@
+import { useOnDraw } from "../hooks/OnDraw";
+
 const DrawScreen = () => {
+
+    const setCanvasRef = useOnDraw();
     return (
         <div className="h-full w-full">
             <div className="flex h-full justify-center p-5">
@@ -11,6 +15,7 @@ const DrawScreen = () => {
                     className={`bg-red-900 border border-black`}
                     width={768}
                     height={576}
+                    ref={setCanvasRef}
                 ></canvas>
 
                 <div className="flex flex-col">
