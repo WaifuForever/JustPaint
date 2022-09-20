@@ -1,52 +1,43 @@
 import { useEffect, useRef } from 'react';
 
+const computePointInCanvas = (clientX, clientY, canvasRef) => {
+    if (!canvasRef.current) {
+        return null;
+    }
+    const boundingRect = canvasRef.current.getBoundingClientRect();
+
+    return {
+        x: clientX - boundingRect.left,
+        y: clientY - boundingRect.top,
+    };
+};
+
 export const usePencil = (onDraw) => {
     const canvasRef = useRef(null);
     const isDrawingRef = useRef(false);
     const prevPointRef = useRef(null);
 
     const mouseMoveListenerRef = useRef(null);
-    const mouseDownListenerRef = useRef(null);
+    //const mouseDownListenerRef = useRef(null);
     const mouseUpListenerRef = useRef(null);
 
     const setCanvasRef = (ref) => {
-        if(!ref) return;
-        if (canvasRef.current) {
-            canvasRef.current.removeEventListener(
-                'mousedown',
-                mouseDownListenerRef.current
-            );
-        }
-        initMouseDownListener();
         canvasRef.current = ref;
     };
 
-    const initMouseDownListener = () => {
-        if (!canvasRef.current) return;
-        const listener = () => {
-            isDrawingRef.current = true;
-        };
-        mouseDownListenerRef.current = listener;
-        canvasRef.current.addEventListener('mousedown', listener);
-    }
+    const onCanvasMouseDown = () => {
+        isDrawingRef.current = true;
+    };
 
     useEffect(() => {
-        const computePointInCanvas = (clientX, clientY) => {
-            if (!canvasRef.current) {
-                return null;
-            }
-            const boundingRect = canvasRef.current.getBoundingClientRect();
-            
-            return {
-                x: clientX - boundingRect.left,
-                y: clientY - boundingRect.top,
-            };
-        };
-
         const initMouseMoveListener = () => {
             const listener = (e) => {
                 if (!isDrawingRef.current || !canvasRef.current) return;
-                const point = computePointInCanvas(e.clientX, e.clientY);
+                const point = computePointInCanvas(
+                    e.clientX,
+                    e.clientY,
+                    canvasRef
+                );
                 const ctx = canvasRef.current.getContext('2d');
                 if (onDraw) onDraw(ctx, point, prevPointRef.current);
                 prevPointRef.current = point;
@@ -85,7 +76,7 @@ export const usePencil = (onDraw) => {
         };
     }, [onDraw]);
 
-    return { setCanvasRef };
+    return { setCanvasRef, onCanvasMouseDown };
 };
 
 export const useStraight = (onDraw) => {
@@ -94,47 +85,25 @@ export const useStraight = (onDraw) => {
     const prevPointRef = useRef(null);
 
     const mouseMoveListenerRef = useRef(null);
-    const mouseDownListenerRef = useRef(null);
     const mouseUpListenerRef = useRef(null);
 
     const setCanvasRef = (ref) => {
-        if(!ref) return;
-        if (canvasRef.current) {
-            canvasRef.current.removeEventListener(
-                'mousedown',
-                mouseDownListenerRef.current
-            );
-        }
-        initMouseDownListener();
         canvasRef.current = ref;
     };
 
-    const initMouseDownListener = () => {
-        if (!canvasRef.current) return;
-        const listener = () => {
-            isDrawingRef.current = true;
-        };
-        mouseDownListenerRef.current = listener;
-        canvasRef.current.addEventListener('mousedown', listener);
-    }
+    const onCanvasMouseDown = () => {
+        isDrawingRef.current = true;
+    };
 
     useEffect(() => {
-        const computePointInCanvas = (clientX, clientY) => {
-            if (!canvasRef.current) {
-                return null;
-            }
-            const boundingRect = canvasRef.current.getBoundingClientRect();
-            
-            return {
-                x: clientX - boundingRect.left,
-                y: clientY - boundingRect.top,
-            };
-        };
-
         const initMouseMoveListener = () => {
             const listener = (e) => {
                 if (!isDrawingRef.current || !canvasRef.current) return;
-                const point = computePointInCanvas(e.clientX, e.clientY);
+                const point = computePointInCanvas(
+                    e.clientX,
+                    e.clientY,
+                    canvasRef
+                );
                 const ctx = canvasRef.current.getContext('2d');
                 if (onDraw) onDraw(ctx, point, prevPointRef.current);
                 prevPointRef.current = point;
@@ -173,5 +142,5 @@ export const useStraight = (onDraw) => {
         };
     }, [onDraw]);
 
-    return { setCanvasRef };
+    return { setCanvasRef, onCanvasMouseDown };
 };

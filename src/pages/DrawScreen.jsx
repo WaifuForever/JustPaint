@@ -8,7 +8,7 @@ const DrawScreen = () => {
     const onDraw = (ctx, point, prevPoint) => {
         drawLine(prevPoint, point, ctx, '#000000', 2);
     };
-    const { setCanvasRef } = usePencil(onDraw);
+    const { setCanvasRef, onCanvasMouseDown } = usePencil(onDraw);
 
     const drawLine = (start, end, ctx, colour, width) => {
         start = start ?? end;
@@ -28,15 +28,16 @@ const DrawScreen = () => {
     return (
         <div className="flex h-full w-full justify-center p-5 bg-skin-default">
             <div className="flex justify-center items-center ">
-                <ToolButton icon={<FaPencilAlt />} onClick={() => onDraw} />
-                <ToolButton icon={<GiStraightPipe />} onClick={() => onDraw} />
+                <ToolButton icon={<FaPencilAlt />} onClick={() => {}} />
+                <ToolButton icon={<GiStraightPipe />} onClick={() => {}} />
             </div>
-            <div className=' overflow-y-auto'>
+            <div className="mx-4 overflow-y-auto">
                 <canvas
                     className={`bg-red-900 border border-black`}
                     width={768}
                     height={576}
                     ref={setCanvasRef}
+                    onMouseDown={onCanvasMouseDown}
                 ></canvas>
             </div>
 
