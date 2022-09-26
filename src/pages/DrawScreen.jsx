@@ -51,16 +51,16 @@ const DrawScreen = () => {
             switch (element[1]) {
                 case 'pencil':
                     for (let i = 0; i < element[0].length - 1; i++) {
-                        onDraw(ctx, element[0][i], element[0][i + 1]);
+                        onDraw(ctx, element[0][i + 1], element[0][i]);
                     }
                     console.log(
-                        element[0][element.length - 2],
-                        element[0][element.length - 1]
+                        element[0][element.length - 1],
+                        element[0][element.length - 2]
                     );
                     onDraw(
                         ctx,
-                        element[0][element.length - 2],
-                        element[0][element.length - 1]
+                        element[0][element.length - 1],
+                        element[0][element.length - 2]
                     );
 
                     break;
@@ -148,12 +148,12 @@ const DrawScreen = () => {
 
     const drawLine = (start, end, ctx, colour, width) => {
         start = start ?? end;
+        end = end ?? start;
         ctx.beginPath();
         ctx.lineWidth = width;
         ctx.strokeStyle = colour;
         ctx.moveTo(start.x, start.y);
         ctx.lineTo(end.x, end.y);
-
         ctx.stroke();
 
         ctx.fillStyle = colour;
