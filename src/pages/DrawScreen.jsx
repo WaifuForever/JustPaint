@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { FaPencilAlt } from 'react-icons/fa';
 import { GiStraightPipe } from 'react-icons/gi';
 import ToolButton from '../components/ToolButton';
@@ -6,9 +6,9 @@ import ToolButton from '../components/ToolButton';
 const DrawScreen = () => {
     const [elements, setElements] = useState([]);
     const [elementType, setElementType] = useState('pencil');
-    const onDraw = (ctx, point, prevPoint) => {
+    const onDraw = useCallback((ctx, point, prevPoint) => {
         drawLine(prevPoint, point, ctx, '#000000', 2);
-    };
+    }, []);
 
     const computePointInCanvas = (clientX, clientY, canvasRef) => {
         if (!canvasRef.current) {
@@ -39,40 +39,74 @@ const DrawScreen = () => {
         setElements((prevState) => [
             ...prevState,
             [
-                computePointInCanvas(event.clientX, event.clientY, canvasRef),
+                [computePointInCanvas(event.clientX, event.clientY, canvasRef)],
                 elementType,
             ],
         ]);
     };
 
     useEffect(() => {
+        const ctx = canvasRef.current.getContext('2d');
+        elements.forEach((element) => {
+            switch (element[1]) {
+                case 'pencil':
+                    for (let i = 0; i < element[0].length - 1; i++) {
+                        onDraw(ctx, element[0][i], element[0][i + 1]);
+                    }
+                    console.log(
+                        element[0][element.length - 2],
+                        element[0][element.length - 1]
+                    );
+                    onDraw(
+                        ctx,
+                        element[0][element.length - 2],
+                        element[0][element.length - 1]
+                    );
+
+                    break;
+
+                case 'line':
+                    onDraw(ctx, element[0][0], element[0][1]);
+                    break;
+
+                default:
+                    break;
+            }
+        });
         const initMouseMoveListener = () => {
             const listener = (e) => {
                 if (!isDrawingRef.current || !canvasRef.current) return;
+
+                const currentPoint = computePointInCanvas(
+                    e.clientX,
+                    e.clientY,
+                    canvasRef
+                );
+
+                const head = elements.slice(0, elements.length - 1);
+                const tail = elements[elements.length - 1];
+                console.log(elements);
                 switch (elementType) {
                     case 'pencil':
-                        console.log('pencil');
-                        const point = computePointInCanvas(
-                            e.clientX,
-                            e.clientY,
-                            canvasRef
-                        );
-                        const head = elements.slice(0, elements.length - 1);
-                        const tail = elements[elements.length - 1];
-
-                        tail.push(point);
+                        tail[0].push(currentPoint);
                         head.push(tail);
-                        console.log({ tail });
+
                         setElements(head);
 
-                        const ctx = canvasRef.current.getContext('2d');
-                        if (onDraw) onDraw(ctx, point, prevPointRef.current);
-                        prevPointRef.current = point;
-                        console.log({ elements });
+                        prevPointRef.current = currentPoint;
+
                         break;
 
                     case 'line':
-                        console.log('line');
+                        if (tail[0].length === 2) tail[0][1] = currentPoint;
+                        else tail[0].push([currentPoint]);
+                        head.push(tail);
+
+                        setElements(head);
+
+                        if (!prevPointRef.current)
+                            prevPointRef.current = currentPoint;
+
                         break;
 
                     default:
@@ -110,7 +144,7 @@ const DrawScreen = () => {
         return () => {
             removeListeners();
         };
-    }, [onDraw, elements]);
+    }, [onDraw, elements, elementType]);
 
     const drawLine = (start, end, ctx, colour, width) => {
         start = start ?? end;
@@ -119,6 +153,7 @@ const DrawScreen = () => {
         ctx.strokeStyle = colour;
         ctx.moveTo(start.x, start.y);
         ctx.lineTo(end.x, end.y);
+
         ctx.stroke();
 
         ctx.fillStyle = colour;
@@ -134,14 +169,12 @@ const DrawScreen = () => {
                     icon={<FaPencilAlt />}
                     action={() => {
                         setElementType('pencil');
-                        console.log(elementType);
                     }}
                 />
                 <ToolButton
                     icon={<GiStraightPipe />}
                     action={() => {
                         setElementType('line');
-                        console.log(elementType);
                     }}
                 />
             </div>
