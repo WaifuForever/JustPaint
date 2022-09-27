@@ -52,7 +52,6 @@ const DrawScreen = () => {
                 case 'pencil':
                     for (let i = 0; i < element[0].length - 1; i++) {
                         onDraw(ctx, element[0][i + 1], element[0][i]);
-                       
                     }
                     console.log(
                         element[0][element.length - 1],
@@ -93,8 +92,6 @@ const DrawScreen = () => {
                         head.push(tail);
 
                         setElements(head);
-
-                       
 
                         break;
 
@@ -147,7 +144,6 @@ const DrawScreen = () => {
         };
     }, [onDraw, elements, elementType]);
 
-    
     const drawLine = (start, end, ctx, colour, width) => {
         start = start ?? end;
         end = end ?? start;
