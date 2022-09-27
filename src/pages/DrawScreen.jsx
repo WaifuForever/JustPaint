@@ -1,16 +1,41 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { FaPencilAlt } from 'react-icons/fa';
 import { GiStraightPipe } from 'react-icons/gi';
 import ToolButton from '../components/ToolButton';
 
+const createElement = (startPoint, endPoint, elementType, width, colour) => {
+    return { startPoint, endPoint, elementType, width, colour };
+};
+
+const drawElement = (element, context) => {
+    switch (element.elementType) {
+        case 'rectangle':
+            context.beginPath();
+            context.lineWidth = element.width;
+            context.strokeStyle = element.colour;
+            context.moveTo(element.startPoint.x, element.startPoint.y);
+            context.lineTo(element.endPoint.x, element.startPoint.y);
+            context.stroke();
+            context.lineTo(element.endPoint.x, element.endPoint.y);
+            context.stroke();
+            context.lineTo(element.startPoint.x, element.endPoint.y);
+            context.stroke();
+            context.lineTo(element.startPoint.x, element.startPoint.y);
+            context.stroke();
+            break;
+        default:
+            break;
+    }
+};
+
 const DrawScreen = () => {
     const [elements, setElements] = useState([]);
-    const [elementType, setElementType] = useState('pencil');
-    const onDraw = useCallback((ctx, point, prevPoint) => {
-        drawLine(prevPoint, point, ctx, '#000000', 2);
-    }, []);
+    const [elementType, setElementType] = useState('rectangle');
+    const [isDrawing, setIsDrawing] = useState(false);
 
-    const computePointInCanvas = (clientX, clientY, canvasRef) => {
+    const canvasRef = useRef(null);
+
+    const computePointInCanvas = (clientX, clientY) => {
         if (!canvasRef.current) {
             return null;
         }
@@ -22,134 +47,60 @@ const DrawScreen = () => {
         };
     };
 
-    const canvasRef = useRef(null);
-    const isDrawingRef = useRef(false);
-    const prevPointRef = useRef(null);
-
-    const mouseMoveListenerRef = useRef(null);
-    //const mouseDownListenerRef = useRef(null);
-    const mouseUpListenerRef = useRef(null);
-
     const setCanvasRef = (ref) => {
         canvasRef.current = ref;
     };
 
-    const onCanvasMouseDown = (event) => {
-        isDrawingRef.current = true;
-        setElements((prevState) => [
-            ...prevState,
-            [
-                [computePointInCanvas(event.clientX, event.clientY, canvasRef)],
-                elementType,
-            ],
-        ]);
+    useLayoutEffect(() => {
+        const ctx = canvasRef.current.getContext('2d');
+
+        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.width);
+        console.log(elements);
+        elements.forEach((element) => {
+            drawElement(element, ctx);
+        });
+    }, [elements]);
+
+    const handleMouseDown = (event) => {
+        setIsDrawing(true);
+
+        const point = computePointInCanvas(
+            event.clientX,
+            event.clientY,
+            canvasRef.current
+        );
+
+        const element = createElement(point, point, elementType, 2, '#000000');
+
+        setElements((prevState) => [...prevState, element]);
     };
 
-    useEffect(() => {
-        const ctx = canvasRef.current.getContext('2d');
-        elements.forEach((element) => {
-            switch (element[1]) {
-                case 'pencil':
-                    for (let i = 0; i < element[0].length - 1; i++) {
-                        onDraw(ctx, element[0][i + 1], element[0][i]);
-                        //console.log(element[0][i], element[0][i + 1]);
-                    }
+    const handleMouseMove = (event) => {
+        if (!isDrawing) return;
 
-                    break;
+        const index = elements.length - 1;
 
-                case 'line':
-                    onDraw(ctx, element[0][0], element[0][1]);
-                    break;
+        const point = computePointInCanvas(
+            event.clientX,
+            event.clientY,
+            canvasRef.current
+        );
 
-                default:
-                    break;
-            }
-        });
-        const initMouseMoveListener = () => {
-            const listener = (e) => {
-                if (!isDrawingRef.current || !canvasRef.current) return;
+        const updatedElement = createElement(
+            elements[index].startPoint,
+            point,
+            elementType,
+            2,
+            '#000000'
+        );
 
-                const currentPoint = computePointInCanvas(
-                    e.clientX,
-                    e.clientY,
-                    canvasRef
-                );
+        const elementsCopy = [...elements];
+        elementsCopy[index] = updatedElement;
+        setElements(elementsCopy);
+    };
 
-                const head = elements.slice(0, elements.length - 1);
-                const tail = elements[elements.length - 1];
-                console.log(elements);
-                switch (elementType) {
-                    case 'pencil':
-                        tail[0].push(currentPoint);
-                        head.push(tail);
-
-                        setElements(head);
-
-                        break;
-
-                    case 'line':
-                        if (tail[0].length === 2) tail[0][1] = currentPoint;
-                        else tail[0].push([currentPoint]);
-                        head.push(tail);
-
-                        setElements(head);
-
-                        if (!prevPointRef.current)
-                            prevPointRef.current = currentPoint;
-
-                        break;
-
-                    default:
-                        break;
-                }
-            };
-            mouseMoveListenerRef.current = listener;
-            window.addEventListener('mousemove', listener);
-        };
-
-        const initMouseUpListener = () => {
-            const listener = () => {
-                isDrawingRef.current = false;
-                prevPointRef.current = null;
-            };
-            mouseUpListenerRef.current = listener;
-            window.addEventListener('mouseup', listener);
-        };
-
-        const removeListeners = () => {
-            if (mouseMoveListenerRef.current)
-                window.removeEventListener(
-                    'mousemove',
-                    mouseMoveListenerRef.current
-                );
-            if (mouseUpListenerRef.current)
-                window.removeEventListener(
-                    'mouseup',
-                    mouseUpListenerRef.current
-                );
-        };
-
-        initMouseMoveListener();
-        initMouseUpListener();
-        return () => {
-            removeListeners();
-        };
-    }, [onDraw, elements, elementType]);
-
-    const drawLine = (start, end, ctx, colour, width) => {
-        start = start ?? end;
-        end = end ?? start;
-        ctx.beginPath();
-        ctx.lineWidth = width;
-        ctx.strokeStyle = colour;
-        ctx.moveTo(start.x, start.y);
-        ctx.lineTo(end.x, end.y);
-        ctx.stroke();
-
-        ctx.fillStyle = colour;
-        ctx.beginPath();
-        ctx.arc(start.x, start.y, width / 2, 0, 2 * Math.PI);
-        ctx.fill();
+    const handleMouseUp = (event) => {
+        setIsDrawing(false);
     };
 
     return (
@@ -174,7 +125,9 @@ const DrawScreen = () => {
                     width={768}
                     height={576}
                     ref={setCanvasRef}
-                    onMouseDown={onCanvasMouseDown}
+                    onMouseUp={handleMouseUp}
+                    onMouseDown={handleMouseDown}
+                    onMouseMove={handleMouseMove}
                 ></canvas>
             </div>
 
