@@ -2,6 +2,8 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { FaPencilAlt } from 'react-icons/fa';
 import { BiRectangle } from 'react-icons/bi';
 import { GiStraightPipe } from 'react-icons/gi';
+
+import ToolTab from '../components/ToolTab';
 import ToolButton from '../components/ToolButton';
 
 const createElement = (startPoint, endPoint, elementType, width, colour) => {
@@ -42,6 +44,7 @@ const DrawScreen = () => {
     const [elements, setElements] = useState([]);
     const [elementType, setElementType] = useState('rectangle');
     const [isDrawing, setIsDrawing] = useState(false);
+    const [colour, setColour] = useState('#000000');
 
     const canvasRef = useRef(null);
 
@@ -101,7 +104,7 @@ const DrawScreen = () => {
             point,
             elementType,
             2,
-            '#000000'
+            colour
         );
 
         const elementsCopy = [...elements];
@@ -115,27 +118,38 @@ const DrawScreen = () => {
 
     return (
         <div className="flex h-full w-full justify-center p-5 bg-skin-default">
-            <div className="flex justify-center items-center ">
-                <ToolButton
-                    icon={<FaPencilAlt />}
-                    selected={elementType === 'pencil'}
-                    action={() => {
-                        setElementType('pencil');
-                    }}
+            <div className="flex flex-col justify-center items-center gap-3 ">
+                <ToolTab
+                    title={'Title'}
+                    tools={[
+                        <ToolButton
+                            icon={<FaPencilAlt />}
+                            selected={elementType === 'pencil'}
+                            action={() => {
+                                setElementType('pencil');
+                            }}
+                        />,
+                        <ToolButton
+                            icon={<GiStraightPipe />}
+                            selected={elementType === 'straightLine'}
+                            action={() => {
+                                setElementType('straightLine');
+                            }}
+                        />,
+                        <ToolButton
+                            icon={<BiRectangle />}
+                            selected={elementType === 'rectangle'}
+                            action={() => {
+                                setElementType('rectangle');
+                            }}
+                        />,
+                    ]}
                 />
-                <ToolButton
-                    icon={<GiStraightPipe />}
-                    selected={elementType === 'straightLine'}
-                    action={() => {
-                        setElementType('straightLine');
-                    }}
-                />
-                <ToolButton
-                    icon={<BiRectangle />}
-                    selected={elementType === 'rectangle'}
-                    action={() => {
-                        setElementType('rectangle');
-                    }}
+                <ToolTab
+                    title={'Colours'}
+                    tools={[
+                       
+                    ]}
                 />
             </div>
             <div className="mx-4 overflow-y-auto">
