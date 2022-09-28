@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { FaPencilAlt } from 'react-icons/fa';
+import { BiRectangle } from 'react-icons/bi';
 import { GiStraightPipe } from 'react-icons/gi';
 import ToolButton from '../components/ToolButton';
 
@@ -22,6 +23,15 @@ const drawElement = (element, context) => {
             context.stroke();
             context.lineTo(element.startPoint.x, element.startPoint.y);
             context.stroke();
+            break;
+        case 'straightLine':
+            context.beginPath();
+            context.lineWidth = element.width;
+            context.strokeStyle = element.colour;
+            context.moveTo(element.startPoint.x, element.startPoint.y);
+            context.lineTo(element.endPoint.x, element.endPoint.y);
+            context.stroke();
+
             break;
         default:
             break;
@@ -55,7 +65,7 @@ const DrawScreen = () => {
         const ctx = canvasRef.current.getContext('2d');
 
         ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.width);
-        console.log(elements);
+
         elements.forEach((element) => {
             drawElement(element, ctx);
         });
@@ -108,14 +118,23 @@ const DrawScreen = () => {
             <div className="flex justify-center items-center ">
                 <ToolButton
                     icon={<FaPencilAlt />}
+                    selected={elementType === 'pencil'}
                     action={() => {
                         setElementType('pencil');
                     }}
                 />
                 <ToolButton
                     icon={<GiStraightPipe />}
+                    selected={elementType === 'straightLine'}
                     action={() => {
-                        setElementType('line');
+                        setElementType('straightLine');
+                    }}
+                />
+                <ToolButton
+                    icon={<BiRectangle />}
+                    selected={elementType === 'rectangle'}
+                    action={() => {
+                        setElementType('rectangle');
                     }}
                 />
             </div>
