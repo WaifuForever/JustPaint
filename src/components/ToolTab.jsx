@@ -16,8 +16,8 @@ const ToolTab = ({ title, tools }) => {
             <div
                 className={`flex ${isDisplayed ? '' : 'hidden'} justify-center`}
             >
-                {tools.map((Tool) => (
-                    <div>{Tool}</div>
+                {tools.map((Tool, index) => (
+                    <div key={index}>{Tool}</div>
                 ))}
             </div>
         </div>

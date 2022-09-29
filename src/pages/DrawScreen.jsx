@@ -5,6 +5,7 @@ import { GiStraightPipe } from 'react-icons/gi';
 
 import ToolTab from '../components/ToolTab';
 import ToolButton from '../components/ToolButton';
+import ColourPicker from '../components/ColourPicker';
 
 const createElement = (startPoint, endPoint, elementType, width, colour) => {
     return { startPoint, endPoint, elementType, width, colour };
@@ -45,6 +46,7 @@ const DrawScreen = () => {
     const [elementType, setElementType] = useState('rectangle');
     const [isDrawing, setIsDrawing] = useState(false);
     const [colour, setColour] = useState('#000000');
+    
 
     const canvasRef = useRef(null);
 
@@ -83,7 +85,7 @@ const DrawScreen = () => {
             canvasRef.current
         );
 
-        const element = createElement(point, point, elementType, 2, '#000000');
+        const element = createElement(point, point, elementType, 2, colour);
 
         setElements((prevState) => [...prevState, element]);
     };
@@ -148,7 +150,7 @@ const DrawScreen = () => {
                 <ToolTab
                     title={'Colours'}
                     tools={[
-                       
+                       <ColourPicker action={setColour}/>
                     ]}
                 />
             </div>
