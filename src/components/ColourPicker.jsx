@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import Chrome from 'react-color/lib/components/chrome/Chrome';
 
-const ColourPicker = ({ action }) => {
+const ColourPicker = ({ action, currentColour }) => {
     const [colours, setColours] = useState([
         '#000000',
         '#ffffff',
@@ -8,6 +9,7 @@ const ColourPicker = ({ action }) => {
         '#3d41a6',
         '#833da6',
         '#bc9fc9',
+        '#fff24e',
         '#f25805',
         '#f20065',
         '#f20000',
@@ -16,9 +18,13 @@ const ColourPicker = ({ action }) => {
     ]);
     const [isDisplayed, setIsDisplayed] = useState(false);
 
+    const handleOnChange = (colour, event) => {
+        action(colour.hex);
+    };
+
     return (
-        <div className="flex">
-            <div className="flex flex-wrap w-32 justify-center">
+        <div className="flex flex-col">
+            <div className="flex flex-wrap w-32 justify-center items-center">
                 {colours.map((colour, index) => {
                     return (
                         <div
@@ -32,12 +38,21 @@ const ColourPicker = ({ action }) => {
                         ></div>
                     );
                 })}
+            </div>
+            <div className="w-full flex justify-center items-center">
                 <div
-                    className="w-4 h-4 border border-black m-0.5 bg-gradient-to-br from-blue-50 to-red-700"
+                    className="w-8 h-8 border border-black m-0.5"
+                    style={{ backgroundColor: currentColour }}
                     onClick={() => setIsDisplayed(!isDisplayed)}
-               
-                   
                 ></div>
+            </div>
+
+            <div className={`flex w-32 ${isDisplayed ? '' : 'hidden'}`}>
+                <Chrome
+                    color={currentColour}
+                    width="100%"
+                    onChange={handleOnChange}
+                />
             </div>
         </div>
     );

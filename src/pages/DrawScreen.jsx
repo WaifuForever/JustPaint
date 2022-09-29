@@ -46,7 +46,6 @@ const DrawScreen = () => {
     const [elementType, setElementType] = useState('rectangle');
     const [isDrawing, setIsDrawing] = useState(false);
     const [colour, setColour] = useState('#000000');
-    
 
     const canvasRef = useRef(null);
 
@@ -150,7 +149,10 @@ const DrawScreen = () => {
                 <ToolTab
                     title={'Colours'}
                     tools={[
-                       <ColourPicker action={setColour}/>
+                        <ColourPicker
+                            action={setColour}
+                            currentColour={colour}
+                        />,
                     ]}
                 />
             </div>
