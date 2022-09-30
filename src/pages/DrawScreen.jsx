@@ -1,10 +1,12 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { FaPencilAlt } from 'react-icons/fa';
 import { BiRectangle } from 'react-icons/bi';
+import { BsFillLayersFill } from 'react-icons/bs';
 import { GiStraightPipe } from 'react-icons/gi';
 
 import ToolTab from '../components/ToolTab';
 import ToolButton from '../components/ToolButton';
+import Layer from '../components/Layer';
 import ColourPicker from '../components/ColourPicker';
 
 const createElement = (startPoint, endPoint, elementType, width, colour) => {
@@ -45,6 +47,7 @@ const DrawScreen = () => {
     const [elements, setElements] = useState([]);
     const [elementType, setElementType] = useState('rectangle');
     const [isDrawing, setIsDrawing] = useState(false);
+    const [displayCanvas, setDisplayCanvas] = useState(true);
     const [colour, setColour] = useState('#000000');
 
     const canvasRef = useRef(null);
@@ -119,7 +122,7 @@ const DrawScreen = () => {
 
     return (
         <div className="flex h-full w-full justify-center p-5 bg-skin-default">
-            <div className="flex flex-col justify-center items-center gap-3 ">
+            <div className="flex flex-col items-center gap-3 ">
                 <ToolTab
                     title={'Title'}
                     tools={[
@@ -158,7 +161,7 @@ const DrawScreen = () => {
             </div>
             <div className="mx-4 overflow-y-auto">
                 <canvas
-                    className={`bg-red-900 border border-black`}
+                    className={`${displayCanvas ? "" : "hidden"} border border-black`}
                     width={768}
                     height={576}
                     ref={setCanvasRef}
@@ -169,8 +172,12 @@ const DrawScreen = () => {
             </div>
 
             <div className="flex flex-col">
-                <span>layer 1</span>
-                <span>layer 2</span>
+                <Layer
+                    icon={<BsFillLayersFill />}
+                    currentTitle="Layer"
+                    isShown={displayCanvas}
+                    setIsShown={() => setDisplayCanvas(!displayCanvas)}
+                />
             </div>
         </div>
     );
