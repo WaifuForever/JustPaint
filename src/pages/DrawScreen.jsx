@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react';
+import { v4 as uuid } from 'uuid';
 import { FaPencilAlt } from 'react-icons/fa';
 import { BiRectangle } from 'react-icons/bi';
 import { BsFillLayersFill } from 'react-icons/bs';
@@ -10,7 +11,8 @@ import Layer from '../components/Layer';
 import ColourPicker from '../components/ColourPicker';
 
 const createElement = (startPoint, endPoint, elementType, width, colour) => {
-    return { startPoint, endPoint, elementType, width, colour };
+    let id = uuid();
+    return { startPoint, endPoint, elementType, width, colour, id };
 };
 
 const drawElement = (element, context) => {
@@ -51,6 +53,7 @@ const DrawScreen = () => {
     const [colour, setColour] = useState('#000000');
 
     const canvasRef = useRef(null);
+    const drewElementsRef = useRef(false);
 
     const computePointInCanvas = (clientX, clientY) => {
         if (!canvasRef.current) {
@@ -69,13 +72,24 @@ const DrawScreen = () => {
     };
 
     useLayoutEffect(() => {
-        const ctx = canvasRef.current.getContext('2d');
+        if (!drewElementsRef.current) {
+            const ctx = canvasRef.current.getContext('2d');
 
-        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.width);
+            ctx.clearRect(
+                0,
+                0,
+                canvasRef.current.width,
+                canvasRef.current.width
+            );
 
-        elements.forEach((element) => {
-            drawElement(element, ctx);
-        });
+            elements.forEach((element) => {
+                drawElement(element, ctx);
+            });
+            return () => {
+                drewElementsRef.current = true;
+            };
+        }
+        console.log(elements);
     }, [elements]);
 
     const handleMouseDown = (event) => {
@@ -114,6 +128,7 @@ const DrawScreen = () => {
         const elementsCopy = [...elements];
         elementsCopy[index] = updatedElement;
         setElements(elementsCopy);
+        drewElementsRef.current = false;
     };
 
     const handleMouseUp = (event) => {
@@ -161,7 +176,9 @@ const DrawScreen = () => {
             </div>
             <div className="mx-4 overflow-y-auto">
                 <canvas
-                    className={`${displayCanvas ? "" : "hidden"} border border-black`}
+                    className={`${
+                        displayCanvas ? '' : 'hidden'
+                    } border border-black`}
                     width={768}
                     height={576}
                     ref={setCanvasRef}
@@ -177,6 +194,9 @@ const DrawScreen = () => {
                     currentTitle="Layer"
                     isShown={displayCanvas}
                     setIsShown={() => setDisplayCanvas(!displayCanvas)}
+                    elements={elements}
+                    setElements={setElements}
+                    drewElements={drewElementsRef}
                 />
             </div>
         </div>
