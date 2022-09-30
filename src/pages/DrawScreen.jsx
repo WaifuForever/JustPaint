@@ -72,9 +72,10 @@ const DrawScreen = () => {
     };
 
     useLayoutEffect(() => {
+        console.log(elements);
         if (!drewElementsRef.current) {
             const ctx = canvasRef.current.getContext('2d');
-
+            console.log(elements);
             ctx.clearRect(
                 0,
                 0,
@@ -85,11 +86,8 @@ const DrawScreen = () => {
             elements.forEach((element) => {
                 drawElement(element, ctx);
             });
-            return () => {
-                drewElementsRef.current = true;
-            };
+            drewElementsRef.current = true;
         }
-        console.log(elements);
     }, [elements]);
 
     const handleMouseDown = (event) => {

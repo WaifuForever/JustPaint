@@ -14,7 +14,7 @@ const ColourPicker = ({ action, currentColour }) => {
         '#f20065',
         '#f20000',
         '#10f200',
-        '#252925',
+        '#66E4FF',
     ]);
     const [isDisplayed, setIsDisplayed] = useState(false);
 

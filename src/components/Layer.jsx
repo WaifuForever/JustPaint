@@ -32,7 +32,7 @@ const Layer = ({
 
     const deleteElement = (id) => {
         let updatedElements = elements.filter((e) => e.id !== id);
-        console.log('here');
+
         setElements(updatedElements);
         drewElements.current = false;
     };
@@ -50,25 +50,25 @@ const Layer = ({
                     onChange={(e) => setTitle(e.target.value)}
                     value={title ? title : ''}
                 />
-                <div onClick={setIsShown}>
+                <div className='cursor-pointer' onClick={setIsShown}>
                     {isShown ? <BsFillEyeFill /> : <BsFillEyeSlashFill />}
                 </div>
             </div>
-            <div className={`flex flex-col ${collapse ? 'hidden' : ''}`}>
+            <div className={`flex flex-col justify-center items-center ${collapse ? 'hidden' : ''}`}>
                 {elements.map((element, index) => {
                     return (
                         <div
                             key={index + element.id}
-                            className="flex w-32 items-center justify-between gap-3 bg-blue-300 p-2 rounded`"
+                            className="flex w-32 items-center justify-between gap-3 border-t-2 bg-blue-300 hover:bg-blue-500 p-2 rounded`"
                         >
-                            <div>{renderIcon(element.elementType)}</div>
+                            <div className='text-sm border'>{renderIcon(element.elementType)}</div>
                             <input
                                 className="border-0 text-xs w-12 bg-transparent outline-none focus:outline-none"
                                 type="text"
                                 onChange={(e) => setTitle(e.target.value)}
                                 value={element.elementType}
                             />
-                            <div onClick={() => deleteElement(element.id)}>
+                            <div className='cursor-pointer' onClick={() => deleteElement(element.id)}>
                                 <BsFillTrash2Fill />
                             </div>
                         </div>
