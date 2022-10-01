@@ -55,7 +55,7 @@ const distance = (a, b) =>
     Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
 
 const getElementAtPosition = (x, y, elements) => {
-    console.log(elements.find((element) => isWithinElement(x, y, element)));
+    //console.log(elements.find((element) => isWithinElement(x, y, element)));
     return elements.find((element) => isWithinElement(x, y, element));
 };
 
@@ -86,6 +86,34 @@ const drawElement = (element, context) => {
             break;
         default:
             break;
+    }
+};
+
+const adjustElementCoordinates = (element) => {
+    const { elementType, startPoint, endPoint } = element;
+    switch (elementType) {
+        case 'rectangle':
+            const minX = Math.min(startPoint.x, endPoint.x);
+            const maxX = Math.max(startPoint.x, endPoint.x);
+            const minY = Math.min(startPoint.y, endPoint.y);
+            const maxY = Math.max(startPoint.y, endPoint.y);
+
+            return {
+                startPoint: { x: minX, y: minY },
+                endPoint: { x: maxX, y: maxY },
+            };
+        case 'straightLine':
+            if (
+                startPoint.x < endPoint.x ||
+                (startPoint.x === endPoint.x && startPoint.y < endPoint.y)
+            ) {
+                return { startPoint, endPoint };
+            } else {
+                return {
+                    startPoint: { ...endPoint },
+                    endPoint: { ...startPoint },
+                };
+            }
     }
 };
 
@@ -143,7 +171,7 @@ const DrawScreen = () => {
             element.colour,
             element.id
         );
-        console.log(updatedElement);
+        //console.log(updatedElement);
         const elementsCopy = [...elements];
 
         elementsCopy[elementsCopy.findIndex((e) => e.id === element.id)] =
@@ -229,6 +257,19 @@ const DrawScreen = () => {
     };
 
     const handleMouseUp = (event) => {
+        const lastElement = elements[elements.length - 1];
+        const { startPoint, endPoint } = adjustElementCoordinates(lastElement);
+
+        if (isDrawing) {
+            updateElement({
+                startPoint,
+                endPoint,
+                elementType: lastElement.elementType,
+                colour: lastElement.colour,
+                width: lastElement.width,
+                id: lastElement.id,
+            });
+        }
         setSelectedElement(null);
         setIsDrawing(false);
     };
