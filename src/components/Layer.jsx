@@ -28,7 +28,7 @@ const Layer = ({
     drewElements,
 }) => {
     const [title, setTitle] = useState(currentTitle);
-    const [collapse, setCollapse] = useState(true);
+    const [collapse, setCollapse] = useState(false);
 
     const deleteElement = (id) => {
         let updatedElements = elements.filter((e) => e.id !== id);

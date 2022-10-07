@@ -23,24 +23,52 @@ const createElement = (
     return { startPoint, endPoint, elementType, width, colour, id };
 };
 
-const isWithinElement = (x, y, element) => {
+const nearPoint = (startPoint, endPoint, name) => {
+    return Math.abs(startPoint.x - endPoint.x) < 5 &&
+        Math.abs(startPoint.y - endPoint.y) < 5
+        ? name
+        : null;
+};
+
+const positionWithinElement = (x, y, element) => {
     const { startPoint, endPoint, elementType } = element;
 
     switch (elementType) {
         case 'rectangle':
-            const minX = Math.min(startPoint.x, endPoint.x);
-            const maxX = Math.max(startPoint.x, endPoint.x);
-            const minY = Math.min(startPoint.y, endPoint.y);
-            const maxY = Math.max(startPoint.y, endPoint.y);
+            const topLeft = nearPoint({ x, y }, startPoint, 'tl');
+            const topRight = nearPoint(
+                { x, y },
+                { x: endPoint.x, y: startPoint.y },
+                'tr'
+            );
+            const bottomLeft = nearPoint(
+                { x, y },
+                { x: startPoint.x, y: endPoint.y },
+                'bl'
+            );
+            const bottomRight = nearPoint({ x, y }, endPoint, 'br');
+            const insideRect =
+                x >= startPoint.x &&
+                x <= endPoint.x &&
+                y >= startPoint.y &&
+                y <= endPoint.y
+                    ? 'inside'
+                    : null;
 
-            return x >= minX && x <= maxX && y >= minY && y <= maxY;
+            return (
+                topLeft || insideRect || topRight || bottomLeft || bottomRight
+            );
 
         case 'straightLine':
             const p = { x, y };
             const offset =
                 distance(startPoint, endPoint) -
                 (distance(startPoint, p) + distance(endPoint, p));
-            return Math.abs(offset) < 1;
+
+            const start = nearPoint({ x, y }, startPoint, 'start');
+            const end = nearPoint({ x, y }, endPoint, 'end');
+            const insideLine = Math.abs(offset) < 1 ? 'inside' : null;
+            return start || end || insideLine;
 
         default:
             const p2 = { x, y };
@@ -55,35 +83,61 @@ const distance = (a, b) =>
     Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
 
 const getElementAtPosition = (x, y, elements) => {
-    //console.log(elements.find((element) => isWithinElement(x, y, element)));
-    return elements.find((element) => isWithinElement(x, y, element));
+    //console.log(elements.find((element) => positionWithinElement(x, y, element)));
+    return elements
+        .map((element) => ({
+            ...element,
+            position: positionWithinElement(x, y, element),
+        }))
+        .find((element) => element.position !== null);
 };
 
 const drawElement = (element, context) => {
-    switch (element.elementType) {
+    const { width, elementType, colour, startPoint, endPoint, length } =
+        element;
+    switch (elementType) {
         case 'rectangle':
             context.beginPath();
-            context.lineWidth = element.width;
-            context.strokeStyle = element.colour;
-            context.moveTo(element.startPoint.x, element.startPoint.y);
-            context.lineTo(element.endPoint.x, element.startPoint.y);
+            context.lineWidth = width;
+            context.strokeStyle = colour;
+            context.moveTo(startPoint.x, startPoint.y);
+            context.lineTo(endPoint.x, startPoint.y);
             context.stroke();
-            context.lineTo(element.endPoint.x, element.endPoint.y);
+            context.lineTo(endPoint.x, endPoint.y);
             context.stroke();
-            context.lineTo(element.startPoint.x, element.endPoint.y);
+            context.lineTo(startPoint.x, endPoint.y);
             context.stroke();
-            context.lineTo(element.startPoint.x, element.startPoint.y);
+            context.lineTo(startPoint.x, startPoint.y);
             context.stroke();
             break;
         case 'straightLine':
             context.beginPath();
-            context.lineWidth = element.width;
-            context.strokeStyle = element.colour;
-            context.moveTo(element.startPoint.x, element.startPoint.y);
-            context.lineTo(element.endPoint.x, element.endPoint.y);
+            context.lineWidth = width;
+            context.strokeStyle = colour;
+            context.moveTo(startPoint.x, startPoint.y);
+            context.lineTo(endPoint.x, endPoint.y);
             context.stroke();
 
             break;
+        case 'parallelogram:':
+            const figureWidth = length
+                ? length
+                : (endPoint.x - startPoint.x) / 3;
+            context.beginPath();
+            context.lineWidth = width;
+            context.strokeStyle = colour;
+
+            context.moveTo(startPoint.x, startPoint.y);
+            context.lineTo(startPoint.x + figureWidth, startPoint.y);
+            context.stroke();
+            context.lineTo(endPoint.x, endPoint.y);
+            context.stroke();
+            context.lineTo(endPoint.x - figureWidth, endPoint.y);
+            context.stroke();
+            context.lineTo(startPoint.x, startPoint.y);
+            context.stroke();
+            break;
+
         default:
             break;
     }
@@ -92,6 +146,7 @@ const drawElement = (element, context) => {
 const adjustElementCoordinates = (element) => {
     const { elementType, startPoint, endPoint } = element;
     switch (elementType) {
+        case 'parallelogram':
         case 'rectangle':
             const minX = Math.min(startPoint.x, endPoint.x);
             const maxX = Math.max(startPoint.x, endPoint.x);
@@ -114,7 +169,53 @@ const adjustElementCoordinates = (element) => {
                     endPoint: { ...startPoint },
                 };
             }
+        default:
+            break;
     }
+};
+
+const drawSelection = (element) => {
+    const newElement = {
+        colour: '#3474eb',
+        width: 2,
+        id: 'default',
+    };
+
+    switch (element.elementType) {
+        case 'rectangle':
+            newElement.elementType = 'rectangle';
+            newElement.startPoint = {
+                x: element.startPoint.x - 1,
+                y: element.startPoint.y - 1,
+            };
+            newElement.endPoint = {
+                x: element.endPoint.x + 1,
+                y: element.endPoint.y + 1,
+            };
+            break;
+        case 'straightLine':
+            newElement.elementType = 'parallelogram:';
+            newElement.startPoint = {
+                x: element.startPoint.x - 2,
+                y: element.startPoint.y - 1,
+            };
+            newElement.endPoint = {
+                x: element.endPoint.x + 2,
+                y: element.endPoint.y + 1,
+            };
+            newElement.length = 3;
+            break;
+
+        default:
+            break;
+    }
+    //console.log(newElement);
+    return newElement;
+};
+
+const cursorForPosition = (position) => {
+    let positions = ['tl', 'br', 'start', 'end', 'tr', 'bl'];
+    return positions.includes(position) ? 'nesw-resize' : 'move';
 };
 
 const DrawScreen = () => {
@@ -147,7 +248,7 @@ const DrawScreen = () => {
     useLayoutEffect(() => {
         if (!drewElementsRef.current) {
             const ctx = canvasRef.current.getContext('2d');
-            console.log(elements);
+            //console.log(elements);
             ctx.clearRect(
                 0,
                 0,
@@ -156,11 +257,18 @@ const DrawScreen = () => {
             );
 
             elements.forEach((element) => {
+                if (selectedElement) {
+                    if (element.id === selectedElement.id) {
+                        drawElement(drawSelection(element), ctx);
+                    }
+                }
+
                 drawElement(element, ctx);
             });
             drewElementsRef.current = true;
+            console.log('done');
         }
-    }, [elements]);
+    }, [elements, selectedElement]);
 
     const updateElement = (element) => {
         const updatedElement = createElement(
@@ -185,7 +293,7 @@ const DrawScreen = () => {
         const point = computePointInCanvas(clientX, clientY, canvasRef.current);
         if (elementType === 'select') {
             const element = getElementAtPosition(point.x, point.y, elements);
-
+            //console.log(element);
             if (!element) return;
 
             const offsetX = point.x - element.startPoint.x;
@@ -213,12 +321,10 @@ const DrawScreen = () => {
         const point = computePointInCanvas(clientX, clientY, canvasRef.current);
 
         if (elementType === 'select') {
-            event.target.style.cursor = getElementAtPosition(
-                point.x,
-                point.y,
-                elements
-            )
-                ? 'move'
+            const element = getElementAtPosition(point.x, point.y, elements);
+
+            event.target.style.cursor = element
+                ? cursorForPosition(element.position)
                 : 'default';
 
             if (!selectedElement) return;
