@@ -59,7 +59,8 @@ const positionWithinElement = (x, y, element) => {
                 topLeft || insideRect || topRight || bottomLeft || bottomRight
             );
 
-        case 'straightLine':
+        case 'ddaLine':
+        case 'bresenhamLine':
             const p = { x, y };
             const offset =
                 distance(startPoint, endPoint) -
@@ -92,22 +93,25 @@ const getElementAtPosition = (x, y, elements) => {
         .find((element) => element.position !== null);
 };
 
-const drawLine = (startPoint, endPoint, width, colour, ctx) => {
+const putPixel = (point, width, colour, ctx) => {
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, width / 2, 0, 2 * Math.PI, true);
+    ctx.fillStyle = colour;
+    ctx.fill();
+
+    ctx.closePath();
+};
+
+const drawBresenhamsLine = (startPoint, endPoint, width, colour, ctx) => {
     let dx = Math.abs(endPoint.x - startPoint.x);
     let dy = Math.abs(endPoint.y - startPoint.y);
-    let p = 2 * dx - dy;
 
-    ctx.beginPath();
     let sy = startPoint.y < endPoint.y ? 1 : -1;
     let sx = startPoint.x < endPoint.x ? 1 : -1;
     let err = dx - dy;
-    console.log(startPoint, endPoint);
-
+    
     while (true) {
-        ctx.arc(startPoint.x, startPoint.y, width / 2, 0, 2 * Math.PI, true);
-        ctx.fillStyle = colour;
-        ctx.fill();
-        ctx.closePath();
+        putPixel(startPoint, width, colour, ctx);
 
         if (startPoint.x === endPoint.x && startPoint.y === endPoint.y) break;
         let e2 = 2 * err;
@@ -121,18 +125,33 @@ const drawLine = (startPoint, endPoint, width, colour, ctx) => {
             startPoint.y += sy;
         }
     }
-    
+};
+
+const drawDdaLine = (startPoint, endPoint, width, colour, ctx) => {
+    let dx = endPoint.x - startPoint.x;
+    let dy = endPoint.y - startPoint.y;
+
+    let steps = Math.abs(dx) > Math.abs(dy) ? Math.abs(dx) : Math.abs(dy);
+
+    let xInc = dx / steps;
+    let yInc = dy / steps;
+
+    let i = 1;
+
+    while (i < steps) {
+        putPixel(startPoint, width, colour, ctx);
+
+        startPoint.x += xInc;
+        startPoint.y += yInc;
+
+        i++;
+    }
 };
 
 const drawElement = (element, context) => {
     const { width, elementType, colour, startPoint, endPoint, length } =
         element;
-    /*
-        startPoint.x = startPoint.x;
-        startPoint.y = startPoint.y;
-        endPoint.x = endPoint.x;
-        endPoint.y = endPoint.y;
-    */
+
     switch (elementType) {
         case 'rectangle':
             context.beginPath();
@@ -144,27 +163,10 @@ const drawElement = (element, context) => {
                 endPoint.x - startPoint.x,
                 endPoint.y - startPoint.y
             );
-            /*context.moveTo(startPoint.x, startPoint.y);
-            context.lineTo(endPoint.x, startPoint.y);
-            context.stroke();
-            context.lineTo(endPoint.x, endPoint.y);
-            context.stroke();
-            context.lineTo(startPoint.x, endPoint.y);
-            context.stroke();
-            context.lineTo(startPoint.x, startPoint.y);
-            context.stroke();
-            */
+
             break;
-        case 'straightLine':
-            let biggerPoint, smallerPointer;
-            if (startPoint.x <= endPoint.x) {
-                biggerPoint = endPoint;
-                smallerPointer = startPoint;
-            } else {
-                biggerPoint = startPoint;
-                smallerPointer = endPoint;
-            }
-            drawLine(
+        case 'bresenhamLine':
+            drawBresenhamsLine(
                 { ...startPoint },
                 { ...endPoint },
                 width,
@@ -173,6 +175,18 @@ const drawElement = (element, context) => {
             );
 
             break;
+
+        case 'ddaLine':
+            drawDdaLine(
+                { ...startPoint },
+                { ...endPoint },
+                width,
+                colour,
+                context
+            );
+
+            break;
+
         case 'parallelogram:':
             const figureWidth = length
                 ? length
@@ -211,7 +225,7 @@ const adjustElementCoordinates = (element) => {
                 startPoint: { x: minX, y: minY },
                 endPoint: { x: maxX, y: maxY },
             };
-        case 'straightLine':
+        case 'bresenhamLine':
             if (
                 startPoint.x < endPoint.x ||
                 (startPoint.x === endPoint.x && startPoint.y < endPoint.y)
@@ -247,7 +261,7 @@ const drawSelection = (element) => {
                 y: element.endPoint.y + element.width,
             };
             break;
-        case 'straightLine':
+        case 'bresenhamLine':
             newElement.elementType = 'parallelogram:';
             newElement.startPoint = {
                 x: element.startPoint.x - element.width + 0.5,
@@ -273,6 +287,7 @@ const cursorForPosition = (position) => {
 };
 
 const DrawScreen = () => {
+    const [lastElement, setLastElement] = useState(null);
     const [elements, setElements] = useState([]);
     const [elementType, setElementType] = useState('rectangle');
     const [selectedElement, setSelectedElement] = useState(null);
@@ -451,9 +466,16 @@ const DrawScreen = () => {
                         />,
                         <ToolButton
                             icon={<GiStraightPipe />}
-                            selected={elementType === 'straightLine'}
+                            selected={elementType === 'bresenhamLine'}
                             action={() => {
-                                setElementType('straightLine');
+                                setElementType('bresenhamLine');
+                            }}
+                        />,
+                        <ToolButton
+                            icon={<GiStraightPipe />}
+                            selected={elementType === 'ddaLine'}
+                            action={() => {
+                                setElementType('ddaLine');
                             }}
                         />,
                         <ToolButton

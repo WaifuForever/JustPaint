@@ -9,7 +9,8 @@ const renderIcon = (elementType) => {
     switch (elementType) {
         case 'rectangle':
             return <BiRectangle />;
-        case 'straightLine':
+        case 'ddaLine':
+        case 'bresenhamLine':
             return <GiStraightPipe />;
         case 'pencil':
             return <FaPencilAlt />;
