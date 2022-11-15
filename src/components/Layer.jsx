@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { BiRectangle } from 'react-icons/bi';
 import { BsFillEyeFill, BsFillEyeSlashFill } from 'react-icons/bs';
-import { FaPencilAlt } from 'react-icons/fa';
+import { FaPaintBrush, FaPencilAlt } from 'react-icons/fa';
 import { BsFillTrash2Fill } from 'react-icons/bs';
 import { GiStraightPipe } from 'react-icons/gi';
 
@@ -12,6 +12,8 @@ const renderIcon = (elementType) => {
         case 'ddaLine':
         case 'bresenhamLine':
             return <GiStraightPipe />;
+        case 'brush':
+            return <FaPaintBrush/>;
         case 'pencil':
             return <FaPencilAlt />;
         default:

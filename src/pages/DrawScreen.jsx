@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { v4 as uuid } from 'uuid';
-import { FaPencilAlt } from 'react-icons/fa';
+import getStroke from 'perfect-freehand';
+import { FaPencilAlt, FaPaintBrush } from 'react-icons/fa';
 import { BiRectangle } from 'react-icons/bi';
 import { BsFillLayersFill } from 'react-icons/bs';
 import { FiMousePointer } from 'react-icons/fi';
@@ -20,7 +21,53 @@ const createElement = (
     id
 ) => {
     id = id ?? uuid();
+
+    if (elementType === 'brush')
+        return {
+            id,
+            points: Array.isArray(startPoint) ? startPoint : [startPoint],
+            elementType,
+            width,
+            colour,
+        };
+
     return { startPoint, endPoint, elementType, width, colour, id };
+};
+
+const average = (a, b) => (a + b) / 2;
+
+const getSvgPathFromStroke = (points, closed = true) => {
+    const len = points.length;
+
+    if (len < 4) {
+        return ``;
+    }
+
+    let a = points[0];
+    let b = points[1];
+    const c = points[2];
+
+    let result = `M${a[0].toFixed(2)},${a[1].toFixed(2)} Q${b[0].toFixed(
+        2
+    )},${b[1].toFixed(2)} ${average(b[0], c[0]).toFixed(2)},${average(
+        b[1],
+        c[1]
+    ).toFixed(2)} T`;
+
+    for (let i = 2, max = len - 1; i < max; i++) {
+        a = points[i];
+        b = points[i + 1];
+        result += `${average(a[0], b[0]).toFixed(2)},${average(
+            a[1],
+            b[1]
+        ).toFixed(2)} `;
+    }
+
+    if (closed) {
+        result += 'Z';
+    }
+
+    return result;
 };
 
 const nearPoint = (startPoint, endPoint, name) => {
@@ -58,7 +105,8 @@ const positionWithinElement = (x, y, element) => {
             return (
                 topLeft || insideRect || topRight || bottomLeft || bottomRight
             );
-
+        case 'brush':
+            break;
         case 'ddaLine':
         case 'bresenhamLine':
             const p = { x, y };
@@ -84,7 +132,6 @@ const distance = (a, b) =>
     Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
 
 const getElementAtPosition = (x, y, elements) => {
-    //console.log(elements.find((element) => positionWithinElement(x, y, element)));
     return elements
         .map((element) => ({
             ...element,
@@ -109,7 +156,7 @@ const drawBresenhamsLine = (startPoint, endPoint, width, colour, ctx) => {
     let sy = startPoint.y < endPoint.y ? 1 : -1;
     let sx = startPoint.x < endPoint.x ? 1 : -1;
     let err = dx - dy;
-    
+
     while (true) {
         putPixel(startPoint, width, colour, ctx);
 
@@ -154,6 +201,7 @@ const drawElement = (element, context) => {
 
     switch (elementType) {
         case 'rectangle':
+            putPixel(endPoint, width, colour, context);
             context.beginPath();
             context.lineWidth = width;
             context.strokeStyle = colour;
@@ -166,6 +214,7 @@ const drawElement = (element, context) => {
 
             break;
         case 'bresenhamLine':
+            putPixel(endPoint, width, colour, context);
             drawBresenhamsLine(
                 { ...startPoint },
                 { ...endPoint },
@@ -177,6 +226,7 @@ const drawElement = (element, context) => {
             break;
 
         case 'ddaLine':
+            putPixel(endPoint, width, colour, context);
             drawDdaLine(
                 { ...startPoint },
                 { ...endPoint },
@@ -187,7 +237,19 @@ const drawElement = (element, context) => {
 
             break;
 
+        case 'pencil':
+            break;
+        case 'brush':
+            const myStroke = getSvgPathFromStroke(
+                getStroke(element.points, { size: element.width })
+            );
+            context.fillStyle = element.colour;
+            context.fill(new Path2D(myStroke));
+
+            break;
+
         case 'parallelogram:':
+            putPixel(endPoint, width, colour, context);
             const figureWidth = length
                 ? length
                 : (endPoint.x - startPoint.x) / 3;
@@ -207,7 +269,7 @@ const drawElement = (element, context) => {
             break;
 
         default:
-            break;
+            throw new Error(`Type not recognised: ${elementType}`);
     }
 };
 
@@ -261,8 +323,9 @@ const drawSelection = (element) => {
                 y: element.endPoint.y + element.width,
             };
             break;
+        case 'ddaLine':
         case 'bresenhamLine':
-            newElement.elementType = 'parallelogram:';
+            newElement.elementType = 'bresenhamLine:';
             newElement.startPoint = {
                 x: element.startPoint.x - element.width + 0.5,
                 y: element.startPoint.y - 1,
@@ -277,7 +340,7 @@ const drawSelection = (element) => {
         default:
             break;
     }
-    //console.log(newElement);
+
     return newElement;
 };
 
@@ -337,20 +400,29 @@ const DrawScreen = () => {
                 drawElement(element, ctx);
             });
             drewElementsRef.current = true;
-            console.log(elements);
         }
     }, [elements, selectedElement]);
 
     const updateElement = (element) => {
-        const updatedElement = createElement(
-            element.startPoint,
-            element.endPoint,
-            element.elementType,
-            element.width,
-            element.colour,
-            element.id
-        );
-        //console.log(updatedElement);
+        const updatedElement =
+            element.elementType === 'brush'
+                ? createElement(
+                      element.points,
+                      undefined,
+                      element.elementType,
+                      element.width,
+                      element.colour,
+                      element.id
+                  )
+                : createElement(
+                      element.startPoint,
+                      element.endPoint,
+                      element.elementType,
+                      element.width,
+                      element.colour,
+                      element.id
+                  );
+
         const elementsCopy = [...elements];
 
         elementsCopy[elementsCopy.findIndex((e) => e.id === element.id)] =
@@ -364,7 +436,7 @@ const DrawScreen = () => {
         const point = computePointInCanvas(clientX, clientY, canvasRef.current);
         if (elementType === 'select') {
             const element = getElementAtPosition(point.x, point.y, elements);
-            //console.log(element);
+
             if (!element) return;
 
             const offsetX = point.x - element.startPoint.x;
@@ -376,7 +448,8 @@ const DrawScreen = () => {
             });
         } else {
             const element = createElement(point, point, elementType, 2, colour);
-
+            console.log(element);
+            drewElementsRef.current = false;
             setElements((prevState) => [...prevState, element]);
         }
     };
@@ -421,14 +494,23 @@ const DrawScreen = () => {
                 id,
             });
         } else {
-            updateElement({
-                startPoint: elements[index].startPoint,
-                endPoint: point,
-                elementType: elementType,
-                width: 2,
-                colour,
-                id: elements[index].id,
-            });
+            if (elementType === 'brush') {
+                updateElement({
+                    points: [...elements[index].points, point],
+                    elementType: elementType,
+                    width: 2,
+                    colour,
+                    id: elements[index].id,
+                });
+            } else
+                updateElement({
+                    startPoint: elements[index].startPoint,
+                    endPoint: point,
+                    elementType: elementType,
+                    width: 2,
+                    colour,
+                    id: elements[index].id,
+                });
         }
         drewElementsRef.current = false;
     };
@@ -438,14 +520,23 @@ const DrawScreen = () => {
         const { startPoint, endPoint } = lastElement;
 
         if (isDrawing) {
-            updateElement({
-                startPoint,
-                endPoint,
-                elementType: lastElement.elementType,
-                colour: lastElement.colour,
-                width: lastElement.width,
-                id: lastElement.id,
-            });
+            if (elementType === 'brush') {
+                updateElement({
+                    points: lastElement.points,
+                    elementType: elementType,
+                    width: lastElement.width,
+                    colour: lastElement.colour,
+                    id: lastElement.id,
+                });
+            } else
+                updateElement({
+                    startPoint,
+                    endPoint,
+                    elementType: lastElement.elementType,
+                    colour: lastElement.colour,
+                    width: lastElement.width,
+                    id: lastElement.id,
+                });
         }
         setSelectedElement(null);
         setIsDrawing(false);
@@ -462,6 +553,13 @@ const DrawScreen = () => {
                             selected={elementType === 'pencil'}
                             action={() => {
                                 setElementType('pencil');
+                            }}
+                        />,
+                        <ToolButton
+                            icon={<FaPaintBrush />}
+                            selected={elementType === 'brush'}
+                            action={() => {
+                                setElementType('brush');
                             }}
                         />,
                         <ToolButton
