@@ -13,7 +13,7 @@ const renderIcon = (elementType) => {
         case 'bresenhamLine':
             return <GiStraightPipe />;
         case 'brush':
-            return <FaPaintBrush/>;
+            return <FaPaintBrush />;
         case 'pencil':
             return <FaPencilAlt />;
         default:
@@ -27,6 +27,7 @@ const Layer = ({
     isShown,
     setIsShown,
     elements,
+    selectedElement,
     setElements,
     drewElements,
 }) => {
@@ -53,25 +54,40 @@ const Layer = ({
                     onChange={(e) => setTitle(e.target.value)}
                     value={title ? title : ''}
                 />
-                <div className='cursor-pointer' onClick={setIsShown}>
+                <div className="cursor-pointer" onClick={setIsShown}>
                     {isShown ? <BsFillEyeFill /> : <BsFillEyeSlashFill />}
                 </div>
             </div>
-            <div className={`flex flex-col justify-center items-center ${collapse ? 'hidden' : ''}`}>
+            <div
+                className={`flex flex-col justify-center items-center ${
+                    collapse ? 'hidden' : ''
+                }`}
+            >
                 {elements.map((element, index) => {
                     return (
                         <div
                             key={index + element.id}
-                            className="flex w-32 items-center justify-between gap-3 border-t-2 bg-blue-300 hover:bg-blue-500 p-2 rounded`"
+                            className={`${
+                                selectedElement
+                                    ? selectedElement.id === element.id
+                                        ? 'bg-blue-500 hover:bg-blue-600'
+                                        : 'bg-blue-300 hover:bg-blue-500'
+                                    : 'bg-blue-300 hover:bg-blue-500'
+                            } flex w-32 items-center justify-between gap-3 border-t-2 p-2 rounded`}
                         >
-                            <div className='text-sm border'>{renderIcon(element.elementType)}</div>
+                            <div className="text-sm border">
+                                {renderIcon(element.elementType)}
+                            </div>
                             <input
                                 className="border-0 text-xs w-12 bg-transparent outline-none focus:outline-none"
                                 type="text"
                                 onChange={(e) => setTitle(e.target.value)}
                                 value={element.elementType}
                             />
-                            <div className='cursor-pointer' onClick={() => deleteElement(element.id)}>
+                            <div
+                                className="cursor-pointer"
+                                onClick={() => deleteElement(element.id)}
+                            >
                                 <BsFillTrash2Fill />
                             </div>
                         </div>

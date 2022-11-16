@@ -12,26 +12,24 @@ import ToolButton from '../components/ToolButton';
 import Layer from '../components/Layer';
 import ColourPicker from '../components/ColourPicker';
 
-const createElement = (
-    startPoint,
-    endPoint,
-    elementType,
-    width,
-    colour,
-    id
-) => {
-    id = id ?? uuid();
-
-    if (elementType === 'brush')
+const createElement = (firstPoint, elementType, width, colour) => {
+    if (elementType === 'brush' || elementType === 'pencil')
         return {
-            id,
-            points: Array.isArray(startPoint) ? startPoint : [startPoint],
+            id: uuid(),
+            points: [firstPoint],
             elementType,
             width,
             colour,
         };
 
-    return { startPoint, endPoint, elementType, width, colour, id };
+    return {
+        startPoint: firstPoint,
+        endPoint: firstPoint,
+        elementType,
+        width,
+        colour,
+        id: uuid(),
+    };
 };
 
 const average = (a, b) => (a + b) / 2;
@@ -105,8 +103,7 @@ const positionWithinElement = (x, y, element) => {
             return (
                 topLeft || insideRect || topRight || bottomLeft || bottomRight
             );
-        case 'brush':
-            break;
+
         case 'ddaLine':
         case 'bresenhamLine':
             const p = { x, y };
@@ -118,7 +115,10 @@ const positionWithinElement = (x, y, element) => {
             const end = nearPoint({ x, y }, endPoint, 'end');
             const insideLine = Math.abs(offset) < 1 ? 'inside' : null;
             return start || end || insideLine;
+        case 'pencil':
 
+        case 'brush':
+            break;
         default:
             const p2 = { x, y };
             const offset2 =
@@ -183,7 +183,7 @@ const drawDdaLine = (startPoint, endPoint, width, colour, ctx) => {
     let xInc = dx / steps;
     let yInc = dy / steps;
 
-    let i = 1;
+    let i = 0;
 
     while (i < steps) {
         putPixel(startPoint, width, colour, ctx);
@@ -238,6 +238,8 @@ const drawElement = (element, context) => {
             break;
 
         case 'pencil':
+            //context.fillStyle = element.colour;
+            //context.fill(new Path2D(getStroke(element.points, { size: element.width })));
             break;
         case 'brush':
             const myStroke = getSvgPathFromStroke(
@@ -300,45 +302,52 @@ const adjustElementCoordinates = (element) => {
                 };
             }
         default:
-            break;
+            throw new Error(`Type not recognised: ${elementType}`);
     }
 };
 
 const drawSelection = (element) => {
+    const { startPoint, endPoint, width, elementType } = element;
+
     const newElement = {
         colour: '#3474eb',
         width: 1,
         id: 'default',
+        elementType: elementType,
     };
 
-    switch (element.elementType) {
+    switch (elementType) {
         case 'rectangle':
-            newElement.elementType = 'rectangle';
             newElement.startPoint = {
-                x: element.startPoint.x - element.width,
-                y: element.startPoint.y - element.width,
+                x: startPoint.x - width,
+                y: startPoint.y - width,
             };
             newElement.endPoint = {
-                x: element.endPoint.x + element.width,
-                y: element.endPoint.y + element.width,
+                x: endPoint.x + width,
+                y: endPoint.y + width,
             };
-            break;
-        case 'ddaLine':
-        case 'bresenhamLine':
-            newElement.elementType = 'bresenhamLine:';
-            newElement.startPoint = {
-                x: element.startPoint.x - element.width + 0.5,
-                y: element.startPoint.y - 1,
-            };
-            newElement.endPoint = {
-                x: element.endPoint.x + element.width - 0.5,
-                y: element.endPoint.y + 1,
-            };
-            newElement.length = element.width + 1;
             break;
 
-        default:
+        case 'ddaLine':
+        case 'bresenhamLine':
+            newElement.startPoint = {
+                x: startPoint.x - width + 0.5,
+                y: startPoint.y - 1,
+            };
+            newElement.endPoint = {
+                x: endPoint.x + width - 0.5,
+                y: endPoint.y + 1,
+            };
+            newElement.length = width + 1;
             break;
+        case 'brush':
+            console.log('here');
+        case 'pencil':
+            throw new Error(
+                `Not implemented yet: draw ${elementType} selection`
+            );
+        default:
+            throw new Error(`Type not recognised: ${elementType}`);
     }
 
     return newElement;
@@ -349,10 +358,22 @@ const cursorForPosition = (position) => {
     return positions.includes(position) ? 'nesw-resize' : 'move';
 };
 
+const computePointInCanvas = (canvasRef, clientX, clientY) => {
+    if (!canvasRef.current) {
+        return null;
+    }
+    const boundingRect = canvasRef.current.getBoundingClientRect();
+
+    return {
+        x: clientX - boundingRect.left,
+        y: clientY - boundingRect.top,
+    };
+};
+
 const DrawScreen = () => {
     const [lastElement, setLastElement] = useState(null);
     const [elements, setElements] = useState([]);
-    const [elementType, setElementType] = useState('rectangle');
+    const [elementType, setElementType] = useState('brush');
     const [selectedElement, setSelectedElement] = useState(null);
     const [isDrawing, setIsDrawing] = useState(false);
     const [displayCanvas, setDisplayCanvas] = useState(true);
@@ -360,18 +381,6 @@ const DrawScreen = () => {
 
     const canvasRef = useRef(null);
     const drewElementsRef = useRef(false);
-
-    const computePointInCanvas = (clientX, clientY) => {
-        if (!canvasRef.current) {
-            return null;
-        }
-        const boundingRect = canvasRef.current.getBoundingClientRect();
-
-        return {
-            x: clientX - boundingRect.left,
-            y: clientY - boundingRect.top,
-        };
-    };
 
     const setCanvasRef = (ref) => {
         canvasRef.current = ref;
@@ -404,52 +413,39 @@ const DrawScreen = () => {
     }, [elements, selectedElement]);
 
     const updateElement = (element) => {
-        const updatedElement =
-            element.elementType === 'brush'
-                ? createElement(
-                      element.points,
-                      undefined,
-                      element.elementType,
-                      element.width,
-                      element.colour,
-                      element.id
-                  )
-                : createElement(
-                      element.startPoint,
-                      element.endPoint,
-                      element.elementType,
-                      element.width,
-                      element.colour,
-                      element.id
-                  );
-
         const elementsCopy = [...elements];
 
         elementsCopy[elementsCopy.findIndex((e) => e.id === element.id)] =
-            updatedElement;
+            element;
         setElements(elementsCopy);
     };
 
     const handleMouseDown = (event) => {
         const { clientX, clientY } = event;
         setIsDrawing(true);
-        const point = computePointInCanvas(clientX, clientY, canvasRef.current);
+        const point = computePointInCanvas(canvasRef, clientX, clientY);
+
         if (elementType === 'select') {
             const element = getElementAtPosition(point.x, point.y, elements);
-
+            console.log(element);
             if (!element) return;
 
-            const offsetX = point.x - element.startPoint.x;
-            const offsetY = point.y - element.startPoint.y;
-
+            const offset = element.points
+                ? { ...point }
+                : {
+                      x: point.x - element.startPoint.x,
+                      y: point.y - element.startPoint.y,
+                  };
+            setLastElement(element);
             setSelectedElement({
                 ...element,
-                offset: { x: offsetX, y: offsetY },
+                offset,
             });
         } else {
-            const element = createElement(point, point, elementType, 2, colour);
+            const element = createElement(point, elementType, 2, colour);
             console.log(element);
             drewElementsRef.current = false;
+            setLastElement(element);
             setElements((prevState) => [...prevState, element]);
         }
     };
@@ -462,7 +458,7 @@ const DrawScreen = () => {
         }
         const { clientX, clientY } = event;
         const index = elements.length - 1;
-        const point = computePointInCanvas(clientX, clientY, canvasRef.current);
+        const point = computePointInCanvas(canvasRef, clientX, clientY);
 
         if (elementType === 'select') {
             const element = getElementAtPosition(point.x, point.y, elements);
@@ -472,29 +468,52 @@ const DrawScreen = () => {
                 : 'default';
 
             if (!selectedElement) return;
-            const { startPoint, endPoint, id, offset } = selectedElement;
+            if (selectedElement.points) {
+                const { points, width, colour, id, offset, elementType } =
+                    selectedElement;
 
-            const width = endPoint.x - startPoint.x;
-            const height = endPoint.y - startPoint.y;
+                updateElement({
+                    points: points.map((item) => {
+                        return { x: item.x - offset.x, y: item.y - offset.y };
+                    }),
+                    elementType,
+                    width,
+                    colour,
+                    id,
+                });
+            } else {
+                const {
+                    startPoint,
+                    endPoint,
+                    width,
+                    colour,
+                    id,
+                    elementType,
+                    offset,
+                } = selectedElement;
 
-            const correctedPosition = {
-                x: point.x - offset.x,
-                y: point.y - offset.y,
-            };
+                const correctedPosition = {
+                    x: point.x - offset.x,
+                    y: point.y - offset.y,
+                };
 
-            updateElement({
-                startPoint: { x: correctedPosition.x, y: correctedPosition.y },
-                endPoint: {
-                    x: correctedPosition.x + width,
-                    y: correctedPosition.y + height,
-                },
-                elementType: selectedElement.elementType,
-                width: selectedElement.width,
-                colour: selectedElement.colour,
-                id,
-            });
+                updateElement({
+                    startPoint: {
+                        x: correctedPosition.x,
+                        y: correctedPosition.y,
+                    },
+                    endPoint: {
+                        x: correctedPosition.x + endPoint.x - startPoint.x,
+                        y: correctedPosition.y + endPoint.y - startPoint.y,
+                    },
+                    elementType,
+                    width,
+                    colour,
+                    id,
+                });
+            }
         } else {
-            if (elementType === 'brush') {
+            if (elements[index].points) {
                 updateElement({
                     points: [...elements[index].points, point],
                     elementType: elementType,
@@ -516,28 +535,8 @@ const DrawScreen = () => {
     };
 
     const handleMouseUp = (event) => {
-        const lastElement = elements[elements.length - 1];
-        const { startPoint, endPoint } = lastElement;
+        console.log(elements);
 
-        if (isDrawing) {
-            if (elementType === 'brush') {
-                updateElement({
-                    points: lastElement.points,
-                    elementType: elementType,
-                    width: lastElement.width,
-                    colour: lastElement.colour,
-                    id: lastElement.id,
-                });
-            } else
-                updateElement({
-                    startPoint,
-                    endPoint,
-                    elementType: lastElement.elementType,
-                    colour: lastElement.colour,
-                    width: lastElement.width,
-                    id: lastElement.id,
-                });
-        }
         setSelectedElement(null);
         setIsDrawing(false);
     };
@@ -623,6 +622,11 @@ const DrawScreen = () => {
                     isShown={displayCanvas}
                     setIsShown={() => setDisplayCanvas(!displayCanvas)}
                     elements={elements}
+                    selectedElement={
+                        elementType === 'select' && selectedElement
+                            ? selectedElement
+                            : lastElement
+                    }
                     setElements={setElements}
                     drewElements={drewElementsRef}
                 />
