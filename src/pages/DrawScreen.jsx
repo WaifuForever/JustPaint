@@ -68,6 +68,23 @@ const getSvgPathFromStroke = (points, closed = true) => {
     return result;
 };
 
+const strokeArrayPoints = (ctx, element) => {
+    const { points, colour, width } = element;
+    let prevPoint = points[0];
+    ctx.lineWidth = width;
+    ctx.strokeStyle = colour;
+    ctx.fillStyle = colour;
+
+    points.forEach((point) => {
+        ctx.beginPath();
+        ctx.moveTo(prevPoint.x, prevPoint.y);
+        ctx.lineTo(point.x, point.y);
+        ctx.stroke();
+        prevPoint = point;
+        putPixel(point, width / 5, colour, ctx);
+    });
+};
+
 const nearPoint = (startPoint, endPoint, name) => {
     return Math.abs(startPoint.x - endPoint.x) < 5 &&
         Math.abs(startPoint.y - endPoint.y) < 5
@@ -238,15 +255,18 @@ const drawElement = (element, context) => {
             break;
 
         case 'pencil':
-            //context.fillStyle = element.colour;
-            //context.fill(new Path2D(getStroke(element.points, { size: element.width })));
+            console.log(element);
+            strokeArrayPoints(context, element);
+            context.strokeStyle = element.colour;
+            context.stroke();
+
             break;
         case 'brush':
-            const myStroke = getSvgPathFromStroke(
+            const brushStroke = getSvgPathFromStroke(
                 getStroke(element.points, { size: element.width })
             );
             context.fillStyle = element.colour;
-            context.fill(new Path2D(myStroke));
+            context.fill(new Path2D(brushStroke));
 
             break;
 
@@ -427,7 +447,7 @@ const DrawScreen = () => {
 
         if (elementType === 'select') {
             const element = getElementAtPosition(point.x, point.y, elements);
-            console.log(element);
+
             if (!element) return;
 
             const offset = element.points
@@ -443,7 +463,7 @@ const DrawScreen = () => {
             });
         } else {
             const element = createElement(point, elementType, 2, colour);
-            console.log(element);
+
             drewElementsRef.current = false;
             setLastElement(element);
             setElements((prevState) => [...prevState, element]);
