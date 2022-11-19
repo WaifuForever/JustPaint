@@ -12,7 +12,7 @@ import ToolButton from '../components/ToolButton';
 import Layer from '../components/Layer';
 import ColourPicker from '../components/ColourPicker';
 
-const createElement = (firstPoint, elementType, width, colour) => {
+const createElement = (firstPoint, elementType, width, colour, isVisible) => {
     if (elementType === 'brush' || elementType === 'pencil')
         return {
             id: uuid(),
@@ -20,6 +20,7 @@ const createElement = (firstPoint, elementType, width, colour) => {
             elementType,
             width,
             colour,
+            isVisible,
         };
 
     return {
@@ -29,6 +30,7 @@ const createElement = (firstPoint, elementType, width, colour) => {
         width,
         colour,
         id: uuid(),
+        isVisible,
     };
 };
 
@@ -213,8 +215,17 @@ const drawDdaLine = (startPoint, endPoint, width, colour, ctx) => {
 };
 
 const drawElement = (element, context) => {
-    const { width, elementType, colour, startPoint, endPoint, length } =
-        element;
+    const {
+        width,
+        elementType,
+        colour,
+        startPoint,
+        endPoint,
+        length,
+        isVisible,
+    } = element;
+
+    if (!isVisible) return;
 
     switch (elementType) {
         case 'rectangle':
@@ -255,7 +266,6 @@ const drawElement = (element, context) => {
             break;
 
         case 'pencil':
-            console.log(element);
             strokeArrayPoints(context, element);
             context.strokeStyle = element.colour;
             context.stroke();
@@ -410,8 +420,6 @@ const DrawScreen = () => {
         if (!drewElementsRef.current) {
             const ctx = canvasRef.current.getContext('2d');
 
-            //ctx.scale(dpi, dpi);
-
             ctx.clearRect(
                 0,
                 0,
@@ -462,7 +470,7 @@ const DrawScreen = () => {
                 offset,
             });
         } else {
-            const element = createElement(point, elementType, 2, colour);
+            const element = createElement(point, elementType, 2, colour, true);
 
             drewElementsRef.current = false;
             setLastElement(element);
@@ -489,8 +497,15 @@ const DrawScreen = () => {
 
             if (!selectedElement) return;
             if (selectedElement.points) {
-                const { points, width, colour, id, offset, elementType } =
-                    selectedElement;
+                const {
+                    points,
+                    width,
+                    colour,
+                    id,
+                    offset,
+                    elementType,
+                    isVisible,
+                } = selectedElement;
 
                 updateElement({
                     points: points.map((item) => {
@@ -499,6 +514,7 @@ const DrawScreen = () => {
                     elementType,
                     width,
                     colour,
+                    isVisible,
                     id,
                 });
             } else {
@@ -509,6 +525,7 @@ const DrawScreen = () => {
                     colour,
                     id,
                     elementType,
+                    isVisible,
                     offset,
                 } = selectedElement;
 
@@ -527,6 +544,7 @@ const DrawScreen = () => {
                         y: correctedPosition.y + endPoint.y - startPoint.y,
                     },
                     elementType,
+                    isVisible,
                     width,
                     colour,
                     id,
@@ -539,6 +557,7 @@ const DrawScreen = () => {
                     elementType: elementType,
                     width: 2,
                     colour,
+                    isVisible: elements[index].isVisible,
                     id: elements[index].id,
                 });
             } else
@@ -548,15 +567,16 @@ const DrawScreen = () => {
                     elementType: elementType,
                     width: 2,
                     colour,
+                    isVisible: elements[index].isVisible,
                     id: elements[index].id,
                 });
         }
         drewElementsRef.current = false;
     };
+    console.log('mounted');
+    console.log(elements);
 
     const handleMouseUp = (event) => {
-        console.log(elements);
-
         setSelectedElement(null);
         setIsDrawing(false);
     };
@@ -638,9 +658,7 @@ const DrawScreen = () => {
             <div className="flex flex-col">
                 <Layer
                     icon={<BsFillLayersFill />}
-                    currentTitle="Layer"
-                    isShown={displayCanvas}
-                    setIsShown={() => setDisplayCanvas(!displayCanvas)}
+                    currentTitle="History"
                     elements={elements}
                     selectedElement={
                         elementType === 'select' && selectedElement
