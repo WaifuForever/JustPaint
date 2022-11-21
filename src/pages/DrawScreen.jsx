@@ -180,13 +180,14 @@ const drawBresenhamsLine = (startPoint, endPoint, width, colour, ctx) => {
         putPixel(startPoint, width, colour, ctx);
 
         if (startPoint.x === endPoint.x && startPoint.y === endPoint.y) break;
-        let e2 = 2 * err;
+        let p = 2 * err;
 
-        if (e2 > -dy) {
+        if (p > -dy) {
             err -= dy;
             startPoint.x += sx;
         }
-        if (e2 < dx) {
+
+        if (p < dx) {
             err += dx;
             startPoint.y += sy;
         }
@@ -230,6 +231,8 @@ const drawElement = (element, context) => {
     switch (elementType) {
         case 'rectangle':
             putPixel(endPoint, width, colour, context);
+
+            /*
             context.beginPath();
             context.lineWidth = width;
             context.strokeStyle = colour;
@@ -238,6 +241,39 @@ const drawElement = (element, context) => {
                 startPoint.y,
                 endPoint.x - startPoint.x,
                 endPoint.y - startPoint.y
+            );
+            */
+
+            drawBresenhamsLine(
+                { ...startPoint },
+                { x: endPoint.x, y: startPoint.y },
+                width,
+                colour,
+                context
+            );
+
+            drawBresenhamsLine(
+                { x: endPoint.x, y: startPoint.y },
+                { ...endPoint },
+                width,
+                colour,
+                context
+            );
+
+            drawBresenhamsLine(
+                { ...endPoint },
+                { x: startPoint.x, y: endPoint.y },
+                width,
+                colour,
+                context
+            );
+
+            drawBresenhamsLine(
+                { x: startPoint.x, y: endPoint.y },
+                { ...startPoint },
+                width,
+                colour,
+                context
             );
 
             break;
@@ -336,6 +372,20 @@ const adjustElementCoordinates = (element) => {
     }
 };
 
+const drawGrid = (gridRef) => {
+    const width = gridRef.current.width;
+    const height = gridRef.current.height;
+    const ctx = gridRef.current.getContext('2d');
+    const colour = '#AF9D9D';
+
+    for (let i = 0; i <= height; i += 8) {
+        drawBresenhamsLine({ x: 0, y: i }, { x: width, y: i }, 1, colour, ctx);
+    }
+    for (let i = 0; i <= width; i += 8) {
+        drawBresenhamsLine({ x: i, y: 0 }, { x: i, y: height }, 1, colour, ctx);
+    }
+};
+
 const drawSelection = (element) => {
     const { startPoint, endPoint, width, elementType } = element;
 
@@ -407,14 +457,28 @@ const DrawScreen = () => {
     const [selectedElement, setSelectedElement] = useState(null);
     const [isDrawing, setIsDrawing] = useState(false);
     const [displayCanvas, setDisplayCanvas] = useState(true);
+    const [displayGrid, setDisplayGrid] = useState(true);
     const [colour, setColour] = useState('#000000');
 
     const canvasRef = useRef(null);
+    const gridRef = useRef(null);
     const drewElementsRef = useRef(false);
+    const drewGridRef = useRef(false);
 
     const setCanvasRef = (ref) => {
         canvasRef.current = ref;
     };
+
+    const setGridRef = (ref) => {
+        gridRef.current = ref;
+    };
+
+    useLayoutEffect(() => {
+        if (displayGrid && !drewGridRef.current) {
+            drawGrid(gridRef);
+            drewGridRef.current = true;
+        }
+    }, [displayGrid]);
 
     useLayoutEffect(() => {
         if (!drewElementsRef.current) {
@@ -641,11 +705,25 @@ const DrawScreen = () => {
                     ]}
                 />
             </div>
-            <div className="mx-4 overflow-y-auto">
+            <div
+                className="relative mx-4 overflow-y-auto"
+                style={{ width: '768px', height: '576px' }}
+            >
+                {' '}
+                <div className="absolute left-0 top-0">
+                    <canvas
+                        className={`${
+                            displayGrid ? '' : 'hidden'
+                        } border border-black bg-transparent object-contain`}
+                        width={'768px'}
+                        height={'576px'}
+                        ref={setGridRef}
+                    ></canvas>
+                </div>
                 <canvas
                     className={`${
                         displayCanvas ? '' : 'hidden'
-                    } border border-black object-contain`}
+                    } absolute left-0 top-0 border border-black bg-transparent object-contain`}
                     width={'768px'}
                     height={'576px'}
                     ref={setCanvasRef}
