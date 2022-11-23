@@ -1,33 +1,48 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { BiRectangle } from 'react-icons/bi';
-import { BsFillEyeFill, BsFillEyeSlashFill } from 'react-icons/bs';
 import { FaPaintBrush, FaPencilAlt } from 'react-icons/fa';
 import { BsFillTrash2Fill } from 'react-icons/bs';
 import { GiStraightPipe } from 'react-icons/gi';
+import { MdHistory } from 'react-icons/md';
 
 import EditableTitle from './EditableTitle';
+
+const RenderIcon = ({ elementType }) => {
+    switch (elementType) {
+        case 'rectangle':
+            return <BiRectangle />;
+        case 'ddaLine':
+        case 'bresenhamLine':
+            return <GiStraightPipe />;
+        case 'brush':
+            return <FaPaintBrush />;
+        case 'pencil':
+            return <FaPencilAlt />;
+        default:
+            return <FaPencilAlt />;
+    }
+};
 
 const Item = ({
     elementId,
     elementType,
-    isActive,
-    selectedId,
+    isSelected,
     deleteElement,
-    toogleElement,
+    setCurrentElements,
 }) => {
+    console.log('ITEM');
+    console.log(elementId, elementType, isSelected);
     return (
         <div
             className={`${
-                selectedId === elementId
+                isSelected
                     ? 'bg-blue-500 hover:bg-blue-600'
                     : 'bg-blue-300 hover:bg-blue-500'
-            } flex w-32 items-center justify-between gap-3 border-t-2 p-2 rounded`}
+            } flex w-32 items-center justify-between gap-3 border-t-2 p-1 rounded`}
+            onClick={() => setCurrentElements(elementId)}
         >
-            <div
-                className="cursor-pointer text-sm border"
-                onClick={() => toogleElement(elementId)}
-            >
-                {isActive ? <BsFillEyeFill /> : <BsFillEyeSlashFill />}
+            <div className="cursor-pointer text-sm border">
+                <RenderIcon elementType={elementType} />
             </div>
 
             <EditableTitle currentTitle={elementType} />
@@ -42,22 +57,31 @@ const Item = ({
     );
 };
 
-const Layer = ({
-    icon,
+const History = ({
     currentTitle,
     elements,
-    selectedElement,
+    selectedElementId,
     deleteElement,
-    toogleElement,
+    setCurrentElements,
 }) => {
     const [collapse, setCollapse] = useState(false);
+   
+    const selectedElementRef = useRef(selectedElementId);
+
+
+    const selectState = (id) => {
+        //setCurrentElements(id);
+        
+        selectedElementRef.current = elements.find((e) => e.id === id).id;
+    };
+
     return (
         <div className="flex flex-col">
             <div
                 className={`flex w-40 items-center justify-center gap-3 bg-blue-300 p-2 rounded`}
                 onClick={() => setCollapse(!collapse)}
             >
-                <div>{icon}</div>
+                <MdHistory />
                 <EditableTitle currentTitle={currentTitle} />
             </div>
 
@@ -69,14 +93,17 @@ const Layer = ({
                 {elements.map((element, index) => {
                     return (
                         <Item
-                            key={index + index}
-                            index={index}
+                            key={index + element.id}
                             elementId={element.id}
-                            selectedId={selectedElement.id}
                             elementType={element.elementType}
                             isActive={element.isVisible}
+                            isSelected={
+                                selectedElementRef.current
+                                    ? element.id === selectedElementRef.current
+                                    : element.id === selectedElementId
+                            }
                             deleteElement={deleteElement}
-                            toogleElement={toogleElement}
+                            setCurrentElements={selectState}
                         />
                     );
                 })}
@@ -85,4 +112,4 @@ const Layer = ({
     );
 };
 
-export default Layer;
+export default History;

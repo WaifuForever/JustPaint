@@ -6,7 +6,9 @@ import { BiRectangle } from 'react-icons/bi';
 import { BsFillLayersFill } from 'react-icons/bs';
 import { FiMousePointer } from 'react-icons/fi';
 import { GiStraightPipe } from 'react-icons/gi';
+import { MdRestartAlt } from 'react-icons/md';
 
+import History from '../components/History';
 import ToolTab from '../components/ToolTab';
 import ToolButton from '../components/ToolButton';
 import Layer from '../components/Layer';
@@ -512,6 +514,37 @@ const DrawScreen = () => {
         setElements(elementsCopy);
     };
 
+    const deleteElement = (id) => {
+        let updatedElements = elements.filter((e) => e.id !== id);
+
+        setElements(updatedElements);
+        drewElementsRef.current = false;
+    };
+
+    const glimpsePreviousState = (id) => {
+        let updatedElements = elements.filter((e) => e.id !== id);
+
+        setElements(updatedElements);
+        drewElementsRef.current = false;
+    }
+
+    const previousState = (id) => {
+        let index = '';
+        elements.forEach((e, i) => {if(e.id === id) index = i});
+        
+        setElements(elements.slice(0, index));
+        drewElementsRef.current = false;
+    }
+
+    const hideElement = (id) => {
+        let updatedElements = elements.map((e) => {
+            if (e.id === id) e.isVisible = !e.isVisible;
+            return e;
+        });
+        drewElementsRef.current = false;
+        setElements(updatedElements);
+    };
+
     const handleMouseDown = (event) => {
         const { clientX, clientY } = event;
         setIsDrawing(true);
@@ -665,6 +698,7 @@ const DrawScreen = () => {
                                 setElementType('brush');
                             }}
                         />,
+
                         <ToolButton
                             icon={<GiStraightPipe />}
                             selected={elementType === 'bresenhamLine'}
@@ -691,6 +725,20 @@ const DrawScreen = () => {
                             selected={elementType === 'select'}
                             action={() => {
                                 setElementType('select');
+                            }}
+                        />,
+                        <ToolButton
+                            icon={<MdRestartAlt />}
+                            action={() => {
+                                setElements([]);
+                                canvasRef.current
+                                    .getContext('2d')
+                                    .clearRect(
+                                        0,
+                                        0,
+                                        canvasRef.current.width,
+                                        canvasRef.current.width
+                                    );
                             }}
                         />,
                     ]}
@@ -733,18 +781,25 @@ const DrawScreen = () => {
                 ></canvas>
             </div>
 
-            <div className="flex flex-col">
+            <div className="flex flex-col gap-2">
+                <History                   
+                    currentTitle="History"
+                    elements={elements}
+                    deleteElement={previousState}
+                    selectedElementId={selectedElement ? selectedElement.id : undefined}
+                    setCurrentElements={previousState}
+                />
                 <Layer
                     icon={<BsFillLayersFill />}
-                    currentTitle="History"
+                    currentTitle="Layer"
                     elements={elements}
                     selectedElement={
                         elementType === 'select' && selectedElement
                             ? selectedElement
                             : lastElement
                     }
-                    setElements={setElements}
-                    drewElements={drewElementsRef}
+                    deleteElement={deleteElement}
+                    toogleElement={hideElement}
                 />
             </div>
         </div>
