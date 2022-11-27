@@ -465,7 +465,7 @@ const DrawScreen = () => {
     const canvasRef = useRef(null);
     const gridRef = useRef(null);
     const drewElementsRef = useRef(false);
-    const drewGridRef = useRef(false);
+    const drewGridRef = useRef(true);
 
     const setCanvasRef = (ref) => {
         canvasRef.current = ref;
@@ -526,15 +526,17 @@ const DrawScreen = () => {
 
         setElements(updatedElements);
         drewElementsRef.current = false;
-    }
+    };
 
     const previousState = (id) => {
         let index = '';
-        elements.forEach((e, i) => {if(e.id === id) index = i});
-        
-        setElements(elements.slice(0, index));
+        elements.forEach((e, i) => {
+            if (e.id === id) index = i;
+        });
+
+        setElements(elements.slice(0, elements.length - 1 - index));
         drewElementsRef.current = false;
-    }
+    };
 
     const hideElement = (id) => {
         let updatedElements = elements.map((e) => {
@@ -782,11 +784,10 @@ const DrawScreen = () => {
             </div>
 
             <div className="flex flex-col gap-2">
-                <History                   
+                <History
                     currentTitle="History"
                     elements={elements}
                     deleteElement={previousState}
-                    selectedElementId={selectedElement ? selectedElement.id : undefined}
                     setCurrentElements={previousState}
                 />
                 <Layer

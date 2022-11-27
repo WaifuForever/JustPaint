@@ -1,14 +1,22 @@
 import { useState } from 'react';
 
+const shortenString = (str) => {
+    console.log('shorten: ', str);
+    if (str.length < 12) return str;
+    return str.substring(0, 8).concat('...');
+};
+
 const EditableTitle = ({ currentTitle }) => {
-    const [title, setTitle] = useState(currentTitle);
+    const [title, setTitle] = useState(() => shortenString(currentTitle));
     const [editTitle, setEditTitle] = useState(false);
 
+    console.log('editableTitle');
+    console.log(title);
     return editTitle ? (
         <input
             className="border-0 w-12 bg-transparent outline-none focus:outline-none"
             type="text"
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => setTitle(shortenString(e.target.value))}
             onBlur={() => setEditTitle(false)}
             value={title}
         />

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useLayoutEffect, useRef } from 'react';
 import { BiRectangle } from 'react-icons/bi';
 import { FaPaintBrush, FaPencilAlt } from 'react-icons/fa';
 import { BsFillTrash2Fill } from 'react-icons/bs';
@@ -30,8 +30,6 @@ const Item = ({
     deleteElement,
     setCurrentElements,
 }) => {
-    console.log('ITEM');
-    console.log(elementId, elementType, isSelected);
     return (
         <div
             className={`${
@@ -44,9 +42,8 @@ const Item = ({
             <div className="cursor-pointer text-sm border">
                 <RenderIcon elementType={elementType} />
             </div>
-
-            <EditableTitle currentTitle={elementType} />
-
+            <span>{elementType}</span>
+            
             <div
                 className="cursor-pointer"
                 onClick={() => deleteElement(elementId)}
@@ -60,18 +57,20 @@ const Item = ({
 const History = ({
     currentTitle,
     elements,
-    selectedElementId,
     deleteElement,
     setCurrentElements,
 }) => {
     const [collapse, setCollapse] = useState(false);
-   
-    const selectedElementRef = useRef(selectedElementId);
+    const selectedElementRef = useRef(undefined);
 
+    useLayoutEffect(() => {
+        if (elements.length > 0)
+            selectedElementRef.current = elements[elements.length - 1].id;
+    }, [elements]);
 
     const selectState = (id) => {
         //setCurrentElements(id);
-        
+
         selectedElementRef.current = elements.find((e) => e.id === id).id;
     };
 
@@ -93,14 +92,22 @@ const History = ({
                 {elements.map((element, index) => {
                     return (
                         <Item
-                            key={index + element.id}
-                            elementId={element.id}
-                            elementType={element.elementType}
-                            isActive={element.isVisible}
+                            key={
+                                index + elements[elements.length - 1 - index].id
+                            }
+                            elementId={elements[elements.length - 1 - index].id}
+                            elementType={
+                                elements[elements.length - 1 - index]
+                                    .elementType
+                            }
+                            isActive={
+                                elements[elements.length - 1 - index].isVisible
+                            }
                             isSelected={
                                 selectedElementRef.current
-                                    ? element.id === selectedElementRef.current
-                                    : element.id === selectedElementId
+                                    ? elements[elements.length - 1 - index]
+                                          .id === selectedElementRef.current
+                                    : false
                             }
                             deleteElement={deleteElement}
                             setCurrentElements={selectState}

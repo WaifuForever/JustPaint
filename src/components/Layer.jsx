@@ -1,9 +1,6 @@
 import { useState } from 'react';
-import { BiRectangle } from 'react-icons/bi';
 import { BsFillEyeFill, BsFillEyeSlashFill } from 'react-icons/bs';
-import { FaPaintBrush, FaPencilAlt } from 'react-icons/fa';
 import { BsFillTrash2Fill } from 'react-icons/bs';
-import { GiStraightPipe } from 'react-icons/gi';
 
 import EditableTitle from './EditableTitle';
 
@@ -15,6 +12,7 @@ const Item = ({
     deleteElement,
     toogleElement,
 }) => {
+    
     return (
         <div
             className={`${
@@ -51,6 +49,9 @@ const Layer = ({
     toogleElement,
 }) => {
     const [collapse, setCollapse] = useState(false);
+    console.log('Layer');
+    console.log(elements);
+    console.log('done');
     return (
         <div className="flex flex-col">
             <div
@@ -67,6 +68,7 @@ const Layer = ({
                 }`}
             >
                 {elements.map((element, index) => {
+                    console.log(element);
                     return (
                         <Item
                             key={index + index}
