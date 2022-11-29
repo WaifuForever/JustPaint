@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState, useEffect } from 'react';
 import { v4 as uuid } from 'uuid';
 import getStroke from 'perfect-freehand';
 import { FaPencilAlt, FaPaintBrush } from 'react-icons/fa';
@@ -423,7 +423,7 @@ const drawSelection = (element) => {
             newElement.length = width + 1;
             break;
         case 'brush':
-            console.log('here');
+        //console.log('here');
         case 'pencil':
             throw new Error(
                 `Not implemented yet: draw ${elementType} selection`
@@ -452,9 +452,45 @@ const computePointInCanvas = (canvasRef, clientX, clientY) => {
     };
 };
 
+const useHistory = (initialState) => {
+    const [index, setIndex] = useState(0);
+    const [history, setHistory] = useState([initialState]);
+
+    const setState = (action, overwrite = false) => {
+        const newState =
+            typeof action === 'function' ? action(history[index]) : action;
+        //console.log(newState);
+        if (overwrite) {
+            const historyCopy = [...history];
+            historyCopy[index] = newState;
+            //console.log('historyCopy', historyCopy);
+            setHistory(historyCopy);
+        } else {
+            const updatedState = [...history].slice(0, index + 1);
+            //console.log('updatedState', updatedState);
+            setHistory([...updatedState, newState]);
+            setIndex((prevState) => prevState + 1);
+        }
+    };
+
+    const undo = () => {
+        //console.log(index, history);
+        if (index > 0) console.log('greater than zero');
+        if (index > 0) setIndex((prevState) => prevState - 1);
+    };
+
+    const redo = () => {
+        if (index < history.length - 1) setIndex((prevState) => prevState + 1);
+    };
+
+    console.log(index, history);
+    return { elements: history[index], setElements: setState, undo, redo };
+};
+
 const DrawScreen = () => {
+    const { elements, setElements, undo, redo } = useHistory([]);
     const [lastElement, setLastElement] = useState(null);
-    const [elements, setElements] = useState([]);
+
     const [elementType, setElementType] = useState('brush');
     const [selectedElement, setSelectedElement] = useState(null);
     const [isDrawing, setIsDrawing] = useState(false);
@@ -474,6 +510,21 @@ const DrawScreen = () => {
     const setGridRef = (ref) => {
         gridRef.current = ref;
     };
+
+    useEffect(() => {
+        const undoRedoFunction = (event) => {
+            if (event.metaKey || event.ctrlKey) {
+                if (event.key === 'z') undo();
+                else if (event.key === 'y') redo();
+            }
+        };
+
+        document.addEventListener('keydown', undoRedoFunction);
+
+        return () => {
+            document.removeEventListener('keydown', undoRedoFunction);
+        };
+    }, [undo, redo]);
 
     useLayoutEffect(() => {
         if (displayGrid && !drewGridRef.current) {
@@ -511,7 +562,7 @@ const DrawScreen = () => {
 
         elementsCopy[elementsCopy.findIndex((e) => e.id === element.id)] =
             element;
-        setElements(elementsCopy);
+        setElements(elementsCopy, true);
     };
 
     const deleteElement = (id) => {
@@ -544,7 +595,7 @@ const DrawScreen = () => {
             return e;
         });
         drewElementsRef.current = false;
-        setElements(updatedElements);
+        setElements(updatedElements, true);
     };
 
     const handleMouseDown = (event) => {
@@ -672,8 +723,6 @@ const DrawScreen = () => {
         }
         drewElementsRef.current = false;
     };
-    console.log('mounted');
-    console.log(elements);
 
     const handleMouseUp = (event) => {
         setSelectedElement(null);
