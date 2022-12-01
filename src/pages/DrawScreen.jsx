@@ -454,42 +454,59 @@ const computePointInCanvas = (canvasRef, clientX, clientY) => {
 
 const useHistory = (initialState) => {
     const [index, setIndex] = useState(0);
-    const [history, setHistory] = useState([initialState]);
+    const [history, setHistory] = useState([
+        {
+            elements: initialState,
+            description: '',
+        },
+    ]);
 
-    const setState = (action, overwrite = false) => {
+    const setState = (
+        action,
+        options = { description: '', overwrite: false }
+    ) => {
         const newState =
             typeof action === 'function' ? action(history[index]) : action;
-        //console.log(newState);
-        if (overwrite) {
+
+        if (options.overwrite) {
             const historyCopy = [...history];
-            historyCopy[index] = newState;
-            //console.log('historyCopy', historyCopy);
+            historyCopy[index].elements = newState;
+
             setHistory(historyCopy);
         } else {
             const updatedState = [...history].slice(0, index + 1);
-            //console.log('updatedState', updatedState);
-            setHistory([...updatedState, newState]);
+
+            setHistory([
+                ...updatedState,
+                { elements: newState, description: options.description },
+            ]);
             setIndex((prevState) => prevState + 1);
         }
     };
 
-    const undo = () => {
-        //console.log(index, history);
-        if (index > 0) console.log('greater than zero');
-        if (index > 0) setIndex((prevState) => prevState - 1);
+    const setHistoryAt = (number) => {
+        if (number > -1 && number < history.length - 1) setIndex(number);
     };
 
-    const redo = () => {
-        if (index < history.length - 1) setIndex((prevState) => prevState + 1);
-    };
+    const undo = () => index > 0 && setIndex((prevState) => prevState - 1);
+    const redo = () =>
+        index < history.length - 1 && setIndex((prevState) => prevState + 1);
 
-    console.log(index, history);
-    return { elements: history[index], setElements: setState, undo, redo };
+    return {
+        history,
+        state: history[index],
+        setElements: setState,
+        setHistoryAt,
+        undo,
+        redo,
+    };
 };
 
 const DrawScreen = () => {
-    const { elements, setElements, undo, redo } = useHistory([]);
+    const { history, state, setElements, setHistoryAt, undo, redo } =
+        useHistory([]);
     const [lastElement, setLastElement] = useState(null);
+    const { elements, description } = state;
 
     const [elementType, setElementType] = useState('brush');
     const [selectedElement, setSelectedElement] = useState(null);
@@ -514,8 +531,13 @@ const DrawScreen = () => {
     useEffect(() => {
         const undoRedoFunction = (event) => {
             if (event.metaKey || event.ctrlKey) {
-                if (event.key === 'z') undo();
-                else if (event.key === 'y') redo();
+                if (event.key === 'z') {
+                    undo();
+                    drewElementsRef.current = false;
+                } else if (event.key === 'y') {
+                    redo();
+                    drewElementsRef.current = false;
+                }
             }
         };
 
@@ -562,24 +584,20 @@ const DrawScreen = () => {
 
         elementsCopy[elementsCopy.findIndex((e) => e.id === element.id)] =
             element;
-        setElements(elementsCopy, true);
+        setElements(elementsCopy, {
+            description: element.type,
+            overwrite: true,
+        });
     };
 
     const deleteElement = (id) => {
         let updatedElements = elements.filter((e) => e.id !== id);
 
-        setElements(updatedElements);
+        setElements(updatedElements, { description: 'Delete element' });
         drewElementsRef.current = false;
     };
 
-    const glimpsePreviousState = (id) => {
-        let updatedElements = elements.filter((e) => e.id !== id);
-
-        setElements(updatedElements);
-        drewElementsRef.current = false;
-    };
-
-    const previousState = (id) => {
+    const setLastState = (id) => {
         let index = '';
         elements.forEach((e, i) => {
             if (e.id === id) index = i;
@@ -589,13 +607,27 @@ const DrawScreen = () => {
         drewElementsRef.current = false;
     };
 
+    const seePreviousState = (number) => {
+        console.log(number);
+        console.log(history[number]);
+        setHistoryAt(number);
+        drewElementsRef.current = false;
+    };
+
     const hideElement = (id) => {
+        let elementDescription = '';
         let updatedElements = elements.map((e) => {
-            if (e.id === id) e.isVisible = !e.isVisible;
+            if (e.id === id) {
+                e.isVisible = !e.isVisible;
+                elementDescription = e.elementType;
+            }
             return e;
         });
         drewElementsRef.current = false;
-        setElements(updatedElements, true);
+        setElements(updatedElements, {
+            description: 'hide ' + elementDescription,
+            overwrite: true,
+        });
     };
 
     const handleMouseDown = (event) => {
@@ -624,7 +656,10 @@ const DrawScreen = () => {
 
             drewElementsRef.current = false;
             setLastElement(element);
-            setElements((prevState) => [...prevState, element]);
+
+            setElements((prevState) => [...prevState.elements, element], {
+                description: element.elementType,
+            });
         }
     };
 
@@ -781,7 +816,9 @@ const DrawScreen = () => {
                         <ToolButton
                             icon={<MdRestartAlt />}
                             action={() => {
-                                setElements([]);
+                                setElements([], {
+                                    description: 'Clear screen',
+                                });
                                 canvasRef.current
                                     .getContext('2d')
                                     .clearRect(
@@ -835,9 +872,9 @@ const DrawScreen = () => {
             <div className="flex flex-col gap-2">
                 <History
                     currentTitle="History"
-                    elements={elements}
-                    deleteElement={previousState}
-                    setCurrentElements={previousState}
+                    history={history}
+                    deleteElement={setLastState}
+                    setCurrentElements={seePreviousState}
                 />
                 <Layer
                     icon={<BsFillLayersFill />}

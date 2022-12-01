@@ -65,7 +65,6 @@ const Layer = ({
                 }`}
             >
                 {elements.map((element, index) => {
-                 
                     return (
                         <Item
                             key={index + index}
