@@ -1,7 +1,7 @@
 import { useState, useLayoutEffect, useRef } from 'react';
 import { BiRectangle } from 'react-icons/bi';
 import { FaPaintBrush, FaPencilAlt } from 'react-icons/fa';
-import { BsFillTrash2Fill } from 'react-icons/bs';
+import { BsCircle, BsFillTrash2Fill } from 'react-icons/bs';
 import { GiStraightPipe } from 'react-icons/gi';
 import { MdHistory } from 'react-icons/md';
 
@@ -11,6 +11,8 @@ const RenderIcon = ({ elementType }) => {
     switch (elementType) {
         case 'rectangle':
             return <BiRectangle />;
+        case 'circle':
+            return <BsCircle />;
         case 'ddaLine':
         case 'bresenhamLine':
             return <GiStraightPipe />;

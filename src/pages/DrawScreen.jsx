@@ -3,7 +3,7 @@ import { v4 as uuid } from 'uuid';
 import getStroke from 'perfect-freehand';
 import { FaPencilAlt, FaPaintBrush } from 'react-icons/fa';
 import { BiRectangle } from 'react-icons/bi';
-import { BsFillLayersFill } from 'react-icons/bs';
+import { BsCircle, BsFillLayersFill } from 'react-icons/bs';
 import { FiMousePointer } from 'react-icons/fi';
 import { GiStraightPipe } from 'react-icons/gi';
 import { IoIosReturnLeft, IoIosReturnRight } from 'react-icons/io';
@@ -171,6 +171,45 @@ const putPixel = (point, width, colour, ctx) => {
     ctx.closePath();
 };
 
+const drawCircle = (xc, yc, x, y, width, colour, ctx) => {
+    putPixel({ x: xc + x, y: yc + y }, width, colour, ctx);
+    putPixel({ x: xc - x, y: yc + y }, width, colour, ctx);
+    putPixel({ x: xc + x, y: yc - y }, width, colour, ctx);
+    putPixel({ x: xc - x, y: yc - y }, width, colour, ctx);
+    putPixel({ x: xc + y, y: yc + x }, width, colour, ctx);
+    putPixel({ x: xc - y, y: yc + x }, width, colour, ctx);
+    putPixel({ x: xc + y, y: yc - x }, width, colour, ctx);
+    putPixel({ x: xc - y, y: yc - x }, width, colour, ctx);
+};
+
+const drawBresenhamsCircle = (startPoint, endPoint, width, colour, ctx) => {
+    let x = 0,
+        y = Math.sqrt(
+            Math.pow(endPoint.x - startPoint.x, 2) +
+                Math.pow(endPoint.y - startPoint.y, 2)
+        ),
+        r = y;
+
+    let d = 3 - 2 * r;
+
+    drawCircle(startPoint.x, startPoint.y, 0, r, width, colour, ctx);
+    while (y >= x) {
+        // for each pixel we will
+        // draw all eight pixels
+
+        x++;
+
+        // check for decision parameter
+        // and correspondingly
+        // update d, x, y
+        if (d > 0) {
+            y--;
+            d = d + 4 * (x - y) + 10;
+        } else d = d + 4 * x + 6;
+        drawCircle(startPoint.x, startPoint.y, x, y, width, colour, ctx);
+    }
+};
+
 const drawBresenhamsLine = (startPoint, endPoint, width, colour, ctx) => {
     let dx = Math.abs(endPoint.x - startPoint.x);
     let dy = Math.abs(endPoint.y - startPoint.y);
@@ -279,6 +318,16 @@ const drawElement = (element, context) => {
                 context
             );
 
+            break;
+        case 'circle':
+            putPixel(endPoint, width, colour, context);
+            drawBresenhamsCircle(
+                { ...startPoint },
+                { ...endPoint },
+                width,
+                colour,
+                context
+            );
             break;
         case 'bresenhamLine':
             putPixel(endPoint, width, colour, context);
@@ -817,6 +866,13 @@ const DrawScreen = () => {
                             selected={elementType === 'rectangle'}
                             action={() => {
                                 setElementType('rectangle');
+                            }}
+                        />,
+                        <ToolButton
+                            icon={<BsCircle />}
+                            selected={elementType === 'circle'}
+                            action={() => {
+                                setElementType('circle');
                             }}
                         />,
                         <ToolButton
