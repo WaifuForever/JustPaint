@@ -25,7 +25,6 @@ const RenderIcon = ({ elementType }) => {
 
 const Item = ({
     description,
-    elementType,
     isSelected,
     deleteElement,
     setCurrentElements,
@@ -42,7 +41,7 @@ const Item = ({
             <div className="cursor-pointer text-sm border">
                 <RenderIcon elementType={description} />
             </div>
-            <span className='text-xs'>{description}</span>
+            <span className="text-xs">{description}</span>
 
             <div
                 className="cursor-pointer"
@@ -57,24 +56,11 @@ const Item = ({
 const History = ({
     currentTitle,
     history,
+    historyIndex,
     deleteElement,
     setCurrentElements,
 }) => {
     const [collapse, setCollapse] = useState(false);
-    const selectedElementRef = useRef(undefined);
-
-    useLayoutEffect(() => {
-        if (history.slice(1).length > 0)
-            selectedElementRef.current = history[history.length - 1].id;
-    }, [history]);
-
-    const selectState = (id) => {
-        //setCurrentElements(id);
-
-        selectedElementRef.current = history.find((e) => e.id === id).id;
-    };
-
-    //console.log(history);
 
     return (
         <div className="flex flex-col">
@@ -92,27 +78,20 @@ const History = ({
                 }`}
             >
                 {history.slice(1).map((element, index) => {
+                    let currentIndex = history.length - 1 - index;
+
                     return (
                         <Item
-                            key={
-                                index +
-                                history[history.length - 1 - index].description
-                            }
-                            description={
-                                history[history.length - 1 - index].description
-                            }
-                            elementType={
-                                history[history.length - 1 - index].description
-                            }
+                            key={index + history[currentIndex].description}
+                            description={history[currentIndex].description}
                             isSelected={
-                                selectedElementRef.current
-                                    ? history[history.length - 1 - index].id ===
-                                      selectedElementRef.current
+                                historyIndex
+                                    ? currentIndex === historyIndex
                                     : false
                             }
-                            deleteElement={deleteElement}
+                            deleteElement={() => deleteElement(currentIndex)}
                             setCurrentElements={() =>
-                                setCurrentElements(history.length - 1 - index)
+                                setCurrentElements(currentIndex)
                             }
                         />
                     );

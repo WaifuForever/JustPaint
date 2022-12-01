@@ -6,6 +6,7 @@ import { BiRectangle } from 'react-icons/bi';
 import { BsFillLayersFill } from 'react-icons/bs';
 import { FiMousePointer } from 'react-icons/fi';
 import { GiStraightPipe } from 'react-icons/gi';
+import { IoIosReturnLeft, IoIosReturnRight } from 'react-icons/io';
 import { MdRestartAlt } from 'react-icons/md';
 
 import History from '../components/History';
@@ -484,8 +485,17 @@ const useHistory = (initialState) => {
         }
     };
 
+    const isValidIndex = (number) => number > -1 && number < history.length - 1;
+
     const setHistoryAt = (number) => {
-        if (number > -1 && number < history.length - 1) setIndex(number);
+        if (isValidIndex) setIndex(number);
+    };
+
+    const sliceHistoryAt = (number) => {
+        if (isValidIndex) {
+            setHistory((prevState) => prevState.slice(0, number + 1));
+            setIndex(number);
+        }
     };
 
     const undo = () => index > 0 && setIndex((prevState) => prevState - 1);
@@ -494,17 +504,27 @@ const useHistory = (initialState) => {
 
     return {
         history,
+        index,
         state: history[index],
         setElements: setState,
         setHistoryAt,
+        sliceHistoryAt,
         undo,
         redo,
     };
 };
 
 const DrawScreen = () => {
-    const { history, state, setElements, setHistoryAt, undo, redo } =
-        useHistory([]);
+    const {
+        history,
+        index,
+        state,
+        setElements,
+        setHistoryAt,
+        sliceHistoryAt,
+        undo,
+        redo,
+    } = useHistory([]);
     const [lastElement, setLastElement] = useState(null);
     const { elements, description } = state;
 
@@ -597,19 +617,12 @@ const DrawScreen = () => {
         drewElementsRef.current = false;
     };
 
-    const setLastState = (id) => {
-        let index = '';
-        elements.forEach((e, i) => {
-            if (e.id === id) index = i;
-        });
-
-        setElements(elements.slice(0, elements.length - 1 - index));
+    const setLastState = (number) => {
+        sliceHistoryAt(number);
         drewElementsRef.current = false;
     };
 
     const seePreviousState = (number) => {
-        console.log(number);
-        console.log(history[number]);
         setHistoryAt(number);
         drewElementsRef.current = false;
     };
@@ -829,6 +842,21 @@ const DrawScreen = () => {
                                     );
                             }}
                         />,
+                        <ToolButton
+                            icon={<IoIosReturnLeft />}
+                            action={() => {
+                                undo();
+                                drewElementsRef.current = false;
+                            }}
+                        />,
+
+                        <ToolButton
+                            icon={<IoIosReturnRight />}
+                            action={() => {
+                                redo();
+                                drewElementsRef.current = false;
+                            }}
+                        />,
                     ]}
                 />
                 <ToolTab
@@ -873,6 +901,7 @@ const DrawScreen = () => {
                 <History
                     currentTitle="History"
                     history={history}
+                    historyIndex={index}
                     deleteElement={setLastState}
                     setCurrentElements={seePreviousState}
                 />
