@@ -29,6 +29,9 @@ module.exports = {
                     default: 'var(--color-bg-default)',
                 },
             },
+            colors: {
+                'slate-350': '#b2bccc',
+            },
         },
     },
     plugins: [require('tailwind-scrollbar-hide')],

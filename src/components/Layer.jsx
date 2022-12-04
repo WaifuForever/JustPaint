@@ -10,7 +10,7 @@ const Item = ({
     isActive,
     selectedId,
     deleteElement,
-    toogleElement,
+    hideElement
 }) => {
     return (
         <div
@@ -22,7 +22,7 @@ const Item = ({
         >
             <div
                 className="cursor-pointer text-sm border"
-                onClick={() => toogleElement(elementId)}
+                onClick={() => hideElement(elementId)}
             >
                 {isActive ? <BsFillEyeFill /> : <BsFillEyeSlashFill />}
             </div>
@@ -45,7 +45,9 @@ const Layer = ({
     elements,
     selectedElement,
     deleteElement,
-    toogleElement,
+    hideElement,
+    setElements,
+    drewElementsRef
 }) => {
     const [collapse, setCollapse] = useState(false);
 
@@ -74,7 +76,7 @@ const Layer = ({
                             elementType={element.elementType}
                             isActive={element.isVisible}
                             deleteElement={deleteElement}
-                            toogleElement={toogleElement}
+                            hideElement={() => hideElement(element.id, elements, setElements, drewElementsRef)}
                         />
                     );
                 })}

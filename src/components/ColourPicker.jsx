@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Chrome from 'react-color/lib/components/chrome/Chrome';
 
-const ColourPicker = ({ action, currentColour }) => {
+const ColourPicker = ({ name }) => {
+    const [colour, setColour] = useState('#000000');
     const [colours, setColours] = useState([
         '#000000',
         '#ffffff',
@@ -18,8 +19,13 @@ const ColourPicker = ({ action, currentColour }) => {
     ]);
     const [isDisplayed, setIsDisplayed] = useState(false);
 
+    useEffect(() => {
+        // storing input colour
+        sessionStorage.setItem(name, JSON.stringify(colour));
+    }, [colour, name]);
+
     const handleOnChange = (colour, event) => {
-        action(colour.hex);
+        setColour(colour.hex);
     };
 
     return (
@@ -30,8 +36,7 @@ const ColourPicker = ({ action, currentColour }) => {
                         <div
                             className="w-4 h-4 border border-black m-0.5 cursor-pointer"
                             onClick={() => {
-                                console.log(colour);
-                                action(colour);
+                                setColour(colour);
                             }}
                             key={`${index + colour}`}
                             style={{ backgroundColor: colour }}
@@ -42,17 +47,13 @@ const ColourPicker = ({ action, currentColour }) => {
             <div className="w-full flex justify-center items-center">
                 <div
                     className="w-8 h-8 border border-black m-0.5"
-                    style={{ backgroundColor: currentColour }}
+                    style={{ backgroundColor: colour }}
                     onClick={() => setIsDisplayed(!isDisplayed)}
                 ></div>
             </div>
 
             <div className={`flex w-32 ${isDisplayed ? '' : 'hidden'}`}>
-                <Chrome
-                    color={currentColour}
-                    width="100%"
-                    onChange={handleOnChange}
-                />
+                <Chrome color={colour} width="100%" onChange={handleOnChange} />
             </div>
         </div>
     );

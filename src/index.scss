@@ -36,8 +36,19 @@ body {
     flex-wrap: wrap;
 }
 
-
 canvas {
     width: 768px;
     height: 576px;
+}
+
+div {
+    input[type='range']::-webkit-slider-thumb {
+        appearance: none;
+        width: 15px;
+        height: 15px;
+        background-color: rgb(29, 29, 210);
+        border: 0.5px solid black;
+        border-radius: 50%;
+        cursor: pointer;
+    }
 }
