@@ -4,6 +4,7 @@ import { FaPaintBrush, FaPencilAlt } from 'react-icons/fa';
 import { BsCircle, BsFillTrash2Fill } from 'react-icons/bs';
 import { GiStraightPipe } from 'react-icons/gi';
 import { MdHistory } from 'react-icons/md';
+import { TbOvalVertical } from 'react-icons/tb';
 
 import EditableTitle from './EditableTitle';
 
@@ -13,6 +14,8 @@ const RenderIcon = ({ elementType }) => {
             return <BiRectangle />;
         case 'circle':
             return <BsCircle />;
+        case 'ellipse':
+            return <TbOvalVertical />;
         case 'ddaLine':
         case 'bresenhamLine':
             return <GiStraightPipe />;

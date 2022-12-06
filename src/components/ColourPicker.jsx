@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import Chrome from 'react-color/lib/components/chrome/Chrome';
 
-const ColourPicker = ({ name }) => {
-    const [colour, setColour] = useState('#10f200');
+const ColourPicker = ({ name, selectedElement }) => {
+    const [colour, setColour] = useState(selectedElement ? selectedElement.colour : '#000000');
     const [colours, setColours] = useState([
         '#000000',
         '#ffffff',

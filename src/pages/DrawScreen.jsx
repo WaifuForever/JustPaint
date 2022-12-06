@@ -7,6 +7,7 @@ import { FiMousePointer } from 'react-icons/fi';
 import { GiStraightPipe } from 'react-icons/gi';
 import { IoIosReturnLeft, IoIosReturnRight } from 'react-icons/io';
 import { MdRestartAlt } from 'react-icons/md';
+import { TbOvalVertical } from 'react-icons/tb';
 
 import { useHistory } from '../hooks/UseHistory';
 import { drawElement } from '../utils/draw.util';
@@ -219,6 +220,13 @@ const DrawScreen = () => {
                             }}
                         />,
                         <ToolButton
+                            icon={<TbOvalVertical />}
+                            selected={elementType === 'ellipse'}
+                            action={() => {
+                                setElementType('ellipse');
+                            }}
+                        />,
+                        <ToolButton
                             icon={<FiMousePointer />}
                             selected={elementType === 'select'}
                             action={() => {
@@ -268,7 +276,10 @@ const DrawScreen = () => {
                 <ToolTab
                     title={'Element Definition'}
                     tools={[
-                        <ColourPicker name={'selectedElementColour'} />,
+                        <ColourPicker
+                            name={'selectedElementColour'}
+                            selectedElement={selectedElement}
+                        />,
                         <Slider
                             title={'Width:'}
                             name={'selectedElementWidth'}

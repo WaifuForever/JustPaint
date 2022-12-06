@@ -1,6 +1,5 @@
 import { useLayoutEffect, useState } from 'react';
 
-import { drawBresenhamsLine } from '../utils/draw.util';
 import {
     createElement,
     getElementAtPosition,
@@ -31,10 +30,10 @@ const drawGrid = (gridRef) => {
     const colour = '#AF9D9D';
 
     for (let i = 0; i <= height; i += 8) {
-        drawBresenhamsLine({ x: 0, y: i }, { x: width, y: i }, 1, colour, ctx);
+        //drawBresenhamsLine({ x: 0, y: i }, { x: width, y: i }, 1, colour, ctx);
     }
     for (let i = 0; i <= width; i += 8) {
-        drawBresenhamsLine({ x: i, y: 0 }, { x: i, y: height }, 1, colour, ctx);
+        //drawBresenhamsLine({ x: i, y: 0 }, { x: i, y: height }, 1, colour, ctx);
     }
 };
 

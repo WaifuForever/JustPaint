@@ -70,8 +70,6 @@ const strokeArrayPoints = (ctx, element) => {
         ctx.stroke();
         ctx.closePath();
         prevPoint = point;
-
-        
     });
 };
 
@@ -153,6 +151,16 @@ const drawElement = (element, context) => {
             drawBresenhamsCircle(
                 { ...startPoint },
                 { ...endPoint },
+                width,
+                colour,
+                context
+            );
+            break;
+        case 'ellipse':
+            putPixel(endPoint, width, colour, context);
+            drawBresenhamsEllipse(
+                startPoint,
+                { x: endPoint.x, y: 80 },
                 width,
                 colour,
                 context
@@ -255,6 +263,97 @@ const drawBresenhamsCircle = (startPoint, endPoint, width, colour, ctx) => {
     }
 };
 
+const drawBresenhamsEllipse = (
+    centrePoint,
+    radiusPoint,
+    width,
+    colour,
+    ctx
+) => {
+    const plotPoints = (x, y) => {
+        putPixel(
+            { x: x + centrePoint.x, y: y + centrePoint.y },
+            width,
+            colour,
+            ctx
+        );
+        putPixel(
+            { x: -x + centrePoint.x, y: y + centrePoint.y },
+            width,
+            colour,
+            ctx
+        );
+        putPixel(
+            { x: x + centrePoint.x, y: -y + centrePoint.y },
+            width,
+            colour,
+            ctx
+        );
+        putPixel(
+            { x: -x + centrePoint.x, y: -y + centrePoint.y },
+            width,
+            colour,
+            ctx
+        );
+    };
+
+    let dx, dy, d1, d2, x, y;
+    x = 0;
+    y = radiusPoint.y;
+    // Initial decision parameter of region 1
+    d1 =
+        radiusPoint.y * radiusPoint.y -
+        radiusPoint.y * radiusPoint.x * radiusPoint.y +
+        0.25 * radiusPoint.x * radiusPoint.x;
+    dx = 2 * radiusPoint.y * radiusPoint.y * x;
+    dy = 2 * radiusPoint.x * radiusPoint.x * y;
+
+    // For region 1
+    while (dx < dy) {
+        // Print points based on 4-way symmetradiusPoint.y
+        plotPoints(x, y);
+
+        // Checking and updating value of
+        // decision parameter based on algorithm
+        if (d1 < 0) {
+            x++;
+            dx = dx + 2 * radiusPoint.y * radiusPoint.y;
+            d1 = d1 + dx + radiusPoint.y * radiusPoint.y;
+        } else {
+            x++;
+            y--;
+            dx = dx + 2 * radiusPoint.y * radiusPoint.y;
+            dy = dy - 2 * radiusPoint.x * radiusPoint.x;
+            d1 = d1 + dx - dy + radiusPoint.y * radiusPoint.x;
+        }
+    }
+
+    // Decision parameter of region 2
+    d2 =
+        radiusPoint.y * radiusPoint.y * ((x + 0.5) * (x + 0.5)) +
+        radiusPoint.x * radiusPoint.x * ((y - 1) * (y - 1)) -
+        radiusPoint.x * radiusPoint.x * radiusPoint.y * radiusPoint.y;
+
+    // Plotting points of region 2
+    while (y >= 0) {
+        plotPoints(x, y);
+
+        // Checking and updating parameter
+        // value based on algorithm
+        if (d2 > 0) {
+            y--;
+            dy = dy - 2 * radiusPoint.x * radiusPoint.x;
+            d2 = d2 + radiusPoint.x * radiusPoint.x - dy;
+        } else {
+            y--;
+            x++;
+            dx = dx + 2 * radiusPoint.y * radiusPoint.y;
+            dy = dy - 2 * radiusPoint.x * radiusPoint.x;
+            d2 = d2 + dx - dy + radiusPoint.x * radiusPoint.x;
+        }
+    }
+};
+
 const drawBresenhamsLine = (startPoint, endPoint, width, colour, ctx) => {
     let dx = Math.abs(endPoint.x - startPoint.x);
     let dy = Math.abs(endPoint.y - startPoint.y);
@@ -302,10 +401,4 @@ const drawDdaLine = (startPoint, endPoint, width, colour, ctx) => {
     }
 };
 
-export {
-    drawElement,
-    drawDdaLine,
-    drawBresenhamsCircle,
-    drawBresenhamsLine,
-    putPixel,
-};
+export { drawElement, putPixel };
