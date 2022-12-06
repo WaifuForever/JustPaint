@@ -67,7 +67,7 @@ const ControlledFigures = ({
                             <div className="flex items-center gap-2">
                                 <span className="text-xs">x1</span>
                                 <Field
-                                    className="w-12 text-center"
+                                    className="w-14 text-center"
                                     type={'number'}
                                     name={'x1'}
                                     error={errors.x1}
@@ -76,7 +76,7 @@ const ControlledFigures = ({
                             <div className="flex items-center gap-2">
                                 <span className="text-xs">y1</span>
                                 <Field
-                                    className="w-12 text-center"
+                                    className="w-14 text-center"
                                     type={'number'}
                                     name={'y1'}
                                     error={errors.y1}
@@ -85,7 +85,7 @@ const ControlledFigures = ({
                             <div className="flex items-center gap-2">
                                 <span className="text-xs">x2</span>
                                 <Field
-                                    className="w-12 text-center"
+                                    className="w-14 text-center"
                                     type={'number'}
                                     name={'x2'}
                                     error={errors.x2}
@@ -94,7 +94,7 @@ const ControlledFigures = ({
                             <div className="flex items-center gap-2">
                                 <span className="text-xs">y2</span>
                                 <Field
-                                    className="w-12 text-center"
+                                    className="w-14 text-center"
                                     type={'number'}
                                     name={'y2'}
                                     error={errors.y2}
@@ -152,7 +152,7 @@ const ControlledFigures = ({
                             <div className="flex items-center gap-2">
                                 <span className="text-xs">xc</span>
                                 <Field
-                                    className="w-12 text-center"
+                                    className="w-14 text-center"
                                     type={'number'}
                                     name={'xc'}
                                     error={errors.xc}
@@ -161,7 +161,7 @@ const ControlledFigures = ({
                             <div className="flex items-center gap-2">
                                 <span className="text-xs">yc</span>
                                 <Field
-                                    className="w-12 text-center"
+                                    className="w-14 text-center"
                                     type={'number'}
                                     name={'yc'}
                                     error={errors.yc}
@@ -170,7 +170,7 @@ const ControlledFigures = ({
                             <div className="flex items-center gap-2">
                                 <span className="text-xs">radius</span>
                                 <Field
-                                    className="w-12 text-center"
+                                    className="w-14 text-center"
                                     type={'number'}
                                     name={'radius'}
                                     error={errors.radius}
@@ -220,7 +220,7 @@ const ControlledFigures = ({
                             <div className="flex items-center gap-2">
                                 <span className="text-xs">xc</span>
                                 <Field
-                                    className="w-12 text-center"
+                                    className="w-14 text-center"
                                     type={'number'}
                                     name={'xc'}
                                     error={errors.xc}
@@ -229,7 +229,7 @@ const ControlledFigures = ({
                             <div className="flex items-center gap-2">
                                 <span className="text-xs">yc</span>
                                 <Field
-                                    className="w-12 text-center"
+                                    className="w-14 text-center"
                                     type={'number'}
                                     name={'yc'}
                                     error={errors.yc}
@@ -238,7 +238,7 @@ const ControlledFigures = ({
                             <div className="flex items-center gap-2">
                                 <span className="text-xs">xr</span>
                                 <Field
-                                    className="w-12 text-center"
+                                    className="w-14 text-center"
                                     type={'number'}
                                     name={'xr'}
                                     error={errors.xr}
@@ -247,7 +247,7 @@ const ControlledFigures = ({
                             <div className="flex items-center gap-2">
                                 <span className="text-xs">yr</span>
                                 <Field
-                                    className="w-12 text-center"
+                                    className="w-14 text-center"
                                     type={'number'}
                                     name={'yr'}
                                     error={errors.yr}

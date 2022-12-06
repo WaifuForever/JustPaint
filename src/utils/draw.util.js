@@ -12,7 +12,19 @@ const putPixel = (point, width, colour, ctx) => {
     ctx.beginPath();
     ctx.arc(point.x, point.y, width / 2, 0, 2 * Math.PI, true);
     ctx.fillStyle = colour;
+    ctx.strokeStyle = colour;
+    ctx.stroke();
     ctx.fill();
+    ctx.closePath();
+};
+
+const putPixelStroke = (point, width, colour, ctx) => {
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, width / 2, 0, 2 * Math.PI, true);
+
+    ctx.strokeStyle = colour;
+    ctx.stroke();
+
     ctx.closePath();
 };
 
@@ -165,7 +177,6 @@ const drawElement = (element, context) => {
 
             break;
         case 'circle':
-            putPixel(endPoint, width, colour, context);
             drawBresenhamsCircle(
                 { ...startPoint },
                 { ...endPoint },
@@ -175,10 +186,12 @@ const drawElement = (element, context) => {
             );
             break;
         case 'ellipse':
-            putPixel(endPoint, width, colour, context);
             drawBresenhamsEllipse(
                 startPoint,
-                { x: endPoint.x, y: 80 },
+                {
+                    x: Math.abs(startPoint.x - endPoint.x),
+                    y: Math.abs(startPoint.y - endPoint.y),
+                },
                 width,
                 colour,
                 context

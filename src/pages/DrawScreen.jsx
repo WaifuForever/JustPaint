@@ -20,6 +20,7 @@ import Slider from '../components/Slider';
 import ToolTab from '../components/ToolTab';
 import ToolButton from '../components/ToolButton';
 import ControlledFigures from '../components/ControlledFigures';
+import { updateElement } from '../utils/element.util';
 
 const drawSelection = (element) => {
     const { startPoint, endPoint, width, elementType } = element;
@@ -84,7 +85,7 @@ const DrawScreen = () => {
 
     const [elementType, setElementType] = useState('brush');
     const [freeRoaming, setFreeRoaming] = useState(true);
-    const [displayGrid, setDisplayGrid] = useState(true);
+    const [displayGrid, setDisplayGrid] = useState(false);
 
     const canvasRef = useRef(null);
     const gridRef = useRef(null);
@@ -164,6 +165,11 @@ const DrawScreen = () => {
     const setLastState = (number) => {
         sliceHistoryAt(number);
         drewElementsRef.current = false;
+    };
+
+    const updateColour = (colour, element) => {
+        element.colour = colour;
+        updateElement(element, elements, setElements);
     };
 
     const seePreviousState = (number) => {
@@ -256,6 +262,7 @@ const DrawScreen = () => {
                                             );
                                     }}
                                 />,
+
                                 <ToolButton
                                     icon={<IoIosReturnLeft />}
                                     action={() => {
@@ -289,6 +296,7 @@ const DrawScreen = () => {
                                 <ColourPicker
                                     name={'selectedElementColour'}
                                     selectedElement={selectedElement}
+                                    updateElement={updateColour}
                                 />,
                                 <Slider
                                     title={'Width:'}

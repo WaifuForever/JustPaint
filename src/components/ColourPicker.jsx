@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Chrome from 'react-color/lib/components/chrome/Chrome';
 
-const ColourPicker = ({ name, selectedElement }) => {
-    const [colour, setColour] = useState(selectedElement ? selectedElement.colour : '#000000');
+const ColourPicker = ({ name, selectedElement, updateElement }) => {
+    const [colour, setColour] = useState('#000000');
+
     const [colours, setColours] = useState([
         '#000000',
         '#ffffff',
@@ -20,11 +21,17 @@ const ColourPicker = ({ name, selectedElement }) => {
     const [isDisplayed, setIsDisplayed] = useState(false);
 
     useEffect(() => {
+        if (selectedElement) {
+            setColour(selectedElement.colour);
+        }
+    }, [selectedElement, name]);
+
+    useEffect(() => {
         // storing input colour
         sessionStorage.setItem(name, JSON.stringify(colour));
-    }, [colour, name]);
+    }, [colour, name, selectedElement]);
 
-    const handleOnChange = (colour, event) => {
+    const handleOnChange = (colour) => {
         setColour(colour.hex);
     };
 
@@ -36,6 +43,12 @@ const ColourPicker = ({ name, selectedElement }) => {
                         <div
                             className="w-4 h-4 border border-black m-0.5 cursor-pointer"
                             onClick={() => {
+                                //console.log(name, colour);
+                                //console.log(updateElement);
+                                //console.log(selectedElement);
+                                if (updateElement && selectedElement) {
+                                    updateElement(colour.hex, selectedElement);
+                                }
                                 setColour(colour);
                             }}
                             key={`${index + colour}`}
