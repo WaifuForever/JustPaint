@@ -26,6 +26,22 @@ const createElement = (firstPoint, elementType, isVisible) => {
     };
 };
 
+const createFixedElement = (startPoint, endPoint, elementType, isVisible) => {
+    let colour = sessionStorage.getItem('globalColour');
+    let width = sessionStorage.getItem('globalWidth');
+    colour = colour ? colour.substring(1, colour.length - 1) : null;
+  
+    return {
+        startPoint: startPoint,
+        endPoint: endPoint,
+        elementType,
+        width,
+        colour,
+        id: uuid(),
+        isVisible,
+    };
+};
+
 const updateElement = (element, elements, setElements) => {
     const elementsCopy = [...elements];
     //console.log('updateElement');
@@ -166,6 +182,7 @@ const getElementAtPosition = (x, y, elements) => {
 
 export {
     createElement,
+    createFixedElement,
     updateElement,
     deleteElement,
     hideElement,

@@ -84,6 +84,28 @@ const drawCircle = (xc, yc, x, y, width, colour, ctx) => {
     putPixel({ x: xc - y, y: yc - x }, width, colour, ctx);
 };
 
+const drawAxis = (origin, canvasSize, context) => {
+    console.log('drawAxis');
+    console.log(origin);
+   
+
+    drawBresenhamsLine(
+        { x: origin.x, y: 0 },
+        { x: origin.x, y: canvasSize.y },
+        1,
+        '#000000',
+        context
+    );
+
+    drawBresenhamsLine(
+        { x: 0, y: origin.y },
+        { x: canvasSize.x, y: origin.y },
+        1,
+        '#000000',
+        context
+    );
+};
+
 const drawElement = (element, context) => {
     const {
         width,
@@ -401,4 +423,4 @@ const drawDdaLine = (startPoint, endPoint, width, colour, ctx) => {
     }
 };
 
-export { drawElement, putPixel };
+export { drawElement, putPixel, drawAxis };

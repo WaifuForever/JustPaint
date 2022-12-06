@@ -6,6 +6,8 @@ import {
     updateElement,
 } from '../utils/element.util';
 
+import { drawAxis } from '../utils/draw.util';
+
 const computePointInCanvas = (canvasRef, clientX, clientY) => {
     if (!canvasRef.current) {
         return null;
@@ -28,6 +30,8 @@ const drawGrid = (gridRef) => {
     const height = gridRef.current.height;
     const ctx = gridRef.current.getContext('2d');
     const colour = '#AF9D9D';
+
+    drawAxis({ x: 384, y: 288 }, { x: 768, y: 576 }, ctx);
 
     for (let i = 0; i <= height; i += 8) {
         //drawBresenhamsLine({ x: 0, y: i }, { x: width, y: i }, 1, colour, ctx);
@@ -83,7 +87,7 @@ const Canvas = ({
             });
         } else {
             const element = createElement(point, elementType, true);
-         
+
             setSelectedElement(element);
             drewElementsRef.current = false;
 
@@ -184,7 +188,7 @@ const Canvas = ({
             let temp = elements[index].points
                 ? { points: [...elements[index].points, point] }
                 : { startPoint: elements[index].startPoint, endPoint: point };
-           
+
             updateElement(
                 {
                     ...temp,
