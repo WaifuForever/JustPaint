@@ -21,7 +21,6 @@ import ToolTab from '../components/ToolTab';
 import ToolButton from '../components/ToolButton';
 import ControlledFigures from '../components/ControlledFigures';
 
-
 const drawSelection = (element) => {
     const { startPoint, endPoint, width, elementType } = element;
 
@@ -348,7 +347,10 @@ const DrawScreen = () => {
                                 <ToolButton
                                     icon={<GiCrosshair />}
                                     action={() => {
-                                        setDisplayGrid(prevState => !prevState);
+                                        console.log(displayGrid);
+                                        setDisplayGrid(
+                                            (prevState) => !prevState
+                                        );
                                     }}
                                 />,
                                 <ToolButton
@@ -387,6 +389,7 @@ const DrawScreen = () => {
                         <ControlledFigures
                             elementType={elementType}
                             setElements={setElements}
+                            gridRef={gridRef}
                             setSelectedElement={handleSetSelectedElement}
                             drewElementsRef={drewElementsRef}
                         />

@@ -32,13 +32,14 @@ const drawGrid = (gridRef) => {
     const colour = '#AF9D9D';
 
     drawAxis({ x: 384, y: 288 }, { x: 768, y: 576 }, ctx);
-
+    /*
     for (let i = 0; i <= height; i += 8) {
-        //drawBresenhamsLine({ x: 0, y: i }, { x: width, y: i }, 1, colour, ctx);
+        drawBresenhamsLine({ x: 0, y: i }, { x: width, y: i }, 1, colour, ctx);
     }
     for (let i = 0; i <= width; i += 8) {
-        //drawBresenhamsLine({ x: i, y: 0 }, { x: i, y: height }, 1, colour, ctx);
+        drawBresenhamsLine({ x: i, y: 0 }, { x: i, y: height }, 1, colour, ctx);
     }
+    */
 };
 
 const Canvas = ({
@@ -58,7 +59,7 @@ const Canvas = ({
     const [isDrawing, setIsDrawing] = useState(false);
 
     useLayoutEffect(() => {
-        if (displayGrid && !drewGridRef.current) {
+        if (displayGrid && drewGridRef.current) {
             drawGrid(gridRef);
             drewGridRef.current = true;
         }

@@ -1,7 +1,7 @@
 import getStroke from 'perfect-freehand';
 
 const putPixel2 = (point, width, colour, ctx) => {
-    console.log(colour, width);
+    //console.log(colour, width);
 
     ctx.fillStyle = colour;
 
@@ -85,10 +85,6 @@ const drawCircle = (xc, yc, x, y, width, colour, ctx) => {
 };
 
 const drawAxis = (origin, canvasSize, context) => {
-    console.log('drawAxis');
-    console.log(origin);
-   
-
     drawBresenhamsLine(
         { x: origin.x, y: 0 },
         { x: origin.x, y: canvasSize.y },

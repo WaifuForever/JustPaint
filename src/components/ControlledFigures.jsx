@@ -11,8 +11,20 @@ import * as yup from 'yup';
 
 import { createFixedElement } from '../utils/element.util';
 
+const computePointInGrid = (gridRef, figureX, figureY) => {
+    if (!gridRef.current) {
+        return null;
+    }
+
+    return {
+        x: figureX + 384,
+        y: 288 - figureY,
+    };
+};
+
 const ControlledFigures = ({
     elementType,
+    gridRef,
     setElements,
     setSelectedElement,
     drewElementsRef,
@@ -34,8 +46,8 @@ const ControlledFigures = ({
                         console.log(values);
                         console.log(formikHelpers);
                         const element = createFixedElement(
-                            { x: values.x1, y: values.y1 },
-                            { x: values.x2, y: values.y2 },
+                            computePointInGrid(gridRef, values.x1, values.y1),
+                            computePointInGrid(gridRef, values.x2, values.y2),
                             elementType,
                             true
                         );
@@ -114,11 +126,13 @@ const ControlledFigures = ({
                     }
                     onSubmit={(values, formikHelpers) => {
                         const element = createFixedElement(
-                            { x: values.xc, y: values.yc },
-                            {
-                                x: values.radius,
-                                y: values.radius,
-                            },
+                            computePointInGrid(gridRef, values.xc, values.yc),
+                            computePointInGrid(
+                                gridRef,
+                                values.radius,
+                                values.radius
+                            ),
+
                             elementType,
                             true
                         );
@@ -185,8 +199,8 @@ const ControlledFigures = ({
                     }
                     onSubmit={(values, formikHelpers) => {
                         const element = createFixedElement(
-                            { x: values.xc, y: values.yc },
-                            { x: values.xr, y: values.yr },
+                            computePointInGrid(gridRef, values.xc, values.yc),
+                            computePointInGrid(gridRef, values.xr, values.yr),
                             elementType,
                             true
                         );
