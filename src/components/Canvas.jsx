@@ -51,7 +51,6 @@ const Canvas = ({
     setGridRef,
     selectedElement,
     setSelectedElement,
-    setLastElement,
 }) => {
     const [isDrawing, setIsDrawing] = useState(false);
 
@@ -78,16 +77,16 @@ const Canvas = ({
                       x: point.x - element.startPoint.x,
                       y: point.y - element.startPoint.y,
                   };
-            setLastElement(element);
+
             setSelectedElement({
                 ...element,
                 offset,
             });
         } else {
             const element = createElement(point, elementType, true);
-
+         
+            setSelectedElement(element);
             drewElementsRef.current = false;
-            setLastElement(element);
 
             setElements((prevState) => [...prevState.elements, element], {
                 description: element.elementType,
@@ -186,7 +185,7 @@ const Canvas = ({
             let temp = elements[index].points
                 ? { points: [...elements[index].points, point] }
                 : { startPoint: elements[index].startPoint, endPoint: point };
-
+           
             updateElement(
                 {
                     ...temp,

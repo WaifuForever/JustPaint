@@ -3,16 +3,15 @@ import { v4 as uuid } from 'uuid';
 const createElement = (firstPoint, elementType, isVisible) => {
     let colour = sessionStorage.getItem('globalColour');
     let width = sessionStorage.getItem('globalWidth');
-    //console.log('createElement');
-    //console.log(width, colour);
-
+    colour = colour ? colour.substring(1, colour.length - 1) : null;
+  
     if (elementType === 'brush' || elementType === 'pencil')
         return {
             id: uuid(),
             points: [firstPoint],
             elementType,
             width,
-            colour,
+           colour,
             isVisible,
         };
 

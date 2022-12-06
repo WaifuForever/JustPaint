@@ -4,21 +4,26 @@ import { BsFillTrash2Fill } from 'react-icons/bs';
 
 import EditableTitle from './EditableTitle';
 
+import { hideElement, deleteElement } from '../utils/element.util';
+
 const Item = ({
     elementId,
     elementType,
     isActive,
-    selectedId,
+    setSelectedElement,
     deleteElement,
-    hideElement
+    hideElement,
 }) => {
+    const selectedId = sessionStorage.getItem('selectedElementId');
+  
     return (
         <div
             className={`${
-                selectedId === elementId
+                selectedId.substring(1, selectedId.length - 1) === elementId
                     ? 'bg-blue-500 hover:bg-blue-600'
                     : 'bg-blue-300 hover:bg-blue-500'
             } flex w-32 items-center justify-between gap-3 border-t-2 p-2 rounded`}
+            onClick={setSelectedElement}
         >
             <div
                 className="cursor-pointer text-sm border"
@@ -29,10 +34,7 @@ const Item = ({
 
             <EditableTitle currentTitle={elementType} />
 
-            <div
-                className="cursor-pointer"
-                onClick={() => deleteElement(elementId)}
-            >
+            <div className="cursor-pointer" onClick={deleteElement}>
                 <BsFillTrash2Fill />
             </div>
         </div>
@@ -43,11 +45,9 @@ const Layer = ({
     icon,
     currentTitle,
     elements,
-    selectedElement,
-    deleteElement,
-    hideElement,
     setElements,
-    drewElementsRef
+    setSelectedElement,
+    drewElementsRef,
 }) => {
     const [collapse, setCollapse] = useState(false);
 
@@ -69,14 +69,25 @@ const Layer = ({
                 {elements.map((element, index) => {
                     return (
                         <Item
-                            key={index + index}
+                            key={index + element.id}
                             index={index}
                             elementId={element.id}
-                            selectedId={selectedElement.id}
                             elementType={element.elementType}
+                            setSelectedElement={() =>
+                                setSelectedElement(element)
+                            }
                             isActive={element.isVisible}
-                            deleteElement={deleteElement}
-                            hideElement={() => hideElement(element.id, elements, setElements, drewElementsRef)}
+                            deleteElement={() =>
+                                deleteElement(element.id, elements, setElements)
+                            }
+                            hideElement={() =>
+                                hideElement(
+                                    element.id,
+                                    elements,
+                                    setElements,
+                                    drewElementsRef
+                                )
+                            }
                         />
                     );
                 })}

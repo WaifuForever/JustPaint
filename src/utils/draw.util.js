@@ -1,20 +1,21 @@
 import getStroke from 'perfect-freehand';
 
-const putPixel = (point, width, colour, ctx) => {
+const putPixel2 = (point, width, colour, ctx) => {
     console.log(colour, width);
 
     ctx.fillStyle = colour;
 
-    ctx.fillRect(point.x, point.y, width, width);
+    ctx.roundRect(point.x, point.y, width, width);
 };
 
-const putPixel2 = (point, width, colour, ctx) => {
+const putPixel = (point, width, colour, ctx) => {
     ctx.beginPath();
-    ctx.arc(point.x, point.y, width, 0, 2 * Math.PI, true);
+    ctx.arc(point.x, point.y, width / 2, 0, 2 * Math.PI, true);
     ctx.fillStyle = colour;
     ctx.fill();
     ctx.closePath();
 };
+
 const average = (a, b) => (a + b) / 2;
 
 const getSvgPathFromStroke = (points, closed = true) => {
@@ -53,20 +54,24 @@ const getSvgPathFromStroke = (points, closed = true) => {
 
 const strokeArrayPoints = (ctx, element) => {
     const { points, colour, width } = element;
-    console.log(element);
+    //console.log(element);
     let prevPoint = points[0];
     ctx.lineWidth = width;
     ctx.strokeStyle = colour;
     ctx.fillStyle = colour;
 
     points.forEach((point) => {
+        putPixel(point, width, colour, ctx);
         ctx.beginPath();
         ctx.moveTo(prevPoint.x, prevPoint.y);
         ctx.lineTo(point.x, point.y);
+        ctx.lineWidth = width;
+        ctx.strokeStyle = colour;
         ctx.stroke();
         ctx.closePath();
         prevPoint = point;
-        putPixel(point, width, colour, ctx);
+
+        
     });
 };
 
@@ -179,8 +184,8 @@ const drawElement = (element, context) => {
 
         case 'pencil':
             strokeArrayPoints(context, element);
-            console.log('pencil');
-            console.log(element.colour);
+            //console.log('pencil');
+            //console.log(element.colour);
             context.strokeStyle = element.colour;
             context.stroke();
 
@@ -189,9 +194,10 @@ const drawElement = (element, context) => {
             const brushStroke = getSvgPathFromStroke(
                 getStroke(element.points, { size: element.width })
             );
-            console.log('brush');
-            console.log(element.colour);
+            //console.log('brush');
+            //console.log(element.colour);
             context.fillStyle = element.colour;
+            //console.log(context.fillStyle);
             context.fill(new Path2D(brushStroke));
 
             break;

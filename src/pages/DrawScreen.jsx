@@ -10,7 +10,6 @@ import { MdRestartAlt } from 'react-icons/md';
 
 import { useHistory } from '../hooks/UseHistory';
 import { drawElement } from '../utils/draw.util';
-import { hideElement, deleteElement } from '../utils/element.util';
 
 import Canvas from '../components/Canvas';
 import ColourPicker from '../components/ColourPicker';
@@ -78,11 +77,11 @@ const DrawScreen = () => {
         undo,
         redo,
     } = useHistory([]);
-    const [lastElement, setLastElement] = useState(null);
     const { elements, description } = state;
+    const [selectedElement, setSelectedElement] = useState(null);
 
     const [elementType, setElementType] = useState('brush');
-    const [selectedElement, setSelectedElement] = useState(null);
+
     const [displayGrid, setDisplayGrid] = useState(true);
 
     const canvasRef = useRef(null);
@@ -96,6 +95,25 @@ const DrawScreen = () => {
 
     const setGridRef = (ref) => {
         gridRef.current = ref;
+    };
+
+    const handleSetSelectedElement = (element) => {
+        if (element) {
+            sessionStorage.setItem(
+                'selectedElementId',
+                JSON.stringify(element.id)
+            );
+
+            sessionStorage.setItem(
+                'selectedElementColour',
+                JSON.stringify(element.colour)
+            );
+            sessionStorage.setItem(
+                'selectedElementWidth',
+                JSON.stringify(element.width)
+            );
+        }
+        setSelectedElement(element);
     };
 
     useEffect(() => {
@@ -130,16 +148,16 @@ const DrawScreen = () => {
             );
 
             elements.forEach((element) => {
-                if (selectedElement) {
-                    if (element.id === selectedElement.id) {
-                        drawElement(drawSelection(element), ctx);
-                    }
+                if (element.id === sessionStorage.getItem('selectedElement')) {
+                    drawElement(drawSelection(element), ctx);
                 }
+
                 drawElement(element, ctx);
             });
             drewElementsRef.current = true;
         }
-    }, [elements, selectedElement]);
+        console.log(elements);
+    }, [elements]);
 
     const setLastState = (number) => {
         sliceHistoryAt(number);
@@ -250,8 +268,11 @@ const DrawScreen = () => {
                 <ToolTab
                     title={'Element Definition'}
                     tools={[
-                        <ColourPicker name={'elementColour'} />,
-                        <Slider title={'Width:'} name={'elementWidth'} />,
+                        <ColourPicker name={'selectedElementColour'} />,
+                        <Slider
+                            title={'Width:'}
+                            name={'selectedElementWidth'}
+                        />,
                     ]}
                 />
             </div>
@@ -266,9 +287,7 @@ const DrawScreen = () => {
                 drewGridRef={drewGridRef}
                 gridRef={gridRef}
                 setGridRef={setGridRef}
-                selectedElement={selectedElement}
-                setSelectedElement={setSelectedElement}
-                setLastElement={setLastElement}
+                setSelectedElement={handleSetSelectedElement}
             />
 
             <div className="flex flex-col gap-2">
@@ -284,14 +303,8 @@ const DrawScreen = () => {
                     currentTitle="Layer"
                     elements={elements}
                     setElements={setElements}
+                    setSelectedElement={handleSetSelectedElement}
                     drewElementsRef={drewElementsRef}
-                    selectedElement={
-                        elementType === 'select' && selectedElement
-                            ? selectedElement
-                            : lastElement
-                    }
-                    deleteElement={deleteElement}
-                    hideElement={hideElement}
                 />
             </div>
         </div>
