@@ -297,6 +297,7 @@ const DrawScreen = () => {
                                     name={'selectedElementColour'}
                                     selectedElement={selectedElement}
                                     updateElement={updateColour}
+                                    drewEleementsRef={drewElementsRef}
                                 />,
                                 <Slider
                                     title={'Width:'}

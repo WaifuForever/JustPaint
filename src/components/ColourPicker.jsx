@@ -1,7 +1,12 @@
 import { useEffect, useState, useRef } from 'react';
 import Chrome from 'react-color/lib/components/chrome/Chrome';
 
-const ColourPicker = ({ name, selectedElement, updateElement }) => {
+const ColourPicker = ({
+    name,
+    selectedElement,
+    updateElement,
+    drewEleementsRef,
+}) => {
     const [colour, setColour] = useState('#000000');
 
     const [colours, setColours] = useState([
@@ -43,11 +48,9 @@ const ColourPicker = ({ name, selectedElement, updateElement }) => {
                         <div
                             className="w-4 h-4 border border-black m-0.5 cursor-pointer"
                             onClick={() => {
-                                //console.log(name, colour);
-                                //console.log(updateElement);
-                                //console.log(selectedElement);
                                 if (updateElement && selectedElement) {
-                                    updateElement(colour.hex, selectedElement);
+                                    updateElement(colour, selectedElement);
+                                    drewEleementsRef.current = false;
                                 }
                                 setColour(colour);
                             }}
