@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { FaPencilAlt, FaPaintBrush } from 'react-icons/fa';
 import { BiRectangle } from 'react-icons/bi';
-import { BsCircle, BsFillLayersFill } from 'react-icons/bs';
+import { BsCircle } from 'react-icons/bs';
 import { FiMousePointer } from 'react-icons/fi';
 import { GiStraightPipe, GiCrosshair } from 'react-icons/gi';
 import { IoIosReturnLeft, IoIosReturnRight } from 'react-icons/io';
@@ -14,13 +14,13 @@ import { drawElement } from '../utils/draw.util';
 
 import Canvas from '../components/Canvas';
 import ColourPicker from '../components/ColourPicker';
-import Layer from '../components/Layer';
-import History from '../components/History';
+import ControlledFigures from '../components/ControlledFigures';
+import RightBar from '../components/RightBar';
 import Slider from '../components/Slider';
 import ToolTab from '../components/ToolTab';
 import ToolButton from '../components/ToolButton';
-import ControlledFigures from '../components/ControlledFigures';
-import { updateElement } from '../utils/element.util';
+
+import SelectedElement from '../components/SelectedElement';
 
 const drawSelection = (element) => {
     const { startPoint, endPoint, width, elementType } = element;
@@ -81,7 +81,6 @@ const DrawScreen = () => {
         redo,
     } = useHistory([]);
     const { elements, description } = state;
-    const [selectedElement, setSelectedElement] = useState(null);
 
     const [elementType, setElementType] = useState('brush');
     const [freeRoaming, setFreeRoaming] = useState(true);
@@ -98,25 +97,6 @@ const DrawScreen = () => {
 
     const setGridRef = (ref) => {
         gridRef.current = ref;
-    };
-
-    const handleSetSelectedElement = (element) => {
-        if (element) {
-            sessionStorage.setItem(
-                'selectedElementId',
-                JSON.stringify(element.id)
-            );
-
-            sessionStorage.setItem(
-                'selectedElementColour',
-                JSON.stringify(element.colour)
-            );
-            sessionStorage.setItem(
-                'selectedElementWidth',
-                JSON.stringify(element.width)
-            );
-        }
-        setSelectedElement(element);
     };
 
     useEffect(() => {
@@ -161,21 +141,6 @@ const DrawScreen = () => {
         }
         console.log(elements);
     }, [elements]);
-
-    const setLastState = (number) => {
-        sliceHistoryAt(number);
-        drewElementsRef.current = false;
-    };
-
-    const updateColour = (colour, element) => {
-        element.colour = colour;
-        updateElement(element, elements, setElements);
-    };
-
-    const seePreviousState = (number) => {
-        setHistoryAt(number);
-        drewElementsRef.current = false;
-    };
 
     return (
         <div className="flex h-full w-full justify-center p-5 bg-skin-default">
@@ -280,31 +245,7 @@ const DrawScreen = () => {
                                 />,
                             ]}
                         />
-                        <ToolTab
-                            title={'Global Definition'}
-                            tools={[
-                                <ColourPicker name={'globalColour'} />,
-                                <Slider
-                                    title={'Width:'}
-                                    name={'globalWidth'}
-                                />,
-                            ]}
-                        />
-                        <ToolTab
-                            title={'Element Definition'}
-                            tools={[
-                                <ColourPicker
-                                    name={'selectedElementColour'}
-                                    selectedElement={selectedElement}
-                                    updateElement={updateColour}
-                                    drewEleementsRef={drewElementsRef}
-                                />,
-                                <Slider
-                                    title={'Width:'}
-                                    name={'selectedElementWidth'}
-                                />,
-                            ]}
-                        />
+                        <ToolTab title={'Global Definition'} tools={[]} />
                     </div>
                 ) : (
                     <div className="flex flex-col flex-wrap items-center gap-3">
@@ -399,19 +340,9 @@ const DrawScreen = () => {
                             elementType={elementType}
                             setElements={setElements}
                             gridRef={gridRef}
-                            setSelectedElement={handleSetSelectedElement}
                             drewElementsRef={drewElementsRef}
                         />
-                        <ToolTab
-                            title={'Global Definition'}
-                            tools={[
-                                <ColourPicker name={'globalColour'} />,
-                                <Slider
-                                    title={'Width:'}
-                                    name={'globalWidth'}
-                                />,
-                            ]}
-                        />
+                        <ToolTab title={'Global Definition'} tools={[]} />
                     </div>
                 )}
             </div>
@@ -427,26 +358,7 @@ const DrawScreen = () => {
                 drewGridRef={drewGridRef}
                 gridRef={gridRef}
                 setGridRef={setGridRef}
-                setSelectedElement={handleSetSelectedElement}
             />
-
-            <div className="flex flex-col gap-2">
-                <History
-                    currentTitle="History"
-                    history={history}
-                    historyIndex={index}
-                    deleteElement={setLastState}
-                    setCurrentElements={seePreviousState}
-                />
-                <Layer
-                    icon={<BsFillLayersFill />}
-                    currentTitle="Layer"
-                    elements={elements}
-                    setElements={setElements}
-                    setSelectedElement={handleSetSelectedElement}
-                    drewElementsRef={drewElementsRef}
-                />
-            </div>
         </div>
     );
 };

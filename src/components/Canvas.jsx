@@ -7,6 +7,7 @@ import {
 } from '../utils/element.util';
 
 import { drawAxis } from '../utils/draw.util';
+import { useSessionStorage } from '../hooks/UseSessionStorage';
 
 const computePointInCanvas = (canvasRef, clientX, clientY) => {
     if (!canvasRef.current) {
@@ -53,17 +54,16 @@ const Canvas = ({
     displayGrid,
     drewGridRef,
     setGridRef,
-    selectedElement,
-    setSelectedElement,
+   
 }) => {
     const [isDrawing, setIsDrawing] = useState(false);
-
+    const { setCurrentElement } = useSessionStorage(null);
     useLayoutEffect(() => {
         if (displayGrid && drewGridRef.current) {
             drawGrid(gridRef);
             drewGridRef.current = true;
         }
-    }, [displayGrid]);
+    }, [displayGrid, drewGridRef, gridRef]);
 
     const handleMouseDown = (event) => {
         const { clientX, clientY } = event;
@@ -71,25 +71,28 @@ const Canvas = ({
         const point = computePointInCanvas(canvasRef, clientX, clientY);
 
         if (elementType === 'select') {
-            const element = getElementAtPosition(point.x, point.y, elements);
+            const selectedElementPoints = sessionStorage.getItem('selectedElementPoints');
+            const selectedElementStartPoint = sessionStorage.getItem('selectedElementStartPoint');
+            const selectedElementEndPoint = sessionStorage.getItem('selectedElementEndPoint');
+            
 
-            if (!element) return;
-
-            const offset = element.points
+            const offset = selectedElementPoints
                 ? { ...point }
                 : {
-                      x: point.x - element.startPoint.x,
-                      y: point.y - element.startPoint.y,
+                      x: point.x - JSON.parse(selectedElementStartPoint).x,
+                      y: point.y - JSON.parse(selectedElementEndPoint).y,
                   };
-
-            setSelectedElement({
-                ...element,
+                  
+            /*setSelectedElement({
+                ...selectedElement,
                 offset,
-            });
+            });*/
         } else {
             const element = createElement(point, elementType, true);
-
-            setSelectedElement(element);
+            console.log('mousedown');
+            console.log(element);
+            //setSelectedElement(element);
+            setCurrentElement(element)
             drewElementsRef.current = false;
 
             setElements((prevState) => [...prevState.elements, element], {
@@ -109,63 +112,65 @@ const Canvas = ({
         const point = computePointInCanvas(canvasRef, clientX, clientY);
 
         if (elementType === 'select') {
-            const element = getElementAtPosition(point.x, point.y, elements);
-
-            event.target.style.cursor = element
+           
+            const selectedElementId = sessionStorage.getItem('selectedElementId');
+            if (!selectedElementId) return;
+            
+            /*event.target.style.cursor = element
                 ? cursorForPosition(element.position)
                 : 'default';
+            */
+                    
+            const points = sessionStorage.getItem('selectedElementPoints');
+            const startPoint = JSON.parse(sessionStorage.getItem('selectedElementStartPoint'));
+            const endPoint = JSON.parse(sessionStorage.getItem('selectedElementEndPoint'));
+            const width = sessionStorage.getItem('selectedElementWidth');
+            const colour = sessionStorage.getItem('colour');
+            const elementType = sessionStorage.getItem('selectedElementType');
+            const isVisible = sessionStorage.getItem('selectedElementIsVisible');
+            const offset = sessionStorage.getItem('selectedElementOffset');
+            
 
-            if (!selectedElement) return;
-            if (selectedElement.points) {
-                const {
-                    points,
-                    width,
-                    colour,
-                    id,
-                    offset,
-                    elementType,
-                    isVisible,
-                } = selectedElement;
-
+            if (points) {
+                const updatedPoints = points.map((item) => {
+                    return {
+                        x: item.x - offset.x,
+                        y: item.y - offset.y,
+                    };
+                });
+               
                 updateElement(
                     {
-                        points: points.map((item) => {
-                            return {
-                                x: item.x - offset.x,
-                                y: item.y - offset.y,
-                            };
-                        }),
+                        points: updatedPoints,
                         elementType,
                         width,
                         colour,
                         isVisible,
-                        id,
+                        selectedElementId,
                     },
                     elements,
                     setElements
                 );
             } else {
-                const {
-                    startPoint,
-                    endPoint,
-                    width,
-                    colour,
-                    id,
-                    elementType,
-                    isVisible,
-                    offset,
-                } = selectedElement;
-
                 const correctedPosition = {
                     x: point.x - offset.x,
                     y: point.y - offset.y,
                 };
-
+                //console.log('pre-update');
+                /*console.log({
+                    startPoint: {
+                        ...correctedPosition,
+                    },
+                    endPoint: {
+                        x: correctedPosition.x + endPoint.x - startPoint.x,
+                        y: correctedPosition.y + endPoint.y - startPoint.y,
+                    },
+                });
+                */
                 updateElement(
                     {
                         startPoint: {
-                            x: correctedPosition.x,
-                            y: correctedPosition.y,
+                            ...correctedPosition,
                         },
                         endPoint: {
                             x: correctedPosition.x + endPoint.x - startPoint.x,
@@ -175,7 +180,7 @@ const Canvas = ({
                         isVisible,
                         width,
                         colour,
-                        id,
+                        selectedElementId,
                     },
                     elements,
                     setElements
@@ -207,7 +212,8 @@ const Canvas = ({
     };
 
     const handleMouseUp = (event) => {
-        setSelectedElement(null);
+        //setSelectedElement(null);
+      
         setIsDrawing(false);
     };
 

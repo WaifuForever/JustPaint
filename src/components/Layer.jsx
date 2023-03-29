@@ -15,7 +15,7 @@ const Item = ({
     hideElement,
 }) => {
     const selectedId = sessionStorage.getItem('selectedElementId');
-  
+
     return (
         <div
             className={`${

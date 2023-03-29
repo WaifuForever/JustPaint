@@ -1,17 +1,28 @@
 import { v4 as uuid } from 'uuid';
 
+const trimString = (str) => {
+    str = str
+        ? str.length > 2
+            ? str.substring(1, str.length - 1)
+            : str
+        : null;
+    return str;
+};
+
 const createElement = (firstPoint, elementType, isVisible) => {
     let colour = sessionStorage.getItem('globalColour');
     let width = sessionStorage.getItem('globalWidth');
-    colour = colour ? colour.substring(1, colour.length - 1) : null;
-  
+
+    colour = trimString(colour);
+    width = trimString(width);
+
     if (elementType === 'brush' || elementType === 'pencil')
         return {
             id: uuid(),
             points: [firstPoint],
             elementType,
             width,
-           colour,
+            colour,
             isVisible,
         };
 
@@ -29,8 +40,9 @@ const createElement = (firstPoint, elementType, isVisible) => {
 const createFixedElement = (startPoint, endPoint, elementType, isVisible) => {
     let colour = sessionStorage.getItem('globalColour');
     let width = sessionStorage.getItem('globalWidth');
-    colour = colour ? colour.substring(1, colour.length - 1) : null;
-  
+    colour = trimString(colour);
+    width = trimString(width);
+
     return {
         startPoint: startPoint,
         endPoint: endPoint,
@@ -44,9 +56,6 @@ const createFixedElement = (startPoint, endPoint, elementType, isVisible) => {
 
 const updateElement = (element, elements, setElements) => {
     const elementsCopy = [...elements];
-    //console.log('updateElement');
-    //console.log(element.width, element.colour);
-
     elementsCopy[elementsCopy.findIndex((e) => e.id === element.id)] = element;
     setElements(elementsCopy, {
         description: element.type,

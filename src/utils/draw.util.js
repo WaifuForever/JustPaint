@@ -126,12 +126,15 @@ const drawElement = (element, context) => {
     } = element;
 
     if (!isVisible) return;
+    if (
+        startPoint &&
+        startPoint.x === endPoint.x &&
+        startPoint.y === endPoint.y
+    )
+        putPixel(endPoint, width, colour, context);
 
     switch (elementType) {
         case 'rectangle':
-            putPixel(endPoint, width, colour, context);
-
-            /*
             context.beginPath();
             context.lineWidth = width;
             context.strokeStyle = colour;
@@ -141,40 +144,40 @@ const drawElement = (element, context) => {
                 endPoint.x - startPoint.x,
                 endPoint.y - startPoint.y
             );
+
+            /*
+            drawBresenhamsLine(
+                { ...startPoint },
+                { x: endPoint.x, y: startPoint.y },
+                width,
+                colour,
+                context
+            );
+
+            drawBresenhamsLine(
+                { x: endPoint.x, y: startPoint.y },
+                { ...endPoint },
+                width,
+                colour,
+                context
+            );
+
+            drawBresenhamsLine(
+                { ...endPoint },
+                { x: startPoint.x, y: endPoint.y },
+                width,
+                colour,
+                context
+            );
+
+            drawBresenhamsLine(
+                { x: startPoint.x, y: endPoint.y },
+                { ...startPoint },
+                width,
+                colour,
+                context
+            );
             */
-
-            drawBresenhamsLine(
-                { ...startPoint },
-                { x: endPoint.x, y: startPoint.y },
-                width,
-                colour,
-                context
-            );
-
-            drawBresenhamsLine(
-                { x: endPoint.x, y: startPoint.y },
-                { ...endPoint },
-                width,
-                colour,
-                context
-            );
-
-            drawBresenhamsLine(
-                { ...endPoint },
-                { x: startPoint.x, y: endPoint.y },
-                width,
-                colour,
-                context
-            );
-
-            drawBresenhamsLine(
-                { x: startPoint.x, y: endPoint.y },
-                { ...startPoint },
-                width,
-                colour,
-                context
-            );
-
             break;
         case 'circle':
             drawBresenhamsCircle(
@@ -198,7 +201,6 @@ const drawElement = (element, context) => {
             );
             break;
         case 'bresenhamLine':
-            putPixel(endPoint, width, colour, context);
             drawBresenhamsLine(
                 { ...startPoint },
                 { ...endPoint },
@@ -210,7 +212,6 @@ const drawElement = (element, context) => {
             break;
 
         case 'ddaLine':
-            putPixel(endPoint, width, colour, context);
             drawDdaLine(
                 { ...startPoint },
                 { ...endPoint },
@@ -242,7 +243,6 @@ const drawElement = (element, context) => {
             break;
 
         case 'parallelogram:':
-            putPixel(endPoint, width, colour, context);
             const figureWidth = length
                 ? length
                 : (endPoint.x - startPoint.x) / 3;

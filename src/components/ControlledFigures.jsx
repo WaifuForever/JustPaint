@@ -43,8 +43,6 @@ const ControlledFigures = ({
                         })
                     }
                     onSubmit={(values, formikHelpers) => {
-                        console.log(values);
-                        console.log(formikHelpers);
                         const element = createFixedElement(
                             computePointInGrid(gridRef, values.x1, values.y1),
                             computePointInGrid(gridRef, values.x2, values.y2),

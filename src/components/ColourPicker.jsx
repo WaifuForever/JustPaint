@@ -1,14 +1,11 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import Chrome from 'react-color/lib/components/chrome/Chrome';
 
-const ColourPicker = ({
-    name,
-    selectedElement,
-    updateElement,
-    drewEleementsRef,
-}) => {
-    const [colour, setColour] = useState('#000000');
+import { useSessionStorage } from '../hooks/UseSessionStorage';
 
+const ColourPicker = ({ name, updateElement, drewElementsRef }) => {
+    const [colour, setColour] = useState('#000000');
+    const { setCurrentElement } = useSessionStorage(null);
     const [colours, setColours] = useState([
         '#000000',
         '#ffffff',
@@ -26,15 +23,14 @@ const ColourPicker = ({
     const [isDisplayed, setIsDisplayed] = useState(false);
 
     useEffect(() => {
-        if (selectedElement) {
-            setColour(selectedElement.colour);
-        }
-    }, [selectedElement, name]);
+        const selectedColour = sessionStorage.getItem('selectedElementColour');
+        if (selectedColour) setColour(selectedColour);
+    }, []);
 
     useEffect(() => {
         // storing input colour
         sessionStorage.setItem(name, JSON.stringify(colour));
-    }, [colour, name, selectedElement]);
+    }, [colour, name]);
 
     const handleOnChange = (colour) => {
         setColour(colour.hex);
@@ -48,9 +44,15 @@ const ColourPicker = ({
                         <div
                             className="w-4 h-4 border border-black m-0.5 cursor-pointer"
                             onClick={() => {
-                                if (updateElement && selectedElement) {
-                                    updateElement(colour, selectedElement);
-                                    drewEleementsRef.current = false;
+                                const selectedColour = sessionStorage.getItem(
+                                    'selectedElementColour'
+                                );
+                                if (updateElement && selectedColour) {
+                                    setCurrentElement({
+                                        colour: selectedColour,
+                                    });
+                                    //updateElement(colour, selectedElement);
+                                    drewElementsRef.current = false;
                                 }
                                 setColour(colour);
                             }}
