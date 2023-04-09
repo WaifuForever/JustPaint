@@ -39,7 +39,9 @@ const useHistory = (initialState) => {
     };
 
     const sliceHistoryAt = (number) => {
-        if (isValidIndex) {
+        console.log(number, isValidIndex(number));
+
+        if (isValidIndex(number - 1)) {
             setHistory((prevState) => prevState.slice(0, number + 1));
             setIndex(number);
         }

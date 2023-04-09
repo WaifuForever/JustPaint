@@ -116,6 +116,8 @@ const DrawScreen = () => {
                 JSON.stringify(element.width)
             );
         }
+        console.log('handleSelectedElement');
+        console.log(element);
         setSelectedElement(element);
     };
 

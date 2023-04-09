@@ -42,6 +42,18 @@ const createFixedElement = (startPoint, endPoint, elementType, isVisible) => {
     };
 };
 
+const generateElementWithOffset = (element, point) => {
+    const offset = element.points
+    ? { ...point }
+    : {
+          x: point.x - element.startPoint.x,
+          y: point.y - element.startPoint.y,
+      };
+    return {
+        ...element,
+        offset,
+    }
+}
 const updateElement = (element, elements, setElements) => {
     const elementsCopy = [...elements];
     console.log('updateElement');
@@ -188,4 +200,5 @@ export {
     deleteElement,
     hideElement,
     getElementAtPosition,
+    generateElementWithOffset
 };

@@ -78,7 +78,7 @@ const Layer = ({
                             }
                             isActive={element.isVisible}
                             deleteElement={() =>
-                                deleteElement(element.id, elements, setElements)
+                                deleteElement(element.id, elements, setElements, drewElementsRef)
                             }
                             hideElement={() =>
                                 hideElement(
