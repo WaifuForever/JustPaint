@@ -2,7 +2,7 @@ import { useLayoutEffect, useState } from 'react';
 
 import {
     createElement,
-    getElementAtPosition,
+    mentAtPosition,
     updateElement,
 } from '../utils/element.util';
 
@@ -71,19 +71,19 @@ const Canvas = ({
         const point = computePointInCanvas(canvasRef, clientX, clientY);
 
         if (elementType === 'select') {
-            const element = getElementAtPosition(point.x, point.y, elements);
+            console.log(selectedElement);
+            if (!selectedElement) return;
 
-            if (!element) return;
-
-            const offset = element.points
+            const offset = selectedElement.points
                 ? { ...point }
                 : {
-                      x: point.x - element.startPoint.x,
-                      y: point.y - element.startPoint.y,
+                      x: point.x - selectedElement.startPoint.x,
+                      y: point.y - selectedElement.startPoint.y,
                   };
-
+            console.log('set selected element');
+            console.log({ ...selectedElement, offset });
             setSelectedElement({
-                ...element,
+                ...selectedElement,
                 offset,
             });
         } else {
@@ -109,13 +109,13 @@ const Canvas = ({
         const point = computePointInCanvas(canvasRef, clientX, clientY);
 
         if (elementType === 'select') {
-            const element = getElementAtPosition(point.x, point.y, elements);
-
-            event.target.style.cursor = element
+            /*event.target.style.cursor = selectedElement
                 ? cursorForPosition(element.position)
                 : 'default';
-
+                */
+            console.log(selectedElement);
             if (!selectedElement) return;
+
             if (selectedElement.points) {
                 const {
                     points,
@@ -145,6 +145,7 @@ const Canvas = ({
                     setElements
                 );
             } else {
+                console.log('else');
                 const {
                     startPoint,
                     endPoint,
@@ -160,6 +161,7 @@ const Canvas = ({
                     x: point.x - offset.x,
                     y: point.y - offset.y,
                 };
+                console.log(point, offset, correctedPosition);
 
                 updateElement(
                     {
@@ -207,7 +209,11 @@ const Canvas = ({
     };
 
     const handleMouseUp = (event) => {
-        setSelectedElement(null);
+        if (elementType != 'select') setSelectedElement(null);
+        else
+            setElements(elements, {
+                description: 'Move element',
+            });
         setIsDrawing(false);
     };
 

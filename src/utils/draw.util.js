@@ -1,5 +1,13 @@
 import getStroke from 'perfect-freehand';
 
+const hexToRGBA = (hex) => {
+    const r = parseInt(hex.substring(1, 3), 16);
+    const g = parseInt(hex.substring(3, 5), 16);
+    const b = parseInt(hex.substring(5, 7), 16);
+    const a = hex.length > 7 ? parseInt(hex.substring(7, 9), 16) : 255;
+    return [r, g, b, a];
+};
+
 const putPixel2 = (point, width, colour, ctx) => {
     //console.log(colour, width);
 
@@ -9,6 +17,39 @@ const putPixel2 = (point, width, colour, ctx) => {
 };
 
 const putPixel = (point, width, colour, ctx) => {
+    const x = point.x - Math.floor(width / 2);
+    const y = point.y - Math.floor(width / 2);
+
+    ctx.fillStyle = colour;
+    ctx.fillRect(x, y, width, width);
+};
+
+
+const putPixel4 = (point, width, colour, ctx) => {
+    const rgbaColor = hexToRGBA(colour);
+    const imageData = ctx.createImageData(width, width);
+    for (let i = 0; i < imageData.data.length; i += 4) {
+        imageData.data[i] = rgbaColor[0];
+        imageData.data[i + 1] = rgbaColor[1];
+        imageData.data[i + 2] = rgbaColor[2];
+        imageData.data[i + 3] = rgbaColor[3];
+    }
+    const x = point.x - Math.floor(width / 2);
+    const y = point.y - Math.floor(width / 2);
+    ctx.putImageData(imageData, x, y);
+};
+
+/*const putPixel5 = (point, width, colour, ctx) => {
+    const rgbaColor = hexToRGBA(colour);
+    const imageData = ctx.createImageData(width, width);
+    imageData.data[0] = rgbaColor[0];
+    imageData.data[1] = rgbaColor[1];
+    imageData.data[2] = rgbaColor[2];
+    imageData.data[3] = rgbaColor[3];
+    ctx.putImageData(imageData, point.x, point.y);
+};*/
+
+const putPixel6 = (point, width, colour, ctx) => {
     ctx.beginPath();
     ctx.arc(point.x, point.y, width / 2, 0, 2 * Math.PI, true);
     ctx.fillStyle = colour;

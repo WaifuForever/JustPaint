@@ -187,7 +187,7 @@ const DrawScreen = () => {
                 {freeRoaming ? (
                     <div className="flex flex-col flex-wrap items-center gap-3">
                         <ToolTab
-                            title={'Title'}
+                            title={'Tools'}
                             tools={[
                                 <ToolButton
                                     icon={<FaPencilAlt />}
@@ -426,6 +426,7 @@ const DrawScreen = () => {
                 drewGridRef={drewGridRef}
                 gridRef={gridRef}
                 setGridRef={setGridRef}
+                selectedElement={selectedElement}
                 setSelectedElement={handleSetSelectedElement}
             />
 
