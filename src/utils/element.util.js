@@ -9,6 +9,7 @@ const createElement = (firstPoint, elementType, isVisible) => {
         return {
             id: uuid(),
             points: [firstPoint],
+            coordinates: new Set([JSON.stringify(firstPoint)]),
             elementType,
             width,
             colour,
@@ -19,6 +20,7 @@ const createElement = (firstPoint, elementType, isVisible) => {
         startPoint: firstPoint,
         endPoint: firstPoint,
         elementType,
+        coordinates: new Set([JSON.stringify(firstPoint)]),
         width,
         colour,
         id: uuid(),
@@ -44,16 +46,16 @@ const createFixedElement = (startPoint, endPoint, elementType, isVisible) => {
 
 const generateElementWithOffset = (element, point) => {
     const offset = element.points
-    ? { ...point }
-    : {
-          x: point.x - element.startPoint.x,
-          y: point.y - element.startPoint.y,
-      };
+        ? { ...point }
+        : {
+              x: point.x - element.startPoint.x,
+              y: point.y - element.startPoint.y,
+          };
     return {
         ...element,
         offset,
-    }
-}
+    };
+};
 const updateElement = (element, elements, setElements) => {
     const elementsCopy = [...elements];
     console.log('updateElement');
@@ -200,5 +202,5 @@ export {
     deleteElement,
     hideElement,
     getElementAtPosition,
-    generateElementWithOffset
+    generateElementWithOffset,
 };

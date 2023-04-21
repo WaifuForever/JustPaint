@@ -153,11 +153,11 @@ const DrawScreen = () => {
             );
 
             elements.forEach((element) => {
-                if (element.id === sessionStorage.getItem('selectedElement')) {
-                    drawElement(drawSelection(element), ctx);
-                }
+                //if (element.id === sessionStorage.getItem('selectedElement')) {
+                //  drawElement(drawSelection(element), ctx);
+                //}
 
-                drawElement(element, ctx);
+                element.coordinates = drawElement(element, ctx);
             });
             drewElementsRef.current = true;
         }

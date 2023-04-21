@@ -9,13 +9,29 @@ import { hideElement, deleteElement } from '../utils/element.util';
 const Item = ({
     elementId,
     elementType,
+    elementCoordinates,
     isActive,
     setSelectedElement,
     deleteElement,
     hideElement,
 }) => {
     const selectedId = sessionStorage.getItem('selectedElementId');
-  
+    const [showInfo, setShowInfo] = useState(false);
+    function handleRightClick(event) {
+        event.preventDefault();
+        console.log('right click event');
+        setShowInfo(true);
+    }
+
+    const temp = () => {
+        if (!elementCoordinates) return [];
+        const coordinatesArray = Array.from(elementCoordinates).map((str) =>
+            JSON.parse(str)
+        );
+        console.log(coordinatesArray);
+        return coordinatesArray;
+    };
+
     return (
         <div
             className={`${
@@ -24,6 +40,7 @@ const Item = ({
                     : 'bg-blue-300 hover:bg-blue-500'
             } flex w-32 items-center justify-between gap-3 border-t-2 p-2 rounded`}
             onClick={setSelectedElement}
+            onContextMenu={handleRightClick}
         >
             <div
                 className="cursor-pointer text-sm border"
@@ -37,6 +54,13 @@ const Item = ({
             <div className="cursor-pointer" onClick={deleteElement}>
                 <BsFillTrash2Fill />
             </div>
+            {showInfo ? (
+                <div className="absolute left-1 h-96 w-32 overflow-y-auto bg-green-400">
+                    {temp().map(
+                        (coordinate) => `(${coordinate.x}, ${coordinate.y})\n`
+                    )}
+                </div>
+            ) : null}
         </div>
     );
 };
@@ -67,18 +91,26 @@ const Layer = ({
                 }`}
             >
                 {elements.map((element, index) => {
+                    console.log(element);
+                    console.log(element.coordinates);
                     return (
                         <Item
                             key={index + element.id}
                             index={index}
                             elementId={element.id}
                             elementType={element.elementType}
+                            elementCoordinates={element.coordinates}
                             setSelectedElement={() =>
                                 setSelectedElement(element)
                             }
                             isActive={element.isVisible}
                             deleteElement={() =>
-                                deleteElement(element.id, elements, setElements, drewElementsRef)
+                                deleteElement(
+                                    element.id,
+                                    elements,
+                                    setElements,
+                                    drewElementsRef
+                                )
                             }
                             hideElement={() =>
                                 hideElement(
