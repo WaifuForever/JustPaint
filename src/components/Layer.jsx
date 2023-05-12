@@ -55,10 +55,16 @@ const Item = ({
                 <BsFillTrash2Fill />
             </div>
             {showInfo ? (
-                <div className="absolute left-1 h-96 w-32 overflow-y-auto bg-green-400">
-                    {temp().map(
-                        (coordinate) => `(${coordinate.x}, ${coordinate.y})\n`
-                    )}
+                <div className='flex flex-row'>
+                    <div className=''></div>
+                    <div className="flex flex-row flex-wrap absolute left-1 h-96 w-32 overflow-y-auto bg-gray-200">
+                        {temp().map((coordinate) => (
+                            <div className="border-y border-gray-700 mx-1 text-xs hover:bg-gray-400">
+                                {Math.floor(coordinate.x)},{' '}
+                                {Math.floor(coordinate.y)}
+                            </div>
+                        ))}
+                    </div>
                 </div>
             ) : null}
         </div>

@@ -187,7 +187,10 @@ const DrawScreen = () => {
                     onChange={() => setFreeRoaming((prevState) => !prevState)}
                 />
                 {freeRoaming ? (
-                    <div className="flex flex-col flex-wrap items-center gap-3">
+                    <div
+                        className="flex flex-col items-center gap-3 overflow-auto scrollbar-hide"
+                        style={{ height: '576px' }}
+                    >
                         <ToolTab
                             title={'Tools'}
                             tools={[
