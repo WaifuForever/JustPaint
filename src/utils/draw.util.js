@@ -161,6 +161,7 @@ const drawElement = (element, context) => {
             putPixel(endPoint, width, colour, context);
 
             /*
+
             context.beginPath();
             context.lineWidth = width;
             context.strokeStyle = colour;
@@ -171,7 +172,6 @@ const drawElement = (element, context) => {
                 endPoint.y - startPoint.y
             );
             */
-
             coordinates = new Set([
                 ...coordinates,
                 ...drawBresenhamsLine(
@@ -215,6 +215,7 @@ const drawElement = (element, context) => {
                     context
                 ),
             ]);
+
 
             break;
         case 'circle':
@@ -256,7 +257,6 @@ const drawElement = (element, context) => {
                     context
                 ),
             ]);
-
             break;
 
         case 'ddaLine':
@@ -271,7 +271,6 @@ const drawElement = (element, context) => {
                     context
                 ),
             ]);
-
             break;
 
         case 'pencil':
@@ -295,7 +294,6 @@ const drawElement = (element, context) => {
             break;
 
         case 'parallelogram:':
-            putPixel(endPoint, width, colour, context);
             const figureWidth = length
                 ? length
                 : (endPoint.x - startPoint.x) / 3;

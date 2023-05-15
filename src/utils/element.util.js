@@ -1,8 +1,18 @@
 import { v4 as uuid } from 'uuid';
 
+const trimString = (str) => {
+    str = str
+        ? str.length > 2
+            ? str.substring(1, str.length - 1)
+            : str
+        : null;
+    return str;
+};
+
 const createElement = (firstPoint, elementType, isVisible) => {
     let colour = sessionStorage.getItem('globalColour');
     let width = sessionStorage.getItem('globalWidth');
+
     colour = colour ? colour.substring(1, colour.length - 1) : null;
 
     if (elementType === 'brush' || elementType === 'pencil')
@@ -31,7 +41,9 @@ const createElement = (firstPoint, elementType, isVisible) => {
 const createFixedElement = (startPoint, endPoint, elementType, isVisible) => {
     let colour = sessionStorage.getItem('globalColour');
     let width = sessionStorage.getItem('globalWidth');
+
     colour = colour ? colour.substring(1, colour.length - 1) : null;
+
 
     return {
         startPoint: startPoint,
@@ -58,9 +70,6 @@ const generateElementWithOffset = (element, point) => {
 };
 const updateElement = (element, elements, setElements) => {
     const elementsCopy = [...elements];
-    console.log('updateElement');
-    console.log(element);
-    //console.log(element.width, element.colour);
 
     elementsCopy[elementsCopy.findIndex((e) => e.id === element.id)] = element;
     setElements(elementsCopy, {

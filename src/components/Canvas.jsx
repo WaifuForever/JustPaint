@@ -8,6 +8,7 @@ import {
 } from '../utils/element.util';
 
 import { drawAxis } from '../utils/draw.util';
+import { useSessionStorage } from '../hooks/UseSessionStorage';
 
 const computePointInCanvas = (canvasRef, clientX, clientY) => {
     if (!canvasRef.current) {
@@ -65,17 +66,16 @@ const Canvas = ({
     displayGrid,
     drewGridRef,
     setGridRef,
-    selectedElement,
-    setSelectedElement,
+   
 }) => {
     const [isDrawing, setIsDrawing] = useState(false);
-
+    const { setCurrentElement } = useSessionStorage(null);
     useLayoutEffect(() => {
         if (displayGrid && drewGridRef.current) {
             drawGrid(gridRef);
             drewGridRef.current = true;
         }
-    }, [displayGrid]);
+    }, [displayGrid, drewGridRef, gridRef]);
 
     const handleMouseDown = (event) => {
         const { clientX, clientY } = event;
@@ -150,6 +150,7 @@ const Canvas = ({
                 isVisible,
                 offset,
             } = selectedElement;
+
             if (points) {
                 const updatedPoints = points.map((item) => {
                     return {
@@ -157,6 +158,7 @@ const Canvas = ({
                         y: item.y - offset.y,
                     };
                 });
+
                 updateElement(
                     {
                         points: updatedPoints,
@@ -164,23 +166,31 @@ const Canvas = ({
                         width,
                         colour,
                         isVisible,
-                        id,
+                        selectedElementId,
                     },
                     elements,
                     setElements
                 );
             } else {
-                console.log(point, offset);
                 const correctedPosition = {
                     x: point.x - offset.x,
                     y: point.y - offset.y,
                 };
-
+                //console.log('pre-update');
+                /*console.log({
+                    startPoint: {
+                        ...correctedPosition,
+                    },
+                    endPoint: {
+                        x: correctedPosition.x + endPoint.x - startPoint.x,
+                        y: correctedPosition.y + endPoint.y - startPoint.y,
+                    },
+                });
+                */
                 updateElement(
                     {
                         startPoint: {
-                            x: correctedPosition.x,
-                            y: correctedPosition.y,
+                            ...correctedPosition,
                         },
                         endPoint: {
                             x: correctedPosition.x + endPoint.x - startPoint.x,
@@ -190,7 +200,7 @@ const Canvas = ({
                         isVisible,
                         width,
                         colour,
-                        id,
+                        selectedElementId,
                     },
                     elements,
                     setElements
