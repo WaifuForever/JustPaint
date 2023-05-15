@@ -13,13 +13,13 @@ const createElement = (firstPoint, elementType, isVisible) => {
     let colour = sessionStorage.getItem('globalColour');
     let width = sessionStorage.getItem('globalWidth');
 
-    colour = trimString(colour);
-    width = trimString(width);
+    colour = colour ? colour.substring(1, colour.length - 1) : null;
 
     if (elementType === 'brush' || elementType === 'pencil')
         return {
             id: uuid(),
             points: [firstPoint],
+            coordinates: new Set([JSON.stringify(firstPoint)]),
             elementType,
             width,
             colour,
@@ -30,6 +30,7 @@ const createElement = (firstPoint, elementType, isVisible) => {
         startPoint: firstPoint,
         endPoint: firstPoint,
         elementType,
+        coordinates: new Set([JSON.stringify(firstPoint)]),
         width,
         colour,
         id: uuid(),
@@ -40,8 +41,9 @@ const createElement = (firstPoint, elementType, isVisible) => {
 const createFixedElement = (startPoint, endPoint, elementType, isVisible) => {
     let colour = sessionStorage.getItem('globalColour');
     let width = sessionStorage.getItem('globalWidth');
-    colour = trimString(colour);
-    width = trimString(width);
+
+    colour = colour ? colour.substring(1, colour.length - 1) : null;
+
 
     return {
         startPoint: startPoint,
@@ -54,8 +56,21 @@ const createFixedElement = (startPoint, endPoint, elementType, isVisible) => {
     };
 };
 
+const generateElementWithOffset = (element, point) => {
+    const offset = element.points
+        ? { ...point }
+        : {
+              x: point.x - element.startPoint.x,
+              y: point.y - element.startPoint.y,
+          };
+    return {
+        ...element,
+        offset,
+    };
+};
 const updateElement = (element, elements, setElements) => {
     const elementsCopy = [...elements];
+
     elementsCopy[elementsCopy.findIndex((e) => e.id === element.id)] = element;
     setElements(elementsCopy, {
         description: element.type,
@@ -65,7 +80,6 @@ const updateElement = (element, elements, setElements) => {
 
 const deleteElement = (id, elements, setElements, drewElementsRef) => {
     let updatedElements = elements.filter((e) => e.id !== id);
-
     setElements(updatedElements, { description: 'Delete element' });
     drewElementsRef.current = false;
 };
@@ -122,21 +136,23 @@ const distance = (a, b) =>
 
 const positionWithinElement = (x, y, element) => {
     const { startPoint, endPoint, elementType } = element;
-
+    const p = { x, y };
     switch (elementType) {
         case 'rectangle':
-            const topLeft = nearPoint({ x, y }, startPoint, 'tl');
+        case 'circle':
+        case 'ellipse':
+            const topLeft = nearPoint(p, startPoint, 'tl');
             const topRight = nearPoint(
-                { x, y },
+                p,
                 { x: endPoint.x, y: startPoint.y },
                 'tr'
             );
             const bottomLeft = nearPoint(
-                { x, y },
+                p,
                 { x: startPoint.x, y: endPoint.y },
                 'bl'
             );
-            const bottomRight = nearPoint({ x, y }, endPoint, 'br');
+            const bottomRight = nearPoint(p, endPoint, 'br');
             const insideRect =
                 x >= startPoint.x &&
                 x <= endPoint.x &&
@@ -151,7 +167,6 @@ const positionWithinElement = (x, y, element) => {
 
         case 'ddaLine':
         case 'bresenhamLine':
-            const p = { x, y };
             const offset =
                 distance(startPoint, endPoint) -
                 (distance(startPoint, p) + distance(endPoint, p));
@@ -159,16 +174,16 @@ const positionWithinElement = (x, y, element) => {
             const start = nearPoint({ x, y }, startPoint, 'start');
             const end = nearPoint({ x, y }, endPoint, 'end');
             const insideLine = Math.abs(offset) < 1 ? 'inside' : null;
+            console.log(start || end || insideLine);
             return start || end || insideLine;
         case 'pencil':
 
         case 'brush':
             break;
         default:
-            const p2 = { x, y };
             const offset2 =
                 distance(startPoint, endPoint) -
-                (distance(startPoint, p2) + distance(endPoint, p2));
+                (distance(startPoint, p) + distance(endPoint, p));
             return Math.abs(offset2) < 1;
     }
 };
@@ -196,4 +211,5 @@ export {
     deleteElement,
     hideElement,
     getElementAtPosition,
+    generateElementWithOffset,
 };

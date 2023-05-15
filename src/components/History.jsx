@@ -1,4 +1,4 @@
-import { useState, useLayoutEffect, useRef } from 'react';
+import { memo, useState, useLayoutEffect, useRef } from 'react';
 import { BiRectangle } from 'react-icons/bi';
 import { FaPaintBrush, FaPencilAlt } from 'react-icons/fa';
 import { BsCircle, BsFillTrash2Fill } from 'react-icons/bs';
@@ -28,35 +28,32 @@ const RenderIcon = ({ elementType }) => {
     }
 };
 
-const Item = ({
-    description,
-    isSelected,
-    deleteElement,
-    setCurrentElements,
-}) => {
-    return (
-        <div
-            className={`${
-                isSelected
-                    ? 'bg-blue-500 hover:bg-blue-600'
-                    : 'bg-blue-300 hover:bg-blue-500'
-            } flex w-32 items-center justify-between gap-3 border-t-2 p-1 rounded`}
-            onClick={() => setCurrentElements(description)}
-        >
-            <div className="cursor-pointer text-sm border">
-                <RenderIcon elementType={description} />
-            </div>
-            <span className="text-xs">{description}</span>
-
+const Item = memo(
+    ({ description, isSelected, deleteElement, setCurrentElements }) => {
+        return (
             <div
-                className="cursor-pointer"
-                onClick={() => deleteElement(description)}
+                className={`${
+                    isSelected
+                        ? 'bg-blue-500 hover:bg-blue-600'
+                        : 'bg-blue-300 hover:bg-blue-500'
+                } flex w-32 items-center justify-between gap-3 border-t-2 p-1 rounded`}
+                onClick={() => setCurrentElements(description)}
             >
-                <BsFillTrash2Fill />
+                <div className="cursor-pointer text-sm border">
+                    <RenderIcon elementType={description} />
+                </div>
+                <span className="text-xs">{description}</span>
+
+                <div
+                    className="cursor-pointer"
+                    onClick={() => deleteElement(description)}
+                >
+                    <BsFillTrash2Fill />
+                </div>
             </div>
-        </div>
-    );
-};
+        );
+    }
+);
 
 const History = ({
     currentTitle,

@@ -99,6 +99,27 @@ const DrawScreen = () => {
         gridRef.current = ref;
     };
 
+    const handleSetSelectedElement = (element) => {
+        if (element) {
+            sessionStorage.setItem(
+                'selectedElementId',
+                JSON.stringify(element.id)
+            );
+
+            sessionStorage.setItem(
+                'selectedElementColour',
+                JSON.stringify(element.colour)
+            );
+            sessionStorage.setItem(
+                'selectedElementWidth',
+                JSON.stringify(element.width)
+            );
+        }
+        console.log('handleSelectedElement');
+        console.log(element);
+        setSelectedElement(element);
+    };
+
     useEffect(() => {
         const undoRedoFunction = (event) => {
             if (event.metaKey || event.ctrlKey) {
@@ -131,11 +152,11 @@ const DrawScreen = () => {
             );
 
             elements.forEach((element) => {
-                if (element.id === sessionStorage.getItem('selectedElement')) {
-                    drawElement(drawSelection(element), ctx);
-                }
+                //if (element.id === sessionStorage.getItem('selectedElement')) {
+                //  drawElement(drawSelection(element), ctx);
+                //}
 
-                drawElement(element, ctx);
+                element.coordinates = drawElement(element, ctx);
             });
             drewElementsRef.current = true;
         }
@@ -150,9 +171,12 @@ const DrawScreen = () => {
                     onChange={() => setFreeRoaming((prevState) => !prevState)}
                 />
                 {freeRoaming ? (
-                    <div className="flex flex-col flex-wrap items-center gap-3">
+                    <div
+                        className="flex flex-col items-center gap-3 overflow-auto scrollbar-hide"
+                        style={{ height: '576px' }}
+                    >
                         <ToolTab
-                            title={'Title'}
+                            title={'Tools'}
                             tools={[
                                 <ToolButton
                                     icon={<FaPencilAlt />}
@@ -358,6 +382,9 @@ const DrawScreen = () => {
                 drewGridRef={drewGridRef}
                 gridRef={gridRef}
                 setGridRef={setGridRef}
+                selectedElement={selectedElement}
+                setSelectedElement={handleSetSelectedElement}
+
             />
         </div>
     );

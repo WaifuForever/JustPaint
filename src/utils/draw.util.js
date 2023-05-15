@@ -1,5 +1,13 @@
 import getStroke from 'perfect-freehand';
 
+const hexToRGBA = (hex) => {
+    const r = parseInt(hex.substring(1, 3), 16);
+    const g = parseInt(hex.substring(3, 5), 16);
+    const b = parseInt(hex.substring(5, 7), 16);
+    const a = hex.length > 7 ? parseInt(hex.substring(7, 9), 16) : 255;
+    return [r, g, b, a];
+};
+
 const putPixel2 = (point, width, colour, ctx) => {
     //console.log(colour, width);
 
@@ -9,6 +17,38 @@ const putPixel2 = (point, width, colour, ctx) => {
 };
 
 const putPixel = (point, width, colour, ctx) => {
+    const x = point.x - Math.floor(width / 2);
+    const y = point.y - Math.floor(width / 2);
+
+    ctx.fillStyle = colour;
+    ctx.fillRect(x, y, width, width);
+};
+
+const putPixel4 = (point, width, colour, ctx) => {
+    const rgbaColor = hexToRGBA(colour);
+    const imageData = ctx.createImageData(width, width);
+    for (let i = 0; i < imageData.data.length; i += 4) {
+        imageData.data[i] = rgbaColor[0];
+        imageData.data[i + 1] = rgbaColor[1];
+        imageData.data[i + 2] = rgbaColor[2];
+        imageData.data[i + 3] = rgbaColor[3];
+    }
+    const x = point.x - Math.floor(width / 2);
+    const y = point.y - Math.floor(width / 2);
+    ctx.putImageData(imageData, x, y);
+};
+
+/*const putPixel5 = (point, width, colour, ctx) => {
+    const rgbaColor = hexToRGBA(colour);
+    const imageData = ctx.createImageData(width, width);
+    imageData.data[0] = rgbaColor[0];
+    imageData.data[1] = rgbaColor[1];
+    imageData.data[2] = rgbaColor[2];
+    imageData.data[3] = rgbaColor[3];
+    ctx.putImageData(imageData, point.x, point.y);
+};*/
+
+const putPixel6 = (point, width, colour, ctx) => {
     ctx.beginPath();
     ctx.arc(point.x, point.y, width / 2, 0, 2 * Math.PI, true);
     ctx.fillStyle = colour;
@@ -85,17 +125,6 @@ const strokeArrayPoints = (ctx, element) => {
     });
 };
 
-const drawCircle = (xc, yc, x, y, width, colour, ctx) => {
-    putPixel({ x: xc + x, y: yc + y }, width, colour, ctx);
-    putPixel({ x: xc - x, y: yc + y }, width, colour, ctx);
-    putPixel({ x: xc + x, y: yc - y }, width, colour, ctx);
-    putPixel({ x: xc - x, y: yc - y }, width, colour, ctx);
-    putPixel({ x: xc + y, y: yc + x }, width, colour, ctx);
-    putPixel({ x: xc - y, y: yc + x }, width, colour, ctx);
-    putPixel({ x: xc + y, y: yc - x }, width, colour, ctx);
-    putPixel({ x: xc - y, y: yc - x }, width, colour, ctx);
-};
-
 const drawAxis = (origin, canvasSize, context) => {
     drawBresenhamsLine(
         { x: origin.x, y: 0 },
@@ -126,15 +155,13 @@ const drawElement = (element, context) => {
     } = element;
 
     if (!isVisible) return;
-    if (
-        startPoint &&
-        startPoint.x === endPoint.x &&
-        startPoint.y === endPoint.y
-    )
-        putPixel(endPoint, width, colour, context);
-
+    let coordinates = new Set();
     switch (elementType) {
-        case 'rectangle':
+        case 'rectangle':            
+            putPixel(endPoint, width, colour, context);
+
+            /*
+
             context.beginPath();
             context.lineWidth = width;
             context.strokeStyle = colour;
@@ -144,82 +171,106 @@ const drawElement = (element, context) => {
                 endPoint.x - startPoint.x,
                 endPoint.y - startPoint.y
             );
-
-            /*
-            drawBresenhamsLine(
-                { ...startPoint },
-                { x: endPoint.x, y: startPoint.y },
-                width,
-                colour,
-                context
-            );
-
-            drawBresenhamsLine(
-                { x: endPoint.x, y: startPoint.y },
-                { ...endPoint },
-                width,
-                colour,
-                context
-            );
-
-            drawBresenhamsLine(
-                { ...endPoint },
-                { x: startPoint.x, y: endPoint.y },
-                width,
-                colour,
-                context
-            );
-
-            drawBresenhamsLine(
-                { x: startPoint.x, y: endPoint.y },
-                { ...startPoint },
-                width,
-                colour,
-                context
-            );
             */
+            coordinates = new Set([
+                ...coordinates,
+                ...drawBresenhamsLine(
+                    { ...startPoint },
+                    { x: endPoint.x, y: startPoint.y },
+                    width,
+                    colour,
+                    context
+                ),
+            ]);
+
+            coordinates = new Set([
+                ...coordinates,
+                ...drawBresenhamsLine(
+                    { x: endPoint.x, y: startPoint.y },
+                    { ...endPoint },
+                    width,
+                    colour,
+                    context
+                ),
+            ]);
+
+            coordinates = new Set([
+                ...coordinates,
+                ...drawBresenhamsLine(
+                    { ...endPoint },
+                    { x: startPoint.x, y: endPoint.y },
+                    width,
+                    colour,
+                    context
+                ),
+            ]);
+
+            coordinates = new Set([
+                ...coordinates,
+                ...drawBresenhamsLine(
+                    { x: startPoint.x, y: endPoint.y },
+                    { ...startPoint },
+                    width,
+                    colour,
+                    context
+                ),
+            ]);
+
+
             break;
         case 'circle':
-            drawBresenhamsCircle(
-                { ...startPoint },
-                { ...endPoint },
-                width,
-                colour,
-                context
-            );
+            coordinates = new Set([
+                ...coordinates,
+                ...drawBresenhamsCircle(
+                    { ...startPoint },
+                    { ...endPoint },
+                    width,
+                    colour,
+                    context
+                ),
+            ]);
             break;
         case 'ellipse':
-            drawBresenhamsEllipse(
-                startPoint,
-                {
-                    x: Math.abs(startPoint.x - endPoint.x),
-                    y: Math.abs(startPoint.y - endPoint.y),
-                },
-                width,
-                colour,
-                context
-            );
+            coordinates = new Set([
+                ...coordinates,
+                ...drawBresenhamsEllipse(
+                    startPoint,
+                    {
+                        x: Math.abs(startPoint.x - endPoint.x),
+                        y: Math.abs(startPoint.y - endPoint.y),
+                    },
+                    width,
+                    colour,
+                    context
+                ),
+            ]);
             break;
         case 'bresenhamLine':
-            drawBresenhamsLine(
-                { ...startPoint },
-                { ...endPoint },
-                width,
-                colour,
-                context
-            );
-
+            putPixel(endPoint, width, colour, context);
+            coordinates = new Set([
+                ...coordinates,
+                ...drawBresenhamsLine(
+                    { ...startPoint },
+                    { ...endPoint },
+                    width,
+                    colour,
+                    context
+                ),
+            ]);
             break;
 
         case 'ddaLine':
-            drawDdaLine(
-                { ...startPoint },
-                { ...endPoint },
-                width,
-                colour,
-                context
-            );
-
+            putPixel(endPoint, width, colour, context);
+            coordinates = new Set([
+                ...coordinates,
+                ...drawDdaLine(
+                    { ...startPoint },
+                    { ...endPoint },
+                    width,
+                    colour,
+                    context
+                ),
+            ]);
             break;
 
         case 'pencil':
@@ -228,7 +279,7 @@ const drawElement = (element, context) => {
             //console.log(element.colour);
             context.strokeStyle = element.colour;
             context.stroke();
-
+            coordinates = new Set(element.points);
             break;
         case 'brush':
             const brushStroke = getSvgPathFromStroke(
@@ -239,7 +290,7 @@ const drawElement = (element, context) => {
             context.fillStyle = element.colour;
             //console.log(context.fillStyle);
             context.fill(new Path2D(brushStroke));
-
+            coordinates = new Set(element.points);
             break;
 
         case 'parallelogram:':
@@ -264,6 +315,28 @@ const drawElement = (element, context) => {
         default:
             throw new Error(`Type not recognised: ${elementType}`);
     }
+    return coordinates;
+};
+
+const drawCircle = (xc, yc, x, y, width, colour, ctx) => {
+    const coordinates = [
+        { x: xc + x, y: yc + y },
+        { x: xc - x, y: yc + y },
+        { x: xc + x, y: yc - y },
+        { x: xc - x, y: yc - y },
+        { x: xc + y, y: yc + x },
+        { x: xc - y, y: yc + x },
+        { x: xc + y, y: yc - x },
+        { x: xc - y, y: yc - x },
+    ];
+
+    const setCoordinates = new Set();
+    coordinates.forEach((pixel) => {
+        putPixel(pixel, width, colour, ctx);
+
+        setCoordinates.add(JSON.stringify(pixel));
+    });
+    return setCoordinates;
 };
 
 const drawBresenhamsCircle = (startPoint, endPoint, width, colour, ctx) => {
@@ -276,7 +349,15 @@ const drawBresenhamsCircle = (startPoint, endPoint, width, colour, ctx) => {
 
     let d = 3 - 2 * r;
 
-    drawCircle(startPoint.x, startPoint.y, 0, r, width, colour, ctx);
+    let coordinates = drawCircle(
+        startPoint.x,
+        startPoint.y,
+        0,
+        r,
+        width,
+        colour,
+        ctx
+    );
     while (y >= x) {
         // for each pixel we will
         // draw all eight pixels
@@ -290,8 +371,12 @@ const drawBresenhamsCircle = (startPoint, endPoint, width, colour, ctx) => {
             y--;
             d = d + 4 * (x - y) + 10;
         } else d = d + 4 * x + 6;
-        drawCircle(startPoint.x, startPoint.y, x, y, width, colour, ctx);
+        coordinates = new Set([
+            ...coordinates,
+            ...drawCircle(startPoint.x, startPoint.y, x, y, width, colour, ctx),
+        ]);
     }
+    return coordinates;
 };
 
 const drawBresenhamsEllipse = (
@@ -301,31 +386,18 @@ const drawBresenhamsEllipse = (
     colour,
     ctx
 ) => {
+    const coordinates = new Set();
     const plotPoints = (x, y) => {
-        putPixel(
+        const points = [
             { x: x + centrePoint.x, y: y + centrePoint.y },
-            width,
-            colour,
-            ctx
-        );
-        putPixel(
             { x: -x + centrePoint.x, y: y + centrePoint.y },
-            width,
-            colour,
-            ctx
-        );
-        putPixel(
             { x: x + centrePoint.x, y: -y + centrePoint.y },
-            width,
-            colour,
-            ctx
-        );
-        putPixel(
             { x: -x + centrePoint.x, y: -y + centrePoint.y },
-            width,
-            colour,
-            ctx
-        );
+        ];
+        points.forEach((point) => {
+            coordinates.add(JSON.stringify(point));
+            putPixel(point, width, colour, ctx);
+        });
     };
 
     let dx, dy, d1, d2, x, y;
@@ -383,6 +455,7 @@ const drawBresenhamsEllipse = (
             d2 = d2 + dx - dy + radiusPoint.x * radiusPoint.x;
         }
     }
+    return coordinates;
 };
 
 const drawBresenhamsLine = (startPoint, endPoint, width, colour, ctx) => {
@@ -392,8 +465,9 @@ const drawBresenhamsLine = (startPoint, endPoint, width, colour, ctx) => {
     let sy = startPoint.y < endPoint.y ? 1 : -1;
     let sx = startPoint.x < endPoint.x ? 1 : -1;
     let err = dx - dy;
-
+    const points = new Set();
     while (true) {
+        points.add(JSON.stringify(startPoint));
         putPixel(startPoint, width, colour, ctx);
 
         if (startPoint.x === endPoint.x && startPoint.y === endPoint.y) break;
@@ -409,6 +483,7 @@ const drawBresenhamsLine = (startPoint, endPoint, width, colour, ctx) => {
             startPoint.y += sy;
         }
     }
+    return points;
 };
 
 const drawDdaLine = (startPoint, endPoint, width, colour, ctx) => {
@@ -421,8 +496,9 @@ const drawDdaLine = (startPoint, endPoint, width, colour, ctx) => {
     let yInc = dy / steps;
 
     let i = 0;
-
+    let coordinates = new Set();
     while (i < steps) {
+        coordinates.add(JSON.stringify(startPoint));
         putPixel(startPoint, width, colour, ctx);
 
         startPoint.x += xInc;
@@ -430,6 +506,7 @@ const drawDdaLine = (startPoint, endPoint, width, colour, ctx) => {
 
         i++;
     }
+    return coordinates;
 };
 
 export { drawElement, putPixel, drawAxis };

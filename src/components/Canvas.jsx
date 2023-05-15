@@ -2,7 +2,8 @@ import { useLayoutEffect, useState } from 'react';
 
 import {
     createElement,
-    getElementAtPosition,
+    mentAtPosition,
+    generateElementWithOffset,
     updateElement,
 } from '../utils/element.util';
 
@@ -43,6 +44,17 @@ const drawGrid = (gridRef) => {
     */
 };
 
+const computePointInGrid = (gridRef, figureX, figureY) => {
+    if (!gridRef.current) {
+        return null;
+    }
+
+    return {
+        x: figureX + 384,
+        y: 288 - figureY,
+    };
+};
+
 const Canvas = ({
     canvasRef,
     setCanvasRef,
@@ -70,30 +82,38 @@ const Canvas = ({
         setIsDrawing(true);
         const point = computePointInCanvas(canvasRef, clientX, clientY);
 
+        drewElementsRef.current = false;
         if (elementType === 'select') {
-            const selectedElementPoints = sessionStorage.getItem('selectedElementPoints');
-            const selectedElementStartPoint = sessionStorage.getItem('selectedElementStartPoint');
-            const selectedElementEndPoint = sessionStorage.getItem('selectedElementEndPoint');
-            
+            console.log('mouse down');
 
-            const offset = selectedElementPoints
-                ? { ...point }
-                : {
-                      x: point.x - JSON.parse(selectedElementStartPoint).x,
-                      y: point.y - JSON.parse(selectedElementEndPoint).y,
-                  };
-                  
-            /*setSelectedElement({
-                ...selectedElement,
-                offset,
-            });*/
+            if (!selectedElement) {
+                if (elements.length > 0) {
+                    const newElement = generateElementWithOffset(
+                        elements[elements.length - 1],
+                        point
+                    );
+                    setSelectedElement(newElement);
+
+                    setElements((prevState) => [...prevState.elements], {
+                        description: `Moving ${newElement.elementType}`,
+                    });
+                }
+
+                return;
+            }
+            const newElement = generateElementWithOffset(
+                selectedElement,
+                point
+            );
+            setSelectedElement(newElement);
+
+            setElements((prevState) => [...prevState.elements], {
+                description: `Moving ${newElement.elementType}`,
+            });
         } else {
             const element = createElement(point, elementType, true);
-            console.log('mousedown');
-            console.log(element);
-            //setSelectedElement(element);
-            setCurrentElement(element)
-            drewElementsRef.current = false;
+
+            setSelectedElement(element);
 
             setElements((prevState) => [...prevState.elements, element], {
                 description: element.elementType,
@@ -112,24 +132,24 @@ const Canvas = ({
         const point = computePointInCanvas(canvasRef, clientX, clientY);
 
         if (elementType === 'select') {
-           
-            const selectedElementId = sessionStorage.getItem('selectedElementId');
-            if (!selectedElementId) return;
-            
-            /*event.target.style.cursor = element
+            /*event.target.style.cursor = selectedElement
                 ? cursorForPosition(element.position)
                 : 'default';
-            */
-                    
-            const points = sessionStorage.getItem('selectedElementPoints');
-            const startPoint = JSON.parse(sessionStorage.getItem('selectedElementStartPoint'));
-            const endPoint = JSON.parse(sessionStorage.getItem('selectedElementEndPoint'));
-            const width = sessionStorage.getItem('selectedElementWidth');
-            const colour = sessionStorage.getItem('colour');
-            const elementType = sessionStorage.getItem('selectedElementType');
-            const isVisible = sessionStorage.getItem('selectedElementIsVisible');
-            const offset = sessionStorage.getItem('selectedElementOffset');
-            
+                */
+            console.log('mouse move');
+            console.log(selectedElement);
+            if (!selectedElement) return;
+            const {
+                startPoint,
+                endPoint,
+                width,
+                colour,
+                id,
+                points,
+                elementType,
+                isVisible,
+                offset,
+            } = selectedElement;
 
             if (points) {
                 const updatedPoints = points.map((item) => {
@@ -138,7 +158,7 @@ const Canvas = ({
                         y: item.y - offset.y,
                     };
                 });
-               
+
                 updateElement(
                     {
                         points: updatedPoints,
@@ -190,19 +210,19 @@ const Canvas = ({
             //const width = sessionStorage.getItem('elementWidth');
             //const colour = sessionStorage.getItem('elementColour');
             //console.log(width, colour);
-
-            let temp = elements[index].points
-                ? { points: [...elements[index].points, point] }
-                : { startPoint: elements[index].startPoint, endPoint: point };
+            const element = elements[index];
+            let temp = element.points
+                ? { points: [...element.points, point] }
+                : { startPoint: element.startPoint, endPoint: point };
 
             updateElement(
                 {
                     ...temp,
                     elementType: elementType,
-                    width: elements[index].width,
-                    colour: elements[index].colour,
-                    isVisible: elements[index].isVisible,
-                    id: elements[index].id,
+                    width: element.width,
+                    colour: element.colour,
+                    isVisible: element.isVisible,
+                    id: element.id,
                 },
                 elements,
                 setElements
@@ -212,8 +232,8 @@ const Canvas = ({
     };
 
     const handleMouseUp = (event) => {
-        //setSelectedElement(null);
-      
+        if (elementType != 'select') setSelectedElement(null);
+
         setIsDrawing(false);
     };
 
