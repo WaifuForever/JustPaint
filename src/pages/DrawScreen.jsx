@@ -10,6 +10,7 @@ import { MdRestartAlt } from 'react-icons/md';
 import { TbOvalVertical } from 'react-icons/tb';
 
 import { useHistory } from '../hooks/UseHistory';
+import { useSelectedElement } from '../hooks/UseSelectedElement';
 import { drawElement } from '../utils/draw.util';
 
 import Canvas from '../components/Canvas';
@@ -80,8 +81,10 @@ const DrawScreen = () => {
         undo,
         redo,
     } = useHistory([]);
+
+    const { selectedElement, setSelectedElement } = useSelectedElement(null);
+
     const { elements, description } = state;
-    const [selectedElement, setSelectedElement] = useState(null);
 
     const [elementType, setElementType] = useState('brush');
     const [freeRoaming, setFreeRoaming] = useState(true);
@@ -98,27 +101,6 @@ const DrawScreen = () => {
 
     const setGridRef = (ref) => {
         gridRef.current = ref;
-    };
-
-    const handleSetSelectedElement = (element) => {
-        if (element) {
-            sessionStorage.setItem(
-                'selectedElementId',
-                JSON.stringify(element.id)
-            );
-
-            sessionStorage.setItem(
-                'selectedElementColour',
-                JSON.stringify(element.colour)
-            );
-            sessionStorage.setItem(
-                'selectedElementWidth',
-                JSON.stringify(element.width)
-            );
-        }
-        console.log('handleSelectedElement');
-        console.log(element);
-        setSelectedElement(element);
     };
 
     useEffect(() => {
@@ -171,7 +153,7 @@ const DrawScreen = () => {
 
     const updateColour = (colour, element) => {
         element.colour = colour;
-        updateElement(element, elements, setElements);
+        updateElement(element, elements, setElements, `Change ${element.elementType} colour`);
     };
 
     const seePreviousState = (number) => {
@@ -401,9 +383,11 @@ const DrawScreen = () => {
                         />
                         <ControlledFigures
                             elementType={elementType}
+                            elements={elements}
                             setElements={setElements}
                             gridRef={gridRef}
-                            setSelectedElement={handleSetSelectedElement}
+                            selectedElement={selectedElement}
+                            setSelectedElement={setSelectedElement}
                             drewElementsRef={drewElementsRef}
                         />
                         <ToolTab
@@ -432,7 +416,7 @@ const DrawScreen = () => {
                 gridRef={gridRef}
                 setGridRef={setGridRef}
                 selectedElement={selectedElement}
-                setSelectedElement={handleSetSelectedElement}
+                setSelectedElement={setSelectedElement}
             />
 
             <div className="flex flex-col gap-2">
@@ -448,7 +432,7 @@ const DrawScreen = () => {
                     currentTitle="Layer"
                     elements={elements}
                     setElements={setElements}
-                    setSelectedElement={handleSetSelectedElement}
+                    setSelectedElement={setSelectedElement}
                     drewElementsRef={drewElementsRef}
                 />
             </div>

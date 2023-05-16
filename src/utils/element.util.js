@@ -1,47 +1,58 @@
 import { v4 as uuid } from 'uuid';
 
-const createElement = (firstPoint, elementType, isVisible) => {
-    let colour = sessionStorage.getItem('globalColour');
-    let width = sessionStorage.getItem('globalWidth');
-    colour = colour ? colour.substring(1, colour.length - 1) : null;
+const createElement = (element, setElements, setSelectedElement) => {
+    const colour = sessionStorage.getItem('globalColour')?.slice(1, -1) ?? null;
+    const width = sessionStorage.getItem('globalWidth') ?? null;
+    const { firstPoint, elementType, isVisible } = element;
 
-    if (elementType === 'brush' || elementType === 'pencil')
-        return {
-            id: uuid(),
-            points: [firstPoint],
-            coordinates: new Set([JSON.stringify(firstPoint)]),
-            elementType,
-            width,
-            colour,
-            isVisible,
-        };
-
-    return {
-        startPoint: firstPoint,
-        endPoint: firstPoint,
-        elementType,
+    const newElement = {
+        id: uuid(),
         coordinates: new Set([JSON.stringify(firstPoint)]),
+        elementType,
         width,
         colour,
-        id: uuid(),
         isVisible,
+        ...(elementType === 'brush' || elementType === 'pencil'
+            ? { points: [firstPoint] }
+            : { startPoint: firstPoint, endPoint: firstPoint }),
     };
+
+    setSelectedElement(newElement);
+
+    setElements((prevState) => [...prevState.elements, newElement], {
+        description: elementType,
+    });
 };
 
-const createFixedElement = (startPoint, endPoint, elementType, isVisible) => {
-    let colour = sessionStorage.getItem('globalColour');
-    let width = sessionStorage.getItem('globalWidth');
-    colour = colour ? colour.substring(1, colour.length - 1) : null;
-
-    return {
+const createFixedElement = (element, setElements, setSelectedElement) => {
+    const { startPoint, endPoint, elementType, isVisible } = element;
+    const colour = sessionStorage.getItem('globalColour')?.slice(1, -1) ?? null;
+    const width = sessionStorage.getItem('globalWidth') ?? null;
+    const newElement = {
         startPoint: startPoint,
         endPoint: endPoint,
+        coordinates: new Set([JSON.stringify(startPoint)]),
         elementType,
         width,
         colour,
         id: uuid(),
         isVisible,
     };
+
+    setSelectedElement(newElement);
+
+    setElements((prevState) => [...prevState.elements, newElement], {
+        description: elementType,
+    });
+};
+
+const updateElement = (element, elements, setElements, description) => {
+    console.log('updateElement', element);
+
+    setElements([...elements.map((e) => (e.id === element.id ? element : e))], {
+        description: description,
+        overwrite: true,
+    });
 };
 
 const generateElementWithOffset = (element, point) => {
@@ -55,18 +66,6 @@ const generateElementWithOffset = (element, point) => {
         ...element,
         offset,
     };
-};
-const updateElement = (element, elements, setElements) => {
-    const elementsCopy = [...elements];
-    console.log('updateElement');
-    console.log(element);
-    //console.log(element.width, element.colour);
-
-    elementsCopy[elementsCopy.findIndex((e) => e.id === element.id)] = element;
-    setElements(elementsCopy, {
-        description: element.type,
-        overwrite: true,
-    });
 };
 
 const deleteElement = (id, elements, setElements, drewElementsRef) => {
