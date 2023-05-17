@@ -1,10 +1,19 @@
 import { useEffect, useState } from 'react';
 
-const Slider = ({ title, name }) => {
+import { useSessionStorage } from '../hooks/UseSessionStorage';
+
+const Slider = ({ title, name, updateElement, drewElementsRef }) => {
     const [value, setValue] = useState(1);
+    const { setCurrentElement } = useSessionStorage(null);
     const getBackgroundSize = () => {
         return { backgroundSize: `${value}% 100%` };
     };
+
+    useEffect(() => {
+        const width = sessionStorage.getItem('selectedElementWidth');
+        if (width) setValue(width);
+        // storing input width
+    }, []);
 
     useEffect(() => {
         // storing input width
@@ -23,7 +32,18 @@ const Slider = ({ title, name }) => {
                 type="range"
                 value={value}
                 max={100}
-                onChange={(e) => setValue(e.target.valueAsNumber + 1)}
+                onChange={(e) => {
+                    const width = sessionStorage.getItem(
+                        'selectedElementWidth'
+                    );
+                    if (updateElement && width) {
+                        setCurrentElement({ width: value });
+                        //updateElement(value, selectedElement);
+                        drewElementsRef.current = false;
+                    }
+
+                    setValue(e.target.valueAsNumber + 1);
+                }}
                 style={getBackgroundSize()}
             />
         </div>
