@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { FaPencilAlt, FaPaintBrush } from 'react-icons/fa';
 import { BiRectangle } from 'react-icons/bi';
-import { BsCircle } from 'react-icons/bs';
+import { BsCircle, BsFillLayersFill } from 'react-icons/bs';
 import { FiMousePointer } from 'react-icons/fi';
 import { GiStraightPipe, GiCrosshair } from 'react-icons/gi';
 import { IoIosReturnLeft, IoIosReturnRight } from 'react-icons/io';
@@ -10,17 +10,18 @@ import { MdRestartAlt } from 'react-icons/md';
 import { TbOvalVertical } from 'react-icons/tb';
 
 import { useHistory } from '../hooks/UseHistory';
+import { useSelectedElement } from '../hooks/UseSelectedElement';
 import { drawElement } from '../utils/draw.util';
 
 import Canvas from '../components/Canvas';
 import ColourPicker from '../components/ColourPicker';
-import ControlledFigures from '../components/ControlledFigures';
-import RightBar from '../components/RightBar';
+import Layer from '../components/Layer';
+import History from '../components/History';
 import Slider from '../components/Slider';
 import ToolTab from '../components/ToolTab';
 import ToolButton from '../components/ToolButton';
-
-import SelectedElement from '../components/SelectedElement';
+import ControlledFigures from '../components/ControlledFigures';
+import { updateElement } from '../utils/element.util';
 
 const drawSelection = (element) => {
     const { startPoint, endPoint, width, elementType } = element;
@@ -80,6 +81,9 @@ const DrawScreen = () => {
         undo,
         redo,
     } = useHistory([]);
+
+    const { selectedElement, setSelectedElement } = useSelectedElement(null);
+
     const { elements, description } = state;
 
     const [elementType, setElementType] = useState('brush');
@@ -97,27 +101,6 @@ const DrawScreen = () => {
 
     const setGridRef = (ref) => {
         gridRef.current = ref;
-    };
-
-    const handleSetSelectedElement = (element) => {
-        if (element) {
-            sessionStorage.setItem(
-                'selectedElementId',
-                JSON.stringify(element.id)
-            );
-
-            sessionStorage.setItem(
-                'selectedElementColour',
-                JSON.stringify(element.colour)
-            );
-            sessionStorage.setItem(
-                'selectedElementWidth',
-                JSON.stringify(element.width)
-            );
-        }
-        console.log('handleSelectedElement');
-        console.log(element);
-        setSelectedElement(element);
     };
 
     useEffect(() => {
@@ -162,6 +145,21 @@ const DrawScreen = () => {
         }
         console.log(elements);
     }, [elements]);
+
+    const setLastState = (number) => {
+        sliceHistoryAt(number);
+        drewElementsRef.current = false;
+    };
+
+    const updateColour = (colour, element) => {
+        element.colour = colour;
+        updateElement(element, elements, setElements, `Change ${element.elementType} colour`);
+    };
+
+    const seePreviousState = (number) => {
+        setHistoryAt(number);
+        drewElementsRef.current = false;
+    };
 
     return (
         <div className="flex h-full w-full justify-center p-5 bg-skin-default">
@@ -269,7 +267,30 @@ const DrawScreen = () => {
                                 />,
                             ]}
                         />
-                        <ToolTab title={'Global Definition'} tools={[]} />
+                        <ToolTab
+                            title={'Global Definition'}
+                            tools={[
+                                <ColourPicker name={'globalColour'} />,
+                                <Slider
+                                    title={'Width:'}
+                                    name={'globalWidth'}
+                                />,
+                            ]}
+                        />
+                        <ToolTab
+                            title={'Element Definition'}
+                            tools={[
+                                <ColourPicker
+                                    name={'selectedElementColour'}
+                                    selectedElement={selectedElement}
+                                    updateElement={updateColour}
+                                />,
+                                <Slider
+                                    title={'Width:'}
+                                    name={'selectedElementWidth'}
+                                />,
+                            ]}
+                        />
                     </div>
                 ) : (
                     <div className="flex flex-col flex-wrap items-center gap-3">
@@ -362,11 +383,23 @@ const DrawScreen = () => {
                         />
                         <ControlledFigures
                             elementType={elementType}
+                            elements={elements}
                             setElements={setElements}
                             gridRef={gridRef}
+                            selectedElement={selectedElement}
+                            setSelectedElement={setSelectedElement}
                             drewElementsRef={drewElementsRef}
                         />
-                        <ToolTab title={'Global Definition'} tools={[]} />
+                        <ToolTab
+                            title={'Global Definition'}
+                            tools={[
+                                <ColourPicker name={'globalColour'} />,
+                                <Slider
+                                    title={'Width:'}
+                                    name={'globalWidth'}
+                                />,
+                            ]}
+                        />
                     </div>
                 )}
             </div>
@@ -383,9 +416,26 @@ const DrawScreen = () => {
                 gridRef={gridRef}
                 setGridRef={setGridRef}
                 selectedElement={selectedElement}
-                setSelectedElement={handleSetSelectedElement}
-
+                setSelectedElement={setSelectedElement}
             />
+
+            <div className="flex flex-col gap-2">
+                <History
+                    currentTitle="History"
+                    history={history}
+                    historyIndex={index}
+                    deleteElement={setLastState}
+                    setCurrentElements={seePreviousState}
+                />
+                <Layer
+                    icon={<BsFillLayersFill />}
+                    currentTitle="Layer"
+                    elements={elements}
+                    setElements={setElements}
+                    setSelectedElement={setSelectedElement}
+                    drewElementsRef={drewElementsRef}
+                />
+            </div>
         </div>
     );
 };

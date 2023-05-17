@@ -9,7 +9,7 @@ import {
 
 import * as yup from 'yup';
 
-import { createFixedElement } from '../utils/element.util';
+import { createFixedElement, updateElement } from '../utils/element.util';
 
 const computePointInGrid = (gridRef, figureX, figureY) => {
     if (!gridRef.current) {
@@ -22,156 +22,173 @@ const computePointInGrid = (gridRef, figureX, figureY) => {
     };
 };
 
+const ElementForm = ({
+    namespaces,
+    elementType,
+    setElements,
+    setSelectedElement,
+    drewElementsRef,
+    gridRef,
+    buttonName = 'Draw',
+}) => {
+    const initialValues = {};
+    const validationSchema = {};
+    namespaces.forEach((item) => {
+        validationSchema[item] = yup
+            .number()
+            .integer()
+            .strict()
+            .default(0)
+            .required();
+        initialValues[item] = 0;
+    });
+    return (
+        <Formik
+            initialValues={initialValues}
+            validationSchema={() => yup.object().shape(validationSchema)}
+            onSubmit={(values, formikHelpers) => {
+                createFixedElement(
+                    {
+                        startPoint: computePointInGrid(
+                            gridRef,
+                            values[namespaces[0]],
+                            values[namespaces[1]]
+                        ),
+                        endPoint: computePointInGrid(
+                            gridRef,
+                            values[namespaces[2]],
+                            values[
+                                namespaces.length < 4
+                                    ? namespaces[2]
+                                    : namespaces[3]
+                            ]
+                        ),
+                        elementType: elementType,
+                        isVisible: true,
+                    },
+                    setElements,
+                    setSelectedElement
+                );
+
+                drewElementsRef.current = false;
+            }}
+        >
+            {({ errors, touched, resetForm }) => (
+                <Form className="flex flex-col items-center gap-1">
+                    {console.log('errors', errors)}
+                    {namespaces.map((namespace, index) => (
+                        <div
+                            className="flex items-center gap-2"
+                            key={index + namespace}
+                        >
+                            <span className="text-xs">{namespace}</span>
+                            <Field
+                                className="w-14 text-center"
+                                type={'number'}
+                                name={namespace}
+                                error={errors[namespace]}
+                            />
+                        </div>
+                    ))}
+
+                    <button
+                        type="submit"
+                        className="px-4 bg-blue-400 rounded hover:bg-blue-600"
+                    >
+                        {buttonName}
+                    </button>
+                </Form>
+            )}
+        </Formik>
+    );
+};
+
 const ControlledFigures = ({
     elementType,
     gridRef,
+    selectedElement,
+    elements,
     setElements,
     setSelectedElement,
     drewElementsRef,
 }) => {
     return (
         <div>
-            {['bresenhamLine', 'ddaLine', 'rectangle'].includes(elementType) ? (
+            {elementType === 'select' ? (
                 <Formik
-                    initialValues={{ x1: 0, x2: 0, y1: 0, y2: 0 }}
+                    initialValues={{ x: 0, y: 0 }}
                     validationSchema={() =>
                         yup.object().shape({
-                            x1: yup.number().integer().default(0).required(),
-                            x2: yup.number().integer().default(0).required(),
-                            y2: yup.number().integer().default(0).required(),
-                            y1: yup.number().integer().default(0).required(),
+                            x: yup.number().integer().default(0).required(),
+                            y: yup.number().integer().default(0).required(),
                         })
                     }
                     onSubmit={(values, formikHelpers) => {
-                        const element = createFixedElement(
-                            computePointInGrid(gridRef, values.x1, values.y1),
-                            computePointInGrid(gridRef, values.x2, values.y2),
+                        if (!selectedElement) return;
+
+                        const {
                             elementType,
-                            true
+                            startPoint,
+                            endPoint,
+                        } = selectedElement;
+
+                        values.x = values.x ?? 0;
+                        values.y = values.y ?? 0;
+
+                        let newElement = selectedElement;
+                        console.log('selectedElement', selectedElement);
+
+                        const correctedPosition = {
+                            x: startPoint.x + values.x,
+                            y: startPoint.y - values.y,
+                        };
+                        if (selectedElement.points)
+                            newElement.points = selectedElement.points.map(
+                                (item) => {
+                                    return {
+                                        x: item.x - values.x,
+                                        y: item.y - values.y,
+                                    };
+                                }
+                            );
+                        else {
+                            newElement.startPoint = { ...correctedPosition };
+                            newElement.endPoint = {
+                                x: endPoint.x + values.x,
+                                y: endPoint.y - values.y,
+                            };
+                        }
+
+                        updateElement(
+                            newElement,
+                            elements,
+                            setElements,
+                            `Moving ${elementType}`,
+                            false
                         );
 
-                        setElements(
-                            (prevState) => [...prevState.elements, element],
-                            {
-                                description: element.elementType,
-                            }
-                        );
-                        setSelectedElement(element);
+                        setSelectedElement(newElement);
                         drewElementsRef.current = false;
                     }}
                 >
                     {({ errors, touched, resetForm }) => (
                         <Form className="flex flex-col items-center gap-1">
                             <div className="flex items-center gap-2">
-                                <span className="text-xs">x1</span>
+                                <span className="text-xs">x</span>
                                 <Field
                                     className="w-14 text-center"
                                     type={'number'}
-                                    name={'x1'}
-                                    error={errors.x1}
+                                    name={'x'}
+                                    error={errors.x}
                                 />
                             </div>
                             <div className="flex items-center gap-2">
-                                <span className="text-xs">y1</span>
+                                <span className="text-xs">y</span>
                                 <Field
                                     className="w-14 text-center"
                                     type={'number'}
-                                    name={'y1'}
-                                    error={errors.y1}
-                                />
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-xs">x2</span>
-                                <Field
-                                    className="w-14 text-center"
-                                    type={'number'}
-                                    name={'x2'}
-                                    error={errors.x2}
-                                />
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-xs">y2</span>
-                                <Field
-                                    className="w-14 text-center"
-                                    type={'number'}
-                                    name={'y2'}
-                                    error={errors.y2}
-                                />
-                            </div>
-                            <button
-                                type="submit"
-                                className="px-4 bg-blue-400 rounded hover:bg-blue-600"
-                            >
-                                Draw
-                            </button>
-                        </Form>
-                    )}
-                </Formik>
-            ) : elementType === 'circle' ? (
-                <Formik
-                    initialValues={{ xc: 0, radius: 0, yc: 0 }}
-                    validationSchema={() =>
-                        yup.object().shape({
-                            xc: yup.number().integer().default(0).required(),
-                            radius: yup
-                                .number()
-                                .integer()
-                                .default(0)
-                                .required(),
-                            yr: yup.number().integer().default(0).required(),
-                            yc: yup.number().integer().default(0).required(),
-                        })
-                    }
-                    onSubmit={(values, formikHelpers) => {
-                        const element = createFixedElement(
-                            computePointInGrid(gridRef, values.xc, values.yc),
-                            computePointInGrid(
-                                gridRef,
-                                values.radius,
-                                values.radius
-                            ),
-
-                            elementType,
-                            true
-                        );
-
-                        setElements(
-                            (prevState) => [...prevState.elements, element],
-                            {
-                                description: element.elementType,
-                            }
-                        );
-                        setSelectedElement(element);
-                        drewElementsRef.current = false;
-                    }}
-                >
-                    {({ errors, touched, resetForm }) => (
-                        <Form className="flex flex-col items-center gap-1">
-                            <div className="flex items-center gap-2">
-                                <span className="text-xs">xc</span>
-                                <Field
-                                    className="w-14 text-center"
-                                    type={'number'}
-                                    name={'xc'}
-                                    error={errors.xc}
-                                />
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-xs">yc</span>
-                                <Field
-                                    className="w-14 text-center"
-                                    type={'number'}
-                                    name={'yc'}
-                                    error={errors.yc}
-                                />
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-xs">radius</span>
-                                <Field
-                                    className="w-14 text-center"
-                                    type={'number'}
-                                    name={'radius'}
-                                    error={errors.radius}
+                                    name={'y'}
+                                    error={errors.y}
                                 />
                             </div>
 
@@ -179,87 +196,30 @@ const ControlledFigures = ({
                                 type="submit"
                                 className="px-4 bg-blue-400 rounded hover:bg-blue-600"
                             >
-                                Draw
+                                Move
                             </button>
                         </Form>
                     )}
                 </Formik>
-            ) : elementType === 'ellipse' ? (
-                <Formik
-                    initialValues={{ xc: 0, xr: 0, yc: 0, yr: 0 }}
-                    validationSchema={() =>
-                        yup.object().shape({
-                            xc: yup.number().integer().default(0).required(),
-                            xr: yup.number().integer().default(0).required(),
-                            yr: yup.number().integer().default(0).required(),
-                            yc: yup.number().integer().default(0).required(),
-                        })
+            ) : [
+                  'bresenhamLine',
+                  'ddaLine',
+                  'rectangle',
+                  'circle',
+                  'ellipse',
+              ].includes(elementType) ? (
+                <ElementForm
+                    namespaces={
+                        elementType === 'circle'
+                            ? ['x', 'y', 'radius']
+                            : ['x1', 'y1', 'x2', 'y2']
                     }
-                    onSubmit={(values, formikHelpers) => {
-                        const element = createFixedElement(
-                            computePointInGrid(gridRef, values.xc, values.yc),
-                            computePointInGrid(gridRef, values.xr, values.yr),
-                            elementType,
-                            true
-                        );
-
-                        setElements(
-                            (prevState) => [...prevState.elements, element],
-                            {
-                                description: element.elementType,
-                            }
-                        );
-                        setSelectedElement(element);
-                        drewElementsRef.current = false;
-                    }}
-                >
-                    {({ errors, touched, resetForm }) => (
-                        <Form className="flex flex-col items-center gap-1">
-                            <div className="flex items-center gap-2">
-                                <span className="text-xs">xc</span>
-                                <Field
-                                    className="w-14 text-center"
-                                    type={'number'}
-                                    name={'xc'}
-                                    error={errors.xc}
-                                />
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-xs">yc</span>
-                                <Field
-                                    className="w-14 text-center"
-                                    type={'number'}
-                                    name={'yc'}
-                                    error={errors.yc}
-                                />
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-xs">xr</span>
-                                <Field
-                                    className="w-14 text-center"
-                                    type={'number'}
-                                    name={'xr'}
-                                    error={errors.xr}
-                                />
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-xs">yr</span>
-                                <Field
-                                    className="w-14 text-center"
-                                    type={'number'}
-                                    name={'yr'}
-                                    error={errors.yr}
-                                />
-                            </div>
-                            <button
-                                type="submit"
-                                className="px-4 bg-blue-400 rounded hover:bg-blue-600"
-                            >
-                                Draw
-                            </button>
-                        </Form>
-                    )}
-                </Formik>
+                    elementType={elementType}
+                    setElements={setElements}
+                    setSelectedElement={setSelectedElement}
+                    drewElementsRef={drewElementsRef}
+                    gridRef={gridRef}
+                />
             ) : (
                 <div></div>
             )}
