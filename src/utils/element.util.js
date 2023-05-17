@@ -46,12 +46,12 @@ const createFixedElement = (element, setElements, setSelectedElement) => {
     });
 };
 
-const updateElement = (element, elements, setElements, description) => {
+const updateElement = (element, elements, setElements, description, overwrite = true) => {
     console.log('updateElement', element);
 
     setElements([...elements.map((e) => (e.id === element.id ? element : e))], {
         description: description,
-        overwrite: true,
+        overwrite,
     });
 };
 

@@ -108,7 +108,7 @@ const Canvas = ({
 
             return;
         }
-      
+
         setElements((prevState) => [...prevState.elements], {
             description: `Moving ${selectedElement.elementType}`,
         });
@@ -143,6 +143,7 @@ const Canvas = ({
                 isVisible,
                 offset,
             } = selectedElement;
+            
             if (points) {
                 const updatedPoints = points.map((item) => {
                     return {
@@ -164,19 +165,18 @@ const Canvas = ({
                     setElements
                 );
             } else {
-                const correctedPosition = {
-                    x: point.x - offset.x,
-                    y: point.y - offset.y,
-                };
+                console.log('point', point);
+                console.log('startPoint', startPoint);
+                console.log('endPoint', endPoint);
                 updateElement(
                     {
                         startPoint: {
-                            x: correctedPosition.x,
-                            y: correctedPosition.y,
+                            x: startPoint.x + point.x,
+                            y: startPoint.y - point.y,
                         },
                         endPoint: {
-                            x: correctedPosition.x + endPoint.x - startPoint.x,
-                            y: correctedPosition.y + endPoint.y - startPoint.y,
+                            x: endPoint.x + point.x,
+                            y: endPoint.y - point.y,
                         },
                         elementType,
                         isVisible,

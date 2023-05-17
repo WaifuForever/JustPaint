@@ -34,7 +34,12 @@ const ElementForm = ({
     const initialValues = {};
     const validationSchema = {};
     namespaces.forEach((item) => {
-        validationSchema[item] = yup.number().integer().default(0).required();
+        validationSchema[item] = yup
+            .number()
+            .integer()
+            .strict()
+            .default(0)
+            .required();
         initialValues[item] = 0;
     });
     return (
@@ -70,6 +75,7 @@ const ElementForm = ({
         >
             {({ errors, touched, resetForm }) => (
                 <Form className="flex flex-col items-center gap-1">
+                    {console.log('errors', errors)}
                     {namespaces.map((namespace, index) => (
                         <div
                             className="flex items-center gap-2"
@@ -118,101 +124,51 @@ const ControlledFigures = ({
                         })
                     }
                     onSubmit={(values, formikHelpers) => {
+                        if (!selectedElement) return;
+
                         const {
                             elementType,
-                            width,
-                            colour,
-                            isVisible,
-                            id,
                             startPoint,
-                            coordinates,
                             endPoint,
                         } = selectedElement;
 
                         values.x = values.x ?? 0;
                         values.y = values.y ?? 0;
-                        
-                        let newElement;
+
+                        let newElement = selectedElement;
                         console.log('selectedElement', selectedElement);
-                        console.log('values', values);
+
                         const correctedPosition = {
                             x: startPoint.x + values.x,
-                            y: startPoint.y + values.y,
+                            y: startPoint.y - values.y,
                         };
-                        switch (elementType) {
-                            case 'circle':
-                                newElement = {
-                                    startPoint: {
-                                        ...correctedPosition,
-                                    },
-                                    endPoint,
-                                    elementType,
-                                    isVisible,
-                                    coordinates,
-                                    width,
-                                    colour,
-                                    id,
-                                };
-
-                                break;
-
-                            case 'rectangle':
-                            case 'ddaline':
-                            case 'bresenhamLine':
-                                newElement = selectedElement.points
-                                    ? {
-                                          points: selectedElement.points.map(
-                                              (item) => {
-                                                  return {
-                                                      x: item.x - values.x,
-                                                      y: item.y - values.y,
-                                                  };
-                                              }
-                                          ),
-                                          elementType,
-                                          width,
-                                          colour,
-                                          coordinates,
-                                          isVisible,
-                                          id,
-                                      }
-                                    : {
-                                          startPoint: {
-                                              ...correctedPosition,
-                                          },
-                                          endPoint: {
-                                              x:
-                                                  correctedPosition.x +
-                                                  endPoint.x -
-                                                  startPoint.x,
-                                              y:
-                                                  correctedPosition.y +
-                                                  endPoint.y -
-                                                  startPoint.y,
-                                          },
-                                          elementType,
-                                          isVisible,
-                                          coordinates,
-                                          width,
-                                          colour,
-                                          id,
-                                      };
-
-                                break;
-
-                            default:
-                                break;
+                        if (selectedElement.points)
+                            newElement.points = selectedElement.points.map(
+                                (item) => {
+                                    return {
+                                        x: item.x - values.x,
+                                        y: item.y - values.y,
+                                    };
+                                }
+                            );
+                        else {
+                            newElement.startPoint = { ...correctedPosition };
+                            newElement.endPoint = {
+                                x: endPoint.x + values.x,
+                                y: endPoint.y - values.y,
+                            };
                         }
 
                         updateElement(
                             newElement,
                             elements,
                             setElements,
-                            `Moving ${elementType}`
+                            `Moving ${elementType}`,
+                            false
                         );
 
+                        setSelectedElement(newElement);
                         drewElementsRef.current = false;
-                        console.log('correctedPosition', correctedPosition);
                     }}
                 >
                     {({ errors, touched, resetForm }) => (
