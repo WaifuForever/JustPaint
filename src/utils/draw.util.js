@@ -157,7 +157,7 @@ const drawElement = (element, context) => {
     if (!isVisible) return;
     let coordinates = new Set();
     switch (elementType) {
-        case 'rectangle':            
+        case 'rectangle':
             putPixel(endPoint, width, colour, context);
 
             /*
@@ -218,11 +218,16 @@ const drawElement = (element, context) => {
 
             break;
         case 'circle':
+            console.log('startPoint', startPoint);
+            console.log('endPoint', endPoint);
             coordinates = new Set([
                 ...coordinates,
                 ...drawBresenhamsCircle(
                     { ...startPoint },
-                    { ...endPoint },
+                    Math.sqrt(
+                        Math.pow(endPoint.x - startPoint.x, 2) +
+                            Math.pow(endPoint.y - startPoint.y, 2)
+                    ),
                     width,
                     colour,
                     context
@@ -341,12 +346,11 @@ const drawCircle = (xc, yc, x, y, width, colour, ctx) => {
     return setCoordinates;
 };
 
-const drawBresenhamsCircle = (startPoint, endPoint, width, colour, ctx) => {
+const drawBresenhamsCircle = (startPoint, radius, width, colour, ctx) => {
+    console.log(typeof radius, radius);
+  
     let x = 0,
-        y = Math.sqrt(
-            Math.pow(endPoint.x - startPoint.x, 2) +
-                Math.pow(endPoint.y - startPoint.y, 2)
-        ),
+        y = radius,
         r = y;
 
     let d = 3 - 2 * r;

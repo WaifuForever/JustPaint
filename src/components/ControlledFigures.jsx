@@ -48,22 +48,26 @@ const ElementForm = ({
             validationSchema={() => yup.object().shape(validationSchema)}
             onSubmit={(values, formikHelpers) => {
                 console.log('create new element');
+                const startPoint = computePointInGrid(
+                    gridRef,
+                    values[namespaces[0]],
+                    values[namespaces[1]]
+                );
                 createFixedElement(
                     {
-                        startPoint: computePointInGrid(
-                            gridRef,
-                            values[namespaces[0]],
-                            values[namespaces[1]]
-                        ),
-                        endPoint: computePointInGrid(
-                            gridRef,
-                            values[namespaces[2]],
-                            values[
-                                namespaces.length < 4
-                                    ? namespaces[2]
-                                    : namespaces[3]
-                            ]
-                        ),
+                        startPoint,
+                        endPoint:
+                            namespaces.length < 4
+                                ? {
+                                      x: startPoint.x + values[namespaces[2]],
+                                      y: startPoint.y,
+                                  }
+                                : computePointInGrid(
+                                      gridRef,
+                                      values[namespaces[2]],
+                                      values[namespaces[3]]
+                                  ),
+
                         elementType: elementType,
                         isVisible: true,
                     },
@@ -135,7 +139,6 @@ const ControlledFigures = ({
 
                         let newElement = { ...selectedElement };
 
-
                         if (selectedElement.points)
                             newElement.points = selectedElement.points.map(
                                 (item) => {
@@ -155,10 +158,6 @@ const ControlledFigures = ({
                                 x: endPoint.x + values.x,
                                 y: endPoint.y - values.y,
                             };
-                            console.log('else', {
-                                startPoint: newElement.startPoint,
-                                endPoint: newElement.endPoint,
-                            });
                         }
 
                         updateElement(
