@@ -47,6 +47,7 @@ const ElementForm = ({
             initialValues={initialValues}
             validationSchema={() => yup.object().shape(validationSchema)}
             onSubmit={(values, formikHelpers) => {
+                console.log('create new element');
                 createFixedElement(
                     {
                         startPoint: computePointInGrid(
@@ -75,7 +76,6 @@ const ElementForm = ({
         >
             {({ errors, touched, resetForm }) => (
                 <Form className="flex flex-col items-center gap-1">
-                    {console.log('errors', errors)}
                     {namespaces.map((namespace, index) => (
                         <div
                             className="flex items-center gap-2"
@@ -126,22 +126,16 @@ const ControlledFigures = ({
                     onSubmit={(values, formikHelpers) => {
                         if (!selectedElement) return;
 
-                        const {
-                            elementType,
-                            startPoint,
-                            endPoint,
-                        } = selectedElement;
+                        console.log('selectedElement', selectedElement);
+                        const { elementType, startPoint, endPoint } =
+                            selectedElement;
 
                         values.x = values.x ?? 0;
                         values.y = values.y ?? 0;
 
-                        let newElement = selectedElement;
-                        console.log('selectedElement', selectedElement);
+                        let newElement = { ...selectedElement };
 
-                        const correctedPosition = {
-                            x: startPoint.x + values.x,
-                            y: startPoint.y - values.y,
-                        };
+
                         if (selectedElement.points)
                             newElement.points = selectedElement.points.map(
                                 (item) => {
@@ -152,11 +146,19 @@ const ControlledFigures = ({
                                 }
                             );
                         else {
-                            newElement.startPoint = { ...correctedPosition };
+                            newElement.startPoint = {
+                                x: startPoint.x + values.x,
+                                y: startPoint.y - values.y,
+                            };
+
                             newElement.endPoint = {
                                 x: endPoint.x + values.x,
                                 y: endPoint.y - values.y,
                             };
+                            console.log('else', {
+                                startPoint: newElement.startPoint,
+                                endPoint: newElement.endPoint,
+                            });
                         }
 
                         updateElement(
@@ -166,7 +168,6 @@ const ControlledFigures = ({
                             `Moving ${elementType}`,
                             false
                         );
-
                         setSelectedElement(newElement);
                         drewElementsRef.current = false;
                     }}

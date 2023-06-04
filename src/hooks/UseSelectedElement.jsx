@@ -9,6 +9,7 @@ const useSelectedElement = (initialState) => {
                 'selectedElementId',
                 JSON.stringify(element.id)
             );
+            
             //console.log('set', element.coordinates);
             //console.log('array', Array.from(element.coordinates));
             //console.log('json', JSON.stringify(Array.from(element.coordinates)));
@@ -29,7 +30,7 @@ const useSelectedElement = (initialState) => {
             );
         }
 
-        //console.log('element', element);
+        console.log('handle element', element);
         setSelectedElement(element);
     };
 

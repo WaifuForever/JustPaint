@@ -19,7 +19,7 @@ const Item = ({
     const [showInfo, setShowInfo] = useState(false);
     function handleRightClick(event) {
         event.preventDefault();
-        console.log('right click event');
+        //console.log('right click event');
         setShowInfo(true);
     }
 
@@ -28,7 +28,7 @@ const Item = ({
         const coordinatesArray = Array.from(elementCoordinates).map((str) =>
             JSON.parse(str)
         );
-        //console.log(coordinatesArray);
+        ////console.log(coordinatesArray);
         return coordinatesArray;
     };
 
@@ -97,8 +97,8 @@ const Layer = ({
                 }`}
             >
                 {elements.map((element, index) => {
-                    //console.log(element);
-                    //console.log(element.coordinates);
+                    ////console.log(element);
+                    ////console.log(element.coordinates);
                     return (
                         <Item
                             key={index + element.id}

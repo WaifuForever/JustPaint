@@ -47,7 +47,8 @@ const createFixedElement = (element, setElements, setSelectedElement) => {
 };
 
 const updateElement = (element, elements, setElements, description, overwrite = true) => {
-    console.log('updateElement', element);
+    console.log('updatedElement ', element);
+    console.log('elements', elements);
 
     setElements([...elements.map((e) => (e.id === element.id ? element : e))], {
         description: description,
@@ -164,7 +165,7 @@ const positionWithinElement = (x, y, element) => {
             const start = nearPoint({ x, y }, startPoint, 'start');
             const end = nearPoint({ x, y }, endPoint, 'end');
             const insideLine = Math.abs(offset) < 1 ? 'inside' : null;
-            console.log(start || end || insideLine);
+            //console.log(start || end || insideLine);
             return start || end || insideLine;
         case 'pencil':
 

@@ -9,21 +9,29 @@ const useHistory = (initialState) => {
         },
     ]);
 
-    const setState = (
+    const setElements = (
         action,
         options = { description: '', overwrite: false }
     ) => {
+        console.log('setElements hook');
         const newState =
             typeof action === 'function' ? action(history[index]) : action;
 
+        console.log('overwrite', options.overwrite);
+        console.log('newState', newState);
+        console.log('history', history);
         if (options.overwrite) {
             const historyCopy = [...history];
             historyCopy[index].elements = newState;
-
+            console.log('newhistory', historyCopy);
             setHistory(historyCopy);
         } else {
             const updatedState = [...history].slice(0, index + 1);
-
+            
+            console.log('newhistory', [
+                ...updatedState,
+                { elements: newState, description: options.description },
+            ]);
             setHistory([
                 ...updatedState,
                 { elements: newState, description: options.description },
@@ -39,23 +47,34 @@ const useHistory = (initialState) => {
     };
 
     const sliceHistoryAt = (number) => {
-        console.log(number, isValidIndex(number));
-
         if (isValidIndex(number - 1)) {
             setHistory((prevState) => prevState.slice(0, number + 1));
             setIndex(number);
         }
     };
 
-    const undo = () => index > 0 && setIndex((prevState) => prevState - 1);
-    const redo = () =>
-        index < history.length - 1 && setIndex((prevState) => prevState + 1);
+    const undo = () => {
+        index > 0 &&
+            setIndex((prevState) => {
+                let newIndex = prevState - 1;
+                setHistoryAt(newIndex);
+                return newIndex;
+            });
+    };
+    const redo = () => {
+        index < history.length - 1 &&
+            setIndex((prevState) => {
+                let newIndex = prevState + 1;
+                setHistoryAt(newIndex);
+                return newIndex;
+            });
+    };
 
     return {
         history,
         index,
         state: history[index],
-        setElements: setState,
+        setElements,
         setHistoryAt,
         sliceHistoryAt,
         undo,

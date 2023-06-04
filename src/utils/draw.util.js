@@ -9,7 +9,7 @@ const hexToRGBA = (hex) => {
 };
 
 const putPixel2 = (point, width, colour, ctx) => {
-    //console.log(colour, width);
+    ////console.log(colour, width);
 
     ctx.fillStyle = colour;
 
@@ -106,7 +106,7 @@ const getSvgPathFromStroke = (points, closed = true) => {
 
 const strokeArrayPoints = (ctx, element) => {
     const { points, colour, width } = element;
-    //console.log(element);
+    ////console.log(element);
     let prevPoint = points[0];
     ctx.lineWidth = width;
     ctx.strokeStyle = colour;
@@ -276,8 +276,8 @@ const drawElement = (element, context) => {
 
         case 'pencil':
             strokeArrayPoints(context, element);
-            //console.log('pencil');
-            //console.log(element.colour);
+            ////console.log('pencil');
+            ////console.log(element.colour);
             context.strokeStyle = element.colour;
             context.stroke();
             coordinates = new Set(element.points);
@@ -286,10 +286,10 @@ const drawElement = (element, context) => {
             const brushStroke = getSvgPathFromStroke(
                 getStroke(element.points, { size: element.width })
             );
-            //console.log('brush');
-            //console.log(element.colour);
+            ////console.log('brush');
+            ////console.log(element.colour);
             context.fillStyle = element.colour;
-            //console.log(context.fillStyle);
+            ////console.log(context.fillStyle);
             context.fill(new Path2D(brushStroke));
             coordinates = new Set(element.points);
             break;

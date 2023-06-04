@@ -58,7 +58,7 @@ const drawSelection = (element) => {
             newElement.length = width + 1;
             break;
         case 'brush':
-        //console.log('here');
+        ////console.log('here');
         case 'pencil':
             throw new Error(
                 `Not implemented yet: draw ${elementType} selection`
@@ -107,10 +107,20 @@ const DrawScreen = () => {
         const undoRedoFunction = (event) => {
             if (event.metaKey || event.ctrlKey) {
                 if (event.key === 'z') {
+                    console.log('before z', elements);
+                    console.log('history', history);
                     undo();
+                    console.log('after z', elements);
+                    console.log('history', history);
+                    setSelectedElement(elements[elements.length - 1]);
                     drewElementsRef.current = false;
                 } else if (event.key === 'y') {
+                    console.log('before y', elements);
+                    console.log('history', history);
                     redo();
+                    console.log('after y', elements);
+                    console.log('history', history);
+                    setSelectedElement(elements[elements.length - 1]);
                     drewElementsRef.current = false;
                 }
             }
@@ -143,21 +153,30 @@ const DrawScreen = () => {
             });
             drewElementsRef.current = true;
         }
-        console.log(elements);
+        //console.log(elements);
     }, [elements]);
 
     const setLastState = (number) => {
         sliceHistoryAt(number);
+        console.log('setLastState', elements[elements.length - 1]);
+        setSelectedElement(elements[elements.length - 1]);
         drewElementsRef.current = false;
     };
 
     const updateColour = (colour, element) => {
         element.colour = colour;
-        updateElement(element, elements, setElements, `Change ${element.elementType} colour`);
+        updateElement(
+            element,
+            elements,
+            setElements,
+            `Change ${element.elementType} colour`
+        );
     };
 
     const seePreviousState = (number) => {
         setHistoryAt(number);
+        console.log('seePreviousState', elements[elements.length - 1]);
+        setSelectedElement(elements[elements.length - 1]);
         drewElementsRef.current = false;
     };
 
@@ -342,7 +361,7 @@ const DrawScreen = () => {
                                 <ToolButton
                                     icon={<GiCrosshair />}
                                     action={() => {
-                                        console.log(displayGrid);
+                                        //console.log(displayGrid);
                                         setDisplayGrid(
                                             (prevState) => !prevState
                                         );
@@ -381,6 +400,7 @@ const DrawScreen = () => {
                                 />,
                             ]}
                         />
+                        {console.log('drawScreen', elements)}
                         <ControlledFigures
                             elementType={elementType}
                             elements={elements}

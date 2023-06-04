@@ -91,7 +91,7 @@ const Canvas = ({
             return;
         }
 
-        console.log('mouse down');
+        //console.log('mouse down');
 
         if (!selectedElement) {
             if (elements.length > 0) {
@@ -129,8 +129,8 @@ const Canvas = ({
                 ? cursorForPosition(element.position)
                 : 'default';
                 */
-            console.log('mouse move');
-            console.log(selectedElement);
+            //console.log('mouse move');
+            //console.log(selectedElement);
             if (!selectedElement) return;
             const {
                 startPoint,
@@ -141,57 +141,42 @@ const Canvas = ({
                 points,
                 elementType,
                 isVisible,
-                offset,
             } = selectedElement;
-            
-            if (points) {
-                const updatedPoints = points.map((item) => {
-                    return {
-                        x: item.x - offset.x,
-                        y: item.y - offset.y,
-                    };
-                });
 
-                updateElement(
-                    {
-                        points: updatedPoints,
-                        elementType,
-                        width,
-                        colour,
-                        isVisible,
-                        id,
-                    },
-                    elements,
-                    setElements
-                );
-            } else {
-                console.log('point', point);
-                console.log('startPoint', startPoint);
-                console.log('endPoint', endPoint);
-                updateElement(
-                    {
-                        startPoint: {
-                            x: startPoint.x + point.x,
-                            y: startPoint.y - point.y,
-                        },
-                        endPoint: {
-                            x: endPoint.x + point.x,
-                            y: endPoint.y - point.y,
-                        },
-                        elementType,
-                        isVisible,
-                        width,
-                        colour,
-                        id,
-                    },
-                    elements,
-                    setElements
-                );
-            }
+            updateElement(
+                {
+                    ...(points
+                        ? {
+                              points: points.map((item) => {
+                                  return {
+                                      x: item.x + (item.x - point.x),
+                                      y: item.y + (item.y - point.y),
+                                  };
+                              }),
+                          }
+                        : {
+                              startPoint: {
+                                  x: startPoint.x + (startPoint.x - point.x),
+                                  y: startPoint.y + (startPoint.y - point.y),
+                              },
+                              endPoint: {
+                                  x: endPoint.x + (endPoint.x - point.x),
+                                  y: endPoint.y + (endPoint.y - point.y),
+                              },
+                          }),
+                    elementType,
+                    width,
+                    colour,
+                    isVisible,
+                    id,
+                },
+                elements,
+                setElements
+            );
         } else {
             //const width = sessionStorage.getItem('elementWidth');
             //const colour = sessionStorage.getItem('elementColour');
-            //console.log(width, colour);
+            ////console.log(width, colour);
             const element = elements[index];
             let temp = element.points
                 ? { points: [...element.points, point] }
@@ -214,7 +199,11 @@ const Canvas = ({
 
     const handleMouseUp = (event) => {
         //if (elementType != 'select') setSelectedElement(null);
+        //console.log('mouseup');
+        //console.log('elements', elements);
+        //console.log('lastElement', elements[elements.length - 1]);
 
+        setSelectedElement(elements[elements.length - 1]);
         setIsDrawing(false);
     };
 

@@ -63,7 +63,7 @@ const History = ({
     setCurrentElements,
 }) => {
     const [collapse, setCollapse] = useState(false);
-
+  
     return (
         <div className="flex flex-col">
             <div

@@ -43,9 +43,6 @@ const ColourPicker = ({ name, selectedElement, updateElement }) => {
                         <div
                             className="w-4 h-4 border border-black m-0.5 cursor-pointer"
                             onClick={() => {
-                                //console.log(name, colour);
-                                //console.log(updateElement);
-                                //console.log(selectedElement);
                                 if (updateElement && selectedElement) {
                                     updateElement(colour.hex, selectedElement);
                                 }
