@@ -400,7 +400,7 @@ const DrawScreen = () => {
                                 />,
                             ]}
                         />
-                        {console.log('drawScreen', elements)}
+
                         <ControlledFigures
                             elementType={elementType}
                             elements={elements}

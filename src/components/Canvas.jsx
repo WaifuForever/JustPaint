@@ -123,7 +123,7 @@ const Canvas = ({
         const { clientX, clientY } = event;
         const index = elements.length - 1;
         const point = computePointInCanvas(canvasRef, clientX, clientY);
-
+        console.log('point', point);
         if (elementType === 'select') {
             /*event.target.style.cursor = selectedElement
                 ? cursorForPosition(element.position)
@@ -149,19 +149,19 @@ const Canvas = ({
                         ? {
                               points: points.map((item) => {
                                   return {
-                                      x: item.x + (item.x - point.x),
-                                      y: item.y + (item.y - point.y),
+                                      x: item.x - (item.x - point.x),
+                                      y: item.y - (item.y - point.y),
                                   };
                               }),
                           }
                         : {
                               startPoint: {
-                                  x: startPoint.x + (startPoint.x - point.x),
-                                  y: startPoint.y + (startPoint.y - point.y),
+                                  x: startPoint.x - (startPoint.x - point.x),
+                                  y: startPoint.y - (startPoint.y - point.y),
                               },
                               endPoint: {
-                                  x: endPoint.x + (endPoint.x - point.x),
-                                  y: endPoint.y + (endPoint.y - point.y),
+                                  x: endPoint.x - (startPoint.x - point.x),
+                                  y: endPoint.y - (startPoint.y - point.y),
                               },
                           }),
                     elementType,
