@@ -16,21 +16,6 @@ const Item = ({
     hideElement,
 }) => {
     const selectedId = sessionStorage.getItem('selectedElementId');
-    const [showInfo, setShowInfo] = useState(false);
-    function handleRightClick(event) {
-        event.preventDefault();
-        //console.log('right click event');
-        setShowInfo(true);
-    }
-
-    const temp = () => {
-        if (!elementCoordinates) return [];
-        const coordinatesArray = Array.from(elementCoordinates).map((str) =>
-            JSON.parse(str)
-        );
-        ////console.log(coordinatesArray);
-        return coordinatesArray;
-    };
 
     return (
         <div
@@ -40,7 +25,6 @@ const Item = ({
                     : 'bg-blue-300 hover:bg-blue-500'
             } flex w-32 items-center justify-between gap-3 border-t-2 p-2 rounded`}
             onClick={setSelectedElement}
-            onContextMenu={handleRightClick}
         >
             <div
                 className="cursor-pointer text-sm border"
@@ -54,19 +38,6 @@ const Item = ({
             <div className="cursor-pointer" onClick={deleteElement}>
                 <BsFillTrash2Fill />
             </div>
-            {showInfo ? (
-                <div className='flex flex-row'>
-                    <div className=''></div>
-                    <div className="flex flex-row flex-wrap absolute left-1 h-96 w-32 overflow-y-auto bg-gray-200">
-                        {temp().map((coordinate) => (
-                            <div className="border-y border-gray-700 mx-1 text-xs hover:bg-gray-400">
-                                {Math.floor(coordinate.x)},{' '}
-                                {Math.floor(coordinate.y)}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            ) : null}
         </div>
     );
 };

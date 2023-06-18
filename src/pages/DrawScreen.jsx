@@ -22,6 +22,7 @@ import ToolTab from '../components/ToolTab';
 import ToolButton from '../components/ToolButton';
 import ControlledFigures from '../components/ControlledFigures';
 import { updateElement } from '../utils/element.util';
+import ShowInfo from '../components/ShowInfo';
 
 const drawSelection = (element) => {
     const { startPoint, endPoint, width, elementType } = element;
@@ -107,19 +108,11 @@ const DrawScreen = () => {
         const undoRedoFunction = (event) => {
             if (event.metaKey || event.ctrlKey) {
                 if (event.key === 'z') {
-                    console.log('before z', elements);
-                    console.log('history', history);
                     undo();
-                    console.log('after z', elements);
-                    console.log('history', history);
                     setSelectedElement(elements[elements.length - 1]);
                     drewElementsRef.current = false;
                 } else if (event.key === 'y') {
-                    console.log('before y', elements);
-                    console.log('history', history);
                     redo();
-                    console.log('after y', elements);
-                    console.log('history', history);
                     setSelectedElement(elements[elements.length - 1]);
                     drewElementsRef.current = false;
                 }
@@ -182,246 +175,253 @@ const DrawScreen = () => {
 
     return (
         <div className="flex h-full w-full justify-center p-5 bg-skin-default">
-            <div>
+            <div className="w-44" style={{ height: '576px' }}>
                 <input
                     type="checkbox"
                     onChange={() => setFreeRoaming((prevState) => !prevState)}
                 />
-                {freeRoaming ? (
-                    <div
-                        className="flex flex-col items-center gap-3 overflow-auto scrollbar-hide"
-                        style={{ height: '576px' }}
-                    >
-                        <ToolTab
-                            title={'Tools'}
-                            tools={[
-                                <ToolButton
-                                    icon={<FaPencilAlt />}
-                                    selected={elementType === 'pencil'}
-                                    action={() => {
-                                        setElementType('pencil');
-                                    }}
-                                />,
-                                <ToolButton
-                                    icon={<FaPaintBrush />}
-                                    selected={elementType === 'brush'}
-                                    action={() => {
-                                        setElementType('brush');
-                                    }}
-                                />,
+                <div
+                    className="flex flex-col items-center gap-3 overflow-auto scrollbar-hide"
+                    style={{ height: '576px' }}
+                >
+                    {freeRoaming ? (
+                        <div className="flex flex-col flex-wrap items-center gap-3">
+                            <ToolTab
+                                title={'Tools'}
+                                tools={[
+                                    <ToolButton
+                                        icon={<FaPencilAlt />}
+                                        selected={elementType === 'pencil'}
+                                        action={() => {
+                                            setElementType('pencil');
+                                        }}
+                                    />,
+                                    <ToolButton
+                                        icon={<FaPaintBrush />}
+                                        selected={elementType === 'brush'}
+                                        action={() => {
+                                            setElementType('brush');
+                                        }}
+                                    />,
 
-                                <ToolButton
-                                    icon={<GiStraightPipe />}
-                                    selected={elementType === 'bresenhamLine'}
-                                    action={() => {
-                                        setElementType('bresenhamLine');
-                                    }}
-                                />,
-                                <ToolButton
-                                    icon={<GiStraightPipe />}
-                                    selected={elementType === 'ddaLine'}
-                                    action={() => {
-                                        setElementType('ddaLine');
-                                    }}
-                                />,
-                                <ToolButton
-                                    icon={<BiRectangle />}
-                                    selected={elementType === 'rectangle'}
-                                    action={() => {
-                                        setElementType('rectangle');
-                                    }}
-                                />,
-                                <ToolButton
-                                    icon={<BsCircle />}
-                                    selected={elementType === 'circle'}
-                                    action={() => {
-                                        setElementType('circle');
-                                    }}
-                                />,
-                                <ToolButton
-                                    icon={<TbOvalVertical />}
-                                    selected={elementType === 'ellipse'}
-                                    action={() => {
-                                        setElementType('ellipse');
-                                    }}
-                                />,
-                                <ToolButton
-                                    icon={<FiMousePointer />}
-                                    selected={elementType === 'select'}
-                                    action={() => {
-                                        setElementType('select');
-                                    }}
-                                />,
-                                <ToolButton
-                                    icon={<MdRestartAlt />}
-                                    action={() => {
-                                        setElements([], {
-                                            description: 'Clear screen',
-                                        });
-                                        canvasRef.current
-                                            .getContext('2d')
-                                            .clearRect(
-                                                0,
-                                                0,
-                                                canvasRef.current.width,
-                                                canvasRef.current.width
+                                    <ToolButton
+                                        icon={<GiStraightPipe />}
+                                        selected={
+                                            elementType === 'bresenhamLine'
+                                        }
+                                        action={() => {
+                                            setElementType('bresenhamLine');
+                                        }}
+                                    />,
+                                    <ToolButton
+                                        icon={<GiStraightPipe />}
+                                        selected={elementType === 'ddaLine'}
+                                        action={() => {
+                                            setElementType('ddaLine');
+                                        }}
+                                    />,
+                                    <ToolButton
+                                        icon={<BiRectangle />}
+                                        selected={elementType === 'rectangle'}
+                                        action={() => {
+                                            setElementType('rectangle');
+                                        }}
+                                    />,
+                                    <ToolButton
+                                        icon={<BsCircle />}
+                                        selected={elementType === 'circle'}
+                                        action={() => {
+                                            setElementType('circle');
+                                        }}
+                                    />,
+                                    <ToolButton
+                                        icon={<TbOvalVertical />}
+                                        selected={elementType === 'ellipse'}
+                                        action={() => {
+                                            setElementType('ellipse');
+                                        }}
+                                    />,
+                                    <ToolButton
+                                        icon={<FiMousePointer />}
+                                        selected={elementType === 'select'}
+                                        action={() => {
+                                            setElementType('select');
+                                        }}
+                                    />,
+                                    <ToolButton
+                                        icon={<MdRestartAlt />}
+                                        action={() => {
+                                            setElements([], {
+                                                description: 'Clear screen',
+                                            });
+                                            canvasRef.current
+                                                .getContext('2d')
+                                                .clearRect(
+                                                    0,
+                                                    0,
+                                                    canvasRef.current.width,
+                                                    canvasRef.current.width
+                                                );
+                                        }}
+                                    />,
+
+                                    <ToolButton
+                                        icon={<IoIosReturnLeft />}
+                                        action={() => {
+                                            undo();
+                                            drewElementsRef.current = false;
+                                        }}
+                                    />,
+
+                                    <ToolButton
+                                        icon={<IoIosReturnRight />}
+                                        action={() => {
+                                            redo();
+                                            drewElementsRef.current = false;
+                                        }}
+                                    />,
+                                ]}
+                            />
+                            <ToolTab
+                                title={'Global Definition'}
+                                tools={[
+                                    <ColourPicker name={'globalColour'} />,
+                                    <Slider
+                                        title={'Width:'}
+                                        name={'globalWidth'}
+                                    />,
+                                ]}
+                            />
+                            <ToolTab
+                                title={'Element Definition'}
+                                tools={[
+                                    <ColourPicker
+                                        name={'selectedElementColour'}
+                                        selectedElement={selectedElement}
+                                        updateElement={updateColour}
+                                    />,
+                                    <Slider
+                                        title={'Width:'}
+                                        name={'selectedElementWidth'}
+                                    />,
+                                ]}
+                            />
+                        </div>
+                    ) : (
+                        <div className="flex flex-col flex-wrap items-center gap-3">
+                            <ToolTab
+                                title={'Figure'}
+                                tools={[
+                                    <ToolButton
+                                        icon={<GiStraightPipe />}
+                                        selected={
+                                            elementType === 'bresenhamLine'
+                                        }
+                                        action={() => {
+                                            setElementType('bresenhamLine');
+                                        }}
+                                    />,
+                                    <ToolButton
+                                        icon={<GiStraightPipe />}
+                                        selected={elementType === 'ddaLine'}
+                                        action={() => {
+                                            setElementType('ddaLine');
+                                        }}
+                                    />,
+                                    <ToolButton
+                                        icon={<BiRectangle />}
+                                        selected={elementType === 'rectangle'}
+                                        action={() => {
+                                            setElementType('rectangle');
+                                        }}
+                                    />,
+                                    <ToolButton
+                                        icon={<BsCircle />}
+                                        selected={elementType === 'circle'}
+                                        action={() => {
+                                            setElementType('circle');
+                                        }}
+                                    />,
+                                    <ToolButton
+                                        icon={<TbOvalVertical />}
+                                        selected={elementType === 'ellipse'}
+                                        action={() => {
+                                            setElementType('ellipse');
+                                        }}
+                                    />,
+                                    <ToolButton
+                                        icon={<FiMousePointer />}
+                                        selected={elementType === 'select'}
+                                        action={() => {
+                                            setElementType('select');
+                                        }}
+                                    />,
+                                    <ToolButton
+                                        icon={<GiCrosshair />}
+                                        action={() => {
+                                            //console.log(displayGrid);
+                                            setDisplayGrid(
+                                                (prevState) => !prevState
                                             );
-                                    }}
-                                />,
+                                        }}
+                                    />,
+                                    <ToolButton
+                                        icon={<MdRestartAlt />}
+                                        action={() => {
+                                            setElements([], {
+                                                description: 'Clear screen',
+                                            });
+                                            canvasRef.current
+                                                .getContext('2d')
+                                                .clearRect(
+                                                    0,
+                                                    0,
+                                                    canvasRef.current.width,
+                                                    canvasRef.current.width
+                                                );
+                                        }}
+                                    />,
+                                    <ToolButton
+                                        icon={<IoIosReturnLeft />}
+                                        action={() => {
+                                            undo();
+                                            drewElementsRef.current = false;
+                                        }}
+                                    />,
 
-                                <ToolButton
-                                    icon={<IoIosReturnLeft />}
-                                    action={() => {
-                                        undo();
-                                        drewElementsRef.current = false;
-                                    }}
-                                />,
+                                    <ToolButton
+                                        icon={<IoIosReturnRight />}
+                                        action={() => {
+                                            redo();
+                                            drewElementsRef.current = false;
+                                        }}
+                                    />,
+                                ]}
+                            />
 
-                                <ToolButton
-                                    icon={<IoIosReturnRight />}
-                                    action={() => {
-                                        redo();
-                                        drewElementsRef.current = false;
-                                    }}
-                                />,
-                            ]}
-                        />
-                        <ToolTab
-                            title={'Global Definition'}
-                            tools={[
-                                <ColourPicker name={'globalColour'} />,
-                                <Slider
-                                    title={'Width:'}
-                                    name={'globalWidth'}
-                                />,
-                            ]}
-                        />
-                        <ToolTab
-                            title={'Element Definition'}
-                            tools={[
-                                <ColourPicker
-                                    name={'selectedElementColour'}
-                                    selectedElement={selectedElement}
-                                    updateElement={updateColour}
-                                />,
-                                <Slider
-                                    title={'Width:'}
-                                    name={'selectedElementWidth'}
-                                />,
-                            ]}
-                        />
-                    </div>
-                ) : (
-                    <div className="flex flex-col flex-wrap items-center gap-3">
-                        <ToolTab
-                            title={'Figure'}
-                            tools={[
-                                <ToolButton
-                                    icon={<GiStraightPipe />}
-                                    selected={elementType === 'bresenhamLine'}
-                                    action={() => {
-                                        setElementType('bresenhamLine');
-                                    }}
-                                />,
-                                <ToolButton
-                                    icon={<GiStraightPipe />}
-                                    selected={elementType === 'ddaLine'}
-                                    action={() => {
-                                        setElementType('ddaLine');
-                                    }}
-                                />,
-                                <ToolButton
-                                    icon={<BiRectangle />}
-                                    selected={elementType === 'rectangle'}
-                                    action={() => {
-                                        setElementType('rectangle');
-                                    }}
-                                />,
-                                <ToolButton
-                                    icon={<BsCircle />}
-                                    selected={elementType === 'circle'}
-                                    action={() => {
-                                        setElementType('circle');
-                                    }}
-                                />,
-                                <ToolButton
-                                    icon={<TbOvalVertical />}
-                                    selected={elementType === 'ellipse'}
-                                    action={() => {
-                                        setElementType('ellipse');
-                                    }}
-                                />,
-                                <ToolButton
-                                    icon={<FiMousePointer />}
-                                    selected={elementType === 'select'}
-                                    action={() => {
-                                        setElementType('select');
-                                    }}
-                                />,
-                                <ToolButton
-                                    icon={<GiCrosshair />}
-                                    action={() => {
-                                        //console.log(displayGrid);
-                                        setDisplayGrid(
-                                            (prevState) => !prevState
-                                        );
-                                    }}
-                                />,
-                                <ToolButton
-                                    icon={<MdRestartAlt />}
-                                    action={() => {
-                                        setElements([], {
-                                            description: 'Clear screen',
-                                        });
-                                        canvasRef.current
-                                            .getContext('2d')
-                                            .clearRect(
-                                                0,
-                                                0,
-                                                canvasRef.current.width,
-                                                canvasRef.current.width
-                                            );
-                                    }}
-                                />,
-                                <ToolButton
-                                    icon={<IoIosReturnLeft />}
-                                    action={() => {
-                                        undo();
-                                        drewElementsRef.current = false;
-                                    }}
-                                />,
-
-                                <ToolButton
-                                    icon={<IoIosReturnRight />}
-                                    action={() => {
-                                        redo();
-                                        drewElementsRef.current = false;
-                                    }}
-                                />,
-                            ]}
-                        />
-
-                        <ControlledFigures
-                            elementType={elementType}
-                            elements={elements}
-                            setElements={setElements}
-                            gridRef={gridRef}
-                            selectedElement={selectedElement}
-                            setSelectedElement={setSelectedElement}
-                            drewElementsRef={drewElementsRef}
-                        />
-                        <ToolTab
-                            title={'Global Definition'}
-                            tools={[
-                                <ColourPicker name={'globalColour'} />,
-                                <Slider
-                                    title={'Width:'}
-                                    name={'globalWidth'}
-                                />,
-                            ]}
-                        />
-                    </div>
-                )}
+                            <ControlledFigures
+                                elementType={elementType}
+                                elements={elements}
+                                setElements={setElements}
+                                gridRef={gridRef}
+                                selectedElement={selectedElement}
+                                setSelectedElement={setSelectedElement}
+                                drewElementsRef={drewElementsRef}
+                            />
+                            <ToolTab
+                                title={'Global Definition'}
+                                tools={[
+                                    <ColourPicker name={'globalColour'} />,
+                                    <Slider
+                                        title={'Width:'}
+                                        name={'globalWidth'}
+                                    />,
+                                ]}
+                            />
+                        </div>
+                    )}
+                    <ShowInfo selectedElement={selectedElement} />
+                </div>
             </div>
 
             <Canvas

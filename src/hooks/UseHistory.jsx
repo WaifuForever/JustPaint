@@ -13,13 +13,9 @@ const useHistory = (initialState) => {
         action,
         options = { description: '', overwrite: false }
     ) => {
-        console.log('setElements hook');
         const newState =
             typeof action === 'function' ? action(history[index]) : action;
 
-        console.log('overwrite', options.overwrite);
-        console.log('newState', newState);
-        console.log('history', history);
         if (options.overwrite) {
             const historyCopy = [...history];
             historyCopy[index].elements = newState;
@@ -27,7 +23,7 @@ const useHistory = (initialState) => {
             setHistory(historyCopy);
         } else {
             const updatedState = [...history].slice(0, index + 1);
-            
+
             console.log('newhistory', [
                 ...updatedState,
                 { elements: newState, description: options.description },
