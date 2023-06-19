@@ -173,7 +173,9 @@ const Canvas = ({
                 elements,
                 setElements
             );
-        } else {
+        } else if(elementType === 'rotate')
+        {}
+        else {
             //const width = sessionStorage.getItem('elementWidth');
             //const colour = sessionStorage.getItem('elementColour');
             ////console.log(width, colour);

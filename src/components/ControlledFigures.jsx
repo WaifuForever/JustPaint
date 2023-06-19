@@ -17,10 +17,45 @@ const computePointInGrid = (gridRef, figureX, figureY) => {
     }
 
     return {
-        x: figureX + 384,
+        x: figureX - 384,
         y: 288 - figureY,
     };
 };
+
+const undoComputePointInGrid = (gridRef, figureX, figureY) => {
+    if (!gridRef.current) {
+        return null;
+    }
+
+    return {
+        x: Math.abs(figureX + 384),
+        y: Math.abs(288 - figureY),
+    };
+};
+
+function rotatePoint(gridRef, point, angle, verbose = false) {
+    //translate the point back to origin
+    const { x, y } = computePointInGrid(gridRef, point.x, point.y);
+    angle = (angle * Math.PI) / 180;
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+
+    //rotate the point
+    const newX = x * cos - y * sin;
+    const newY = x * sin + y * cos;
+
+    // translate it back
+    const temp = undoComputePointInGrid(gridRef, newX, newY);
+    //console.log('point', point);
+    if(verbose){
+        console.log('point', point);
+        console.log('pointInGrid', { x, y });
+        console.log('newPointInGrid', { x: newX, y: newY });
+        console.log('newPoint', temp);
+    }
+
+    return temp;
+}
 
 const ElementForm = ({
     namespaces,
@@ -197,6 +232,81 @@ const ControlledFigures = ({
                                 className="px-4 bg-blue-400 rounded hover:bg-blue-600"
                             >
                                 Move
+                            </button>
+                        </Form>
+                    )}
+                </Formik>
+            ) : elementType === 'rotate' ? (
+                <Formik
+                    initialValues={{ radius: 0 }}
+                    validationSchema={() =>
+                        yup.object().shape({
+                            radius: yup
+                                .number()
+                                .integer()
+                                .default(0)
+                                .required(),
+                        })
+                    }
+                    onSubmit={(values, formikHelpers) => {
+                        if (!selectedElement) return;
+
+                        console.log('selectedElement', selectedElement);
+                        const { elementType, startPoint, endPoint } =
+                            selectedElement;
+
+                        values.radius = values.radius ?? 0;
+
+                        let newElement = { ...selectedElement };
+
+                        if (selectedElement.points)
+                            newElement.points = selectedElement.points.map(
+                                (item) =>
+                                    rotatePoint(gridRef, item, values.radius)
+                            );
+                        else {
+                            newElement.startPoint = rotatePoint(
+                                gridRef,
+                                startPoint,
+                                values.radius,
+                                true
+                            );
+
+                            newElement.endPoint = rotatePoint(
+                                gridRef,
+                                endPoint,
+                                values.radius
+                            );
+                        }
+                        console.log('rotating element', newElement);
+                        updateElement(
+                            newElement,
+                            elements,
+                            setElements,
+                            `Rotating ${elementType}`,
+                            false
+                        );
+                        setSelectedElement(newElement);
+                        drewElementsRef.current = false;
+                    }}
+                >
+                    {({ errors, touched, resetForm }) => (
+                        <Form className="flex flex-col items-center gap-1">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs">radius</span>
+                                <Field
+                                    className="w-14 text-center"
+                                    type={'number'}
+                                    name={'radius'}
+                                    error={errors.radius}
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                className="px-4 bg-blue-400 rounded hover:bg-blue-600"
+                            >
+                                Rotate
                             </button>
                         </Form>
                     )}

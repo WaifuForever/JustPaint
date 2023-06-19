@@ -10,9 +10,11 @@ const coordinatesToArray = (elementCoordinates) => {
 };
 
 const Coordinate = ({ x, y }) => {
-    
     return (
-        <div className="flex justify-center border-y border-gray-700 mx-1 text-xs hover:bg-gray-400" style={{minWidth: "50px"}}>
+        <div
+            className="flex justify-center border-y border-gray-700 mx-1 text-xs hover:bg-gray-400"
+            style={{ minWidth: '50px' }}
+        >
             {Math.floor(x)}, {Math.floor(y)}
         </div>
     );
@@ -20,12 +22,13 @@ const Coordinate = ({ x, y }) => {
 
 const ShowInfo = ({ selectedElement }) => {
     const [showInfo, setShowInfo] = useState(true);
-    console.log(selectedElement);
+  
     return (
         <>
             {showInfo && selectedElement ? (
                 <div className="flex flex-col gap-2">
                     <div className="flex">{selectedElement.elementType}</div>
+
                     {selectedElement.startPoint && (
                         <div className="flex">
                             <span className="text-xs">Start Point</span>
@@ -46,11 +49,14 @@ const ShowInfo = ({ selectedElement }) => {
                     )}
 
                     <div className="flex flex-row flex-wrap h-96 w-32 justify-center overflow-y-auto scrollbar-hide bg-gray-200">
-                        {coordinatesToArray(selectedElement.coordinates).map(
-                            ({ x, y }) => (
-                                <Coordinate x={x} y={y} />
-                            )
-                        )}
+                        {(['pencil', 'brush'].includes(
+                            selectedElement.elementType
+                        )
+                            ? selectedElement.points
+                            : coordinatesToArray(selectedElement.coordinates)
+                        ).map(({ x, y }, index) => (
+                            <Coordinate key={index + `${x}`} x={x} y={y} />
+                        ))}
                     </div>
                 </div>
             ) : null}

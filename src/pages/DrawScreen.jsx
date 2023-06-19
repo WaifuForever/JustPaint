@@ -1,13 +1,12 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { FaPencilAlt, FaPaintBrush } from 'react-icons/fa';
-import { BiRectangle } from 'react-icons/bi';
+import { BiRectangle, BiFileBlank } from 'react-icons/bi';
 import { BsCircle, BsFillLayersFill } from 'react-icons/bs';
 import { FiMousePointer } from 'react-icons/fi';
 import { GiStraightPipe, GiCrosshair } from 'react-icons/gi';
 import { IoIosReturnLeft, IoIosReturnRight } from 'react-icons/io';
-import { MdRestartAlt } from 'react-icons/md';
-import { TbOvalVertical } from 'react-icons/tb';
+import { TbOvalVertical, TbRotate2 } from 'react-icons/tb';
 
 import { useHistory } from '../hooks/UseHistory';
 import { useSelectedElement } from '../hooks/UseSelectedElement';
@@ -105,16 +104,16 @@ const DrawScreen = () => {
     };
 
     useEffect(() => {
+        setSelectedElement(elements[elements.length - 1]);
+        drewElementsRef.current = false;
         const undoRedoFunction = (event) => {
             if (event.metaKey || event.ctrlKey) {
                 if (event.key === 'z') {
                     undo();
-                    setSelectedElement(elements[elements.length - 1]);
-                    drewElementsRef.current = false;
+                    console.log('z', elements);
                 } else if (event.key === 'y') {
                     redo();
-                    setSelectedElement(elements[elements.length - 1]);
-                    drewElementsRef.current = false;
+                    console.log('y', elements);
                 }
             }
         };
@@ -249,7 +248,7 @@ const DrawScreen = () => {
                                         }}
                                     />,
                                     <ToolButton
-                                        icon={<MdRestartAlt />}
+                                        icon={<BiFileBlank />}
                                         action={() => {
                                             setElements([], {
                                                 description: 'Clear screen',
@@ -357,6 +356,13 @@ const DrawScreen = () => {
                                         }}
                                     />,
                                     <ToolButton
+                                        icon={<TbRotate2 />}
+                                        selected={elementType === 'rotate'}
+                                        action={() => {
+                                            setElementType('rotate');
+                                        }}
+                                    />,
+                                    <ToolButton
                                         icon={<GiCrosshair />}
                                         action={() => {
                                             //console.log(displayGrid);
@@ -366,7 +372,7 @@ const DrawScreen = () => {
                                         }}
                                     />,
                                     <ToolButton
-                                        icon={<MdRestartAlt />}
+                                        icon={<BiFileBlank />}
                                         action={() => {
                                             setElements([], {
                                                 description: 'Clear screen',

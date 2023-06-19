@@ -16,6 +16,7 @@ const putPixel2 = (point, width, colour, ctx) => {
     ctx.roundRect(point.x, point.y, width, width);
 };
 
+
 const putPixel = (point, width, colour, ctx) => {
     const x = point.x - Math.floor(width / 2);
     const y = point.y - Math.floor(width / 2);
@@ -218,8 +219,7 @@ const drawElement = (element, context) => {
 
             break;
         case 'circle':
-            console.log('startPoint', startPoint);
-            console.log('endPoint', endPoint);
+         
             coordinates = new Set([
                 ...coordinates,
                 ...drawBresenhamsCircle(
@@ -347,8 +347,6 @@ const drawCircle = (xc, yc, x, y, width, colour, ctx) => {
 };
 
 const drawBresenhamsCircle = (startPoint, radius, width, colour, ctx) => {
-    console.log(typeof radius, radius);
-  
     let x = 0,
         y = radius,
         r = y;
