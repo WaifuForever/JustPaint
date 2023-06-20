@@ -16,7 +16,6 @@ const putPixel2 = (point, width, colour, ctx) => {
     ctx.roundRect(point.x, point.y, width, width);
 };
 
-
 const putPixel = (point, width, colour, ctx) => {
     const x = point.x - Math.floor(width / 2);
     const y = point.y - Math.floor(width / 2);
@@ -219,7 +218,6 @@ const drawElement = (element, context) => {
 
             break;
         case 'circle':
-         
             coordinates = new Set([
                 ...coordinates,
                 ...drawBresenhamsCircle(
@@ -470,11 +468,16 @@ const drawBresenhamsLine = (startPoint, endPoint, width, colour, ctx) => {
     let sx = startPoint.x < endPoint.x ? 1 : -1;
     let err = dx - dy;
     const points = new Set();
+
     while (true) {
         points.add(JSON.stringify(startPoint));
         putPixel(startPoint, width, colour, ctx);
 
-        if (startPoint.x === endPoint.x && startPoint.y === endPoint.y) break;
+        if (
+            Math.round(startPoint.x) === Math.round(endPoint.x) &&
+            Math.round(startPoint.y) === Math.round(endPoint.y)
+        )
+            break;
         let p = 2 * err;
 
         if (p > -dy) {
@@ -487,6 +490,7 @@ const drawBresenhamsLine = (startPoint, endPoint, width, colour, ctx) => {
             startPoint.y += sy;
         }
     }
+
     return points;
 };
 
@@ -513,26 +517,35 @@ const drawDdaLine = (startPoint, endPoint, width, colour, ctx) => {
     return coordinates;
 };
 
-const computePointInGrid = (gridRef, figureX, figureY) => {
+const computePointInGrid = (gridRef, point) => {
     if (!gridRef.current) {
         return null;
     }
 
+    const { x, y } = point;
+
     return {
-        x: figureX - 384,
-        y: 288 - figureY,
+        x: x - 384,
+        y: 288 - y,
     };
 };
 
-const undoComputePointInGrid = (gridRef, figureX, figureY) => {
+const undoComputePointInGrid = (gridRef, point) => {
     if (!gridRef.current) {
         return null;
     }
+    const { x, y } = point;
 
     return {
-        x: Math.abs(figureX + 384),
-        y: Math.abs(288 - figureY),
+        x: x + 384,
+        y: 288 - y,
     };
 };
 
-export { drawElement, putPixel, drawAxis, computePointInGrid, undoComputePointInGrid };
+export {
+    drawElement,
+    putPixel,
+    drawAxis,
+    computePointInGrid,
+    undoComputePointInGrid,
+};

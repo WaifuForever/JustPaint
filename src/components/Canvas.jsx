@@ -42,17 +42,6 @@ const drawGrid = (gridRef) => {
     */
 };
 
-const computePointInGrid = (gridRef, figureX, figureY) => {
-    if (!gridRef.current) {
-        return null;
-    }
-
-    return {
-        x: figureX + 384,
-        y: 288 - figureY,
-    };
-};
-
 const Canvas = ({
     canvasRef,
     setCanvasRef,

@@ -12,6 +12,7 @@ import { FiMousePointer } from 'react-icons/fi';
 import { GiStraightPipe, GiCrosshair } from 'react-icons/gi';
 import { IoIosReturnLeft, IoIosReturnRight } from 'react-icons/io';
 import { TbOvalVertical, TbRotate2 } from 'react-icons/tb';
+import { VscMirror } from 'react-icons/vsc';
 
 import { useHistory } from '../hooks/UseHistory';
 import { useSelectedElement } from '../hooks/UseSelectedElement';
@@ -295,7 +296,10 @@ const DrawScreen = () => {
                             <ToolTab
                                 title={'Global Definition'}
                                 tools={[
-                                    <ColourPicker name={'globalColour'} selectedElement={selectedElement} />,
+                                    <ColourPicker
+                                        name={'globalColour'}
+                                        selectedElement={selectedElement}
+                                    />,
                                     <Slider
                                         title={'Width:'}
                                         name={'globalWidth'}
@@ -386,30 +390,32 @@ const DrawScreen = () => {
                                         icon={<BiHorizontalCenter />}
                                         action={() => {
                                             const newElement = {
-                                                ...selectedElement,
+                                                ...selectedElement.current,
                                             };
                                             let startPoint = computePointInGrid(
                                                 gridRef,
-                                                newElement.startPoint.x,
-                                                newElement.startPoint.y
+                                                newElement.startPoint
                                             );
                                             let endPoint = computePointInGrid(
                                                 gridRef,
-                                                newElement.endPoint.x,
-                                                newElement.endPoint.y
+                                                newElement.endPoint
                                             );
 
                                             newElement.startPoint =
                                                 undoComputePointInGrid(
                                                     gridRef,
-                                                    -startPoint.x,
-                                                    startPoint.y
+                                                    {
+                                                        x: -startPoint.x,
+                                                        y: startPoint.y,
+                                                    }
                                                 );
                                             newElement.endPoint =
                                                 undoComputePointInGrid(
                                                     gridRef,
-                                                    -endPoint.x,
-                                                    endPoint.y
+                                                    {
+                                                        x: -endPoint.x,
+                                                        y: endPoint.y,
+                                                    }
                                                 );
 
                                             updateElement(
@@ -425,30 +431,32 @@ const DrawScreen = () => {
                                         icon={<BiVerticalCenter />}
                                         action={() => {
                                             const newElement = {
-                                                ...selectedElement,
+                                                ...selectedElement.current,
                                             };
                                             let startPoint = computePointInGrid(
                                                 gridRef,
-                                                newElement.startPoint.x,
-                                                newElement.startPoint.y
+                                                newElement.startPoint
                                             );
                                             let endPoint = computePointInGrid(
                                                 gridRef,
-                                                newElement.endPoint.x,
-                                                newElement.endPoint.y
+                                                newElement.endPoint
                                             );
 
                                             newElement.startPoint =
                                                 undoComputePointInGrid(
                                                     gridRef,
-                                                    startPoint.x,
-                                                    -startPoint.y
+                                                    {
+                                                        x: startPoint.x,
+                                                        y: -startPoint.y,
+                                                    }
                                                 );
                                             newElement.endPoint =
                                                 undoComputePointInGrid(
                                                     gridRef,
-                                                    endPoint.x,
-                                                    -endPoint.y
+                                                    {
+                                                        x: endPoint.x,
+                                                        y: -endPoint.y,
+                                                    }
                                                 );
 
                                             updateElement(
@@ -458,6 +466,13 @@ const DrawScreen = () => {
                                                 'Reflect on Y',
                                                 false
                                             );
+                                        }}
+                                    />,
+                                    <ToolButton
+                                        icon={<VscMirror />}
+                                        selected={elementType === 'reflection'}
+                                        action={() => {
+                                            setElementType('reflection');
                                         }}
                                     />,
                                     <ToolButton

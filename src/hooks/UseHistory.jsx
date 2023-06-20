@@ -19,12 +19,15 @@ const useHistory = (initialState) => {
         if (options.overwrite) {
             const historyCopy = [...history];
             historyCopy[index].elements = newState;
-            //console.log('newhistory', historyCopy);
+            console.log('newhistory', historyCopy);
             setHistory(historyCopy);
         } else {
             const updatedState = [...history].slice(0, index + 1);
 
-         
+            console.log('newhistory', [
+                ...updatedState,
+                { elements: newState, description: options.description },
+            ]);
             setHistory([
                 ...updatedState,
                 { elements: newState, description: options.description },

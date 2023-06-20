@@ -18,7 +18,7 @@ const createElement = (element, setElements, setSelectedElement) => {
     };
 
     setSelectedElement(newElement);
-
+ 
     setElements((prevState) => [...prevState.elements, newElement], {
         description: elementType,
     });
@@ -55,9 +55,9 @@ const updateElement = (
     description,
     overwrite = true
 ) => {
-    //console.log('updatedElement ', element);
+    //console.log(description, element);
     //console.log('elements', elements);
-
+    
     setElements([...elements.map((e) => (e.id === element.id ? element : e))], {
         description: description,
         overwrite,

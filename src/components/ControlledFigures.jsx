@@ -20,9 +20,29 @@ function reflectY(point) {
     return { x: point.x, y: -point.y };
 }
 
+function reflectPointOverLine(point, m, b2) {
+    let a = m;
+    let b = 1;
+    let c = b2;
+
+    //y = mx + b;
+    //m *x + 1 * y + b = 0;
+
+    let coef = Math.sqrt(a * a + b * b);
+
+    a = a / coef;
+    b = b / coef;
+    c = c / coef;
+
+    //signed distance
+    let d = a * point.x + b * point.y + c;
+
+    return { x: point.x - 2 * a * d, y: point.y - 2 * b * d };
+}
+
 function rotatePoint(gridRef, point, angle, verbose = false) {
     //translate the point back to origin
-    const { x, y } = computePointInGrid(gridRef, point.x, point.y);
+    const { x, y } = computePointInGrid(gridRef, point);
     angle = (angle * Math.PI) / 180;
     const cos = Math.cos(angle);
     const sin = Math.sin(angle);
@@ -32,7 +52,7 @@ function rotatePoint(gridRef, point, angle, verbose = false) {
     const newY = x * sin + y * cos;
 
     // translate it back
-    const temp = undoComputePointInGrid(gridRef, newX, newY);
+    const temp = undoComputePointInGrid(gridRef, { x: newX, y: newY });
     //console.log('point', point);
     if (verbose) {
         console.log('point', point);
@@ -71,26 +91,24 @@ const ElementForm = ({
             validationSchema={() => yup.object().shape(validationSchema)}
             onSubmit={(values, formikHelpers) => {
                 console.log('create new element');
-                const startPoint = undoComputePointInGrid(
-                    gridRef,
-                    values[namespaces[0]],
-                    values[namespaces[1]]
-                );
+                const startPoint = undoComputePointInGrid(gridRef, {
+                    x: values[namespaces[0]],
+                    y: values[namespaces[1]],
+                });
                 console.log('values', values);
                 createFixedElement(
                     {
                         startPoint,
                         endPoint:
                             namespaces.length < 4
-                                ? {
+                                ? undoComputePointInGrid(gridRef, {
                                       x: startPoint.x + values[namespaces[2]],
                                       y: startPoint.y,
-                                  }
-                                : undoComputePointInGrid(
-                                      gridRef,
-                                      values[namespaces[2]],
-                                      values[namespaces[3]]
-                                  ),
+                                  })
+                                : undoComputePointInGrid(gridRef, {
+                                      x: values[namespaces[2]],
+                                      y: values[namespaces[3]],
+                                  }),
 
                         elementType: elementType,
                         isVisible: true,
@@ -295,6 +313,105 @@ const ControlledFigures = ({
                                 className="px-4 bg-blue-400 rounded hover:bg-blue-600"
                             >
                                 Rotate
+                            </button>
+                        </Form>
+                    )}
+                </Formik>
+            ) : elementType === 'reflection' ? (
+                <Formik
+                    initialValues={{ m: 0, b: 0 }}
+                    validationSchema={() =>
+                        yup.object().shape({
+                            m: yup.number().integer().default(0).required(),
+                            b: yup.number().integer().default(0).required(),
+                        })
+                    }
+                    onSubmit={(values, formikHelpers) => {
+                        if (!selectedElement) return;
+
+                        const { elementType, startPoint, endPoint } =
+                            selectedElement.current;
+
+                        values.m = values.m ?? 0;
+                        values.b = values.b ?? 0;
+
+                        let newElement = { ...selectedElement.current };
+
+                        if (selectedElement.current.points)
+                            newElement.points =
+                                selectedElement.current.points.map(
+                                    (item) =>
+                                        undoComputePointInGrid(
+                                            gridRef,
+                                            reflectPointOverLine(
+                                                computePointInGrid(
+                                                    gridRef,
+                                                    item
+                                                ),
+                                                values.m,
+                                                values.b
+                                            )
+                                        )
+                                    //rotatePoint(gridRef, item, values.radius)
+                                );
+                        else {
+                            newElement.startPoint = undoComputePointInGrid(
+                                gridRef,
+                                reflectPointOverLine(
+                                    computePointInGrid(gridRef, startPoint),
+                                    values.m,
+                                    values.b
+                                )
+                            );
+
+                            newElement.endPoint = undoComputePointInGrid(
+                                gridRef,
+                                reflectPointOverLine(
+                                    computePointInGrid(gridRef, endPoint),
+                                    values.m,
+                                    values.b
+                                )
+                            );
+                        }
+
+                        updateElement(
+                            newElement,
+                            elements,
+                            setElements,
+                            `Reflecting ${elementType}`,
+                            false
+                        );
+                        setSelectedElement(newElement);
+                        drewElementsRef.current = false;
+                    }}
+                >
+                    {({ errors, touched, resetForm }) => (
+                        <Form className="flex flex-col items-center gap-1">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs">m</span>
+                                <Field
+                                    className="w-14 text-center"
+                                    type={'number'}
+                                    name={'m'}
+                                    error={errors.m}
+                                />
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs">b</span>
+                                <Field
+                                    className="w-14 text-center"
+                                    type={'number'}
+                                    name={'b'}
+                                    error={errors.b}
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                className="px-4 bg-blue-400 rounded hover:bg-blue-600"
+                            >
+                                Reflect
                             </button>
                         </Form>
                     )}
