@@ -40,6 +40,15 @@ function reflectPointOverLine(point, m, b2) {
     return { x: point.x - 2 * a * d, y: point.y - 2 * b * d };
 }
 
+function shearPoint(point, shearX, shearY) {
+    const { x, y } = point;
+
+    return {
+        x: x + shearX * y,
+        y: y + shearY * x,
+    };
+}
+
 function rotatePoint(gridRef, point, angle, verbose = false) {
     //translate the point back to origin
     const { x, y } = computePointInGrid(gridRef, point);
@@ -101,15 +110,23 @@ const ElementForm = ({
                         startPoint,
                         endPoint:
                             namespaces.length < 4
-                                ? undoComputePointInGrid(gridRef, {
+                                ? {
                                       x: startPoint.x + values[namespaces[2]],
                                       y: startPoint.y,
-                                  })
+                                  }
                                 : undoComputePointInGrid(gridRef, {
                                       x: values[namespaces[2]],
                                       y: values[namespaces[3]],
                                   }),
 
+                        ...(namespaces.length > 5
+                            ? {
+                                  zPoint: undoComputePointInGrid(gridRef, {
+                                      x: values[namespaces[4]],
+                                      y: values[namespaces[5]],
+                                  }),
+                              }
+                            : {}),
                         elementType: elementType,
                         isVisible: true,
                     },
@@ -283,6 +300,13 @@ const ControlledFigures = ({
                                 endPoint,
                                 values.radius
                             );
+
+                            if (newElement.zPoint)
+                                newElement.zPoint = rotatePoint(
+                                    gridRef,
+                                    newElement.zPoint,
+                                    values.radius
+                                );
                         }
                         console.log('rotating element', newElement);
                         updateElement(
@@ -372,6 +396,19 @@ const ControlledFigures = ({
                                     values.b
                                 )
                             );
+
+                            if (newElement.zPoint)
+                                newElement.zPoint = undoComputePointInGrid(
+                                    gridRef,
+                                    reflectPointOverLine(
+                                        computePointInGrid(
+                                            gridRef,
+                                            newElement.zPoint
+                                        ),
+                                        values.m,
+                                        values.b
+                                    )
+                                );
                         }
 
                         updateElement(
@@ -412,6 +449,100 @@ const ControlledFigures = ({
                                 className="px-4 bg-blue-400 rounded hover:bg-blue-600"
                             >
                                 Reflect
+                            </button>
+                        </Form>
+                    )}
+                </Formik>
+            ) : elementType === 'shear' ? (
+                <Formik
+                    initialValues={{ x: 0, y: 0 }}
+                    validationSchema={() =>
+                        yup.object().shape({
+                            x: yup.number().integer().default(0).required(),
+                            y: yup.number().integer().default(0).required(),
+                        })
+                    }
+                    onSubmit={(values, formikHelpers) => {
+                        if (!selectedElement) return;
+
+                        const { elementType, startPoint, endPoint } =
+                            selectedElement.current;
+
+                        values.x = values.x ?? 0;
+                        values.y = values.y ?? 0;
+
+                        let newElement = { ...selectedElement.current };
+
+                        if (selectedElement.current.points)
+                            newElement.points =
+                                selectedElement.current.points.map(
+                                    (item) =>
+                                        undoComputePointInGrid(
+                                            gridRef,
+                                            shearPoint(
+                                                computePointInGrid(
+                                                    gridRef,
+                                                    item
+                                                ),
+                                                values.x,
+                                                values.y
+                                            )
+                                        )
+                                    //rotatePoint(gridRef, item, values.radius)
+                                );
+                        else {
+                            newElement.endPoint = undoComputePointInGrid(
+                                gridRef,
+
+                                shearPoint(
+                                    computePointInGrid(
+                                        gridRef,
+                                        newElement.endPoint
+                                    ),
+                                    values.x,
+                                    values.y
+                                )
+                            );
+                        }
+
+                        updateElement(
+                            newElement,
+                            elements,
+                            setElements,
+                            `Shearing ${elementType}`,
+                            false
+                        );
+                        setSelectedElement(newElement);
+                        drewElementsRef.current = false;
+                    }}
+                >
+                    {({ errors, touched, resetForm }) => (
+                        <Form className="flex flex-col items-center gap-1">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs">x</span>
+                                <Field
+                                    className="w-14 text-center"
+                                    type={'number'}
+                                    name={'x'}
+                                    error={errors.x}
+                                />
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs">y</span>
+                                <Field
+                                    className="w-14 text-center"
+                                    type={'number'}
+                                    name={'y'}
+                                    error={errors.y}
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                className="px-4 bg-blue-400 rounded hover:bg-blue-600"
+                            >
+                                Shear
                             </button>
                         </Form>
                     )}
@@ -476,6 +607,41 @@ const ControlledFigures = ({
                                               ) *
                                                   values.scale,
                                       };
+
+                            newElement.zPoint =
+                                values.scale <= 1
+                                    ? {
+                                          x:
+                                              newElement.zPoint.x -
+                                              Math.abs(
+                                                  startPoint.x -
+                                                      newElement.zPoint.x
+                                              ) *
+                                                  values.scale,
+                                          y:
+                                              newElement.zPoint.y -
+                                              Math.abs(
+                                                  startPoint.y -
+                                                      newElement.zPoint.y
+                                              ) *
+                                                  values.scale,
+                                      }
+                                    : {
+                                          x:
+                                              newElement.zPoint.x +
+                                              Math.abs(
+                                                  startPoint.x -
+                                                      newElement.zPoint.x
+                                              ) *
+                                                  values.scale,
+                                          y:
+                                              newElement.zPoint.y +
+                                              Math.abs(
+                                                  startPoint.y -
+                                                      newElement.zPoint.y
+                                              ) *
+                                                  values.scale,
+                                      };
                         }
 
                         updateElement(
@@ -516,11 +682,14 @@ const ControlledFigures = ({
                   'rectangle',
                   'circle',
                   'ellipse',
+                  'cube',
               ].includes(elementType) ? (
                 <ElementForm
                     namespaces={
                         elementType === 'circle'
                             ? ['x', 'y', 'radius']
+                            : elementType === 'cube'
+                            ? ['x1', 'y1', 'x2', 'y2', 'x3', 'y3']
                             : ['x1', 'y1', 'x2', 'y2']
                     }
                     elementType={elementType}

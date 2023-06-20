@@ -122,17 +122,8 @@ const Canvas = ({
             //console.log('mouse move');
             //console.log(selectedElement);
             if (!selectedElement) return;
-            const {
-                startPoint,
-                endPoint,
-                width,
-                colour,
-                id,
-                points,
-                coordinates,
-                elementType,
-                isVisible,
-            } = selectedElement.current;
+            const { startPoint, endPoint, zPoint, points } =
+                selectedElement.current;
 
             updateElement(
                 {
@@ -154,13 +145,14 @@ const Canvas = ({
                                   x: endPoint.x - (startPoint.x - point.x),
                                   y: endPoint.y - (startPoint.y - point.y),
                               },
+                              ...(zPoint && {
+                                  zPoint: {
+                                      x: zPoint.x - (startPoint.x - point.x),
+                                      y: zPoint.y - (startPoint.y - point.y),
+                                  },
+                              }),
                           }),
-                    elementType,
-                    width,
-                    colour,
-                    coordinates,
-                    isVisible,
-                    id,
+                    ...selectedElement.current,
                 },
                 elements,
                 setElements
@@ -199,7 +191,7 @@ const Canvas = ({
         //console.log('lastElement', elements[elements.length - 1]);
 
         setSelectedElement(elements[elements.length - 1]);
-        setRedraw(prevState => !prevState);
+        setRedraw((prevState) => !prevState);
         setIsDrawing(false);
     };
 

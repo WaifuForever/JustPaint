@@ -18,33 +18,29 @@ const createElement = (element, setElements, setSelectedElement) => {
     };
 
     setSelectedElement(newElement);
- 
+
     setElements((prevState) => [...prevState.elements, newElement], {
         description: elementType,
     });
 };
 
 const createFixedElement = (element, setElements, setSelectedElement) => {
-    const { startPoint, endPoint, elementType, isVisible } = element;
     const colour = sessionStorage.getItem('globalColour')?.slice(1, -1) ?? null;
     const width = sessionStorage.getItem('globalWidth') ?? null;
-  
+
     const newElement = {
-        startPoint: startPoint,
-        endPoint: endPoint,
-        coordinates: new Set([JSON.stringify(startPoint)]),
-        elementType,
+        coordinates: new Set([JSON.stringify(element.startPoint)]),
         width,
         colour,
         id: uuid(),
-        isVisible,
+        ...element,
     };
 
     console.log('fixed', newElement);
     setSelectedElement(newElement);
 
     setElements((prevState) => [...prevState.elements, newElement], {
-        description: elementType,
+        description: element.elementType,
     });
 };
 
@@ -57,7 +53,7 @@ const updateElement = (
 ) => {
     //console.log(description, element);
     //console.log('elements', elements);
-    
+
     setElements([...elements.map((e) => (e.id === element.id ? element : e))], {
         description: description,
         overwrite,

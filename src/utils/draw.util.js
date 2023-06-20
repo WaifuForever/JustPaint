@@ -151,6 +151,7 @@ const drawElement = (element, context) => {
         startPoint,
         endPoint,
         length,
+        zPoint,
         isVisible,
     } = element;
 
@@ -285,6 +286,7 @@ const drawElement = (element, context) => {
             context.stroke();
             coordinates = new Set(element.points);
             break;
+
         case 'brush':
             const brushStroke = getSvgPathFromStroke(
                 getStroke(element.points, { size: element.width })
@@ -295,6 +297,173 @@ const drawElement = (element, context) => {
             ////console.log(context.fillStyle);
             context.fill(new Path2D(brushStroke));
             coordinates = new Set(element.points);
+            break;
+
+        case 'cube':
+            putPixel(endPoint, width, colour, context);
+
+            /*
+            context.beginPath();
+            context.lineWidth = width;
+            context.strokeStyle = colour;
+            context.strokeRect(
+                startPoint.x,
+                startPoint.y,
+                endPoint.x - startPoint.x,
+                endPoint.y - startPoint.y
+            );
+            */
+
+            coordinates = new Set([
+                ...coordinates,
+                ...drawBresenhamsLine(
+                    { ...startPoint },
+                    { x: endPoint.x, y: startPoint.y },
+                    width,
+                    colour,
+                    context
+                ),
+            ]);
+
+            coordinates = new Set([
+                ...coordinates,
+                ...drawBresenhamsLine(
+                    { x: endPoint.x, y: startPoint.y },
+                    { ...endPoint },
+                    width,
+                    colour,
+                    context
+                ),
+            ]);
+
+            coordinates = new Set([
+                ...coordinates,
+                ...drawBresenhamsLine(
+                    { ...endPoint },
+                    { x: startPoint.x, y: endPoint.y },
+                    width,
+                    colour,
+                    context
+                ),
+            ]);
+
+            coordinates = new Set([
+                ...coordinates,
+                ...drawBresenhamsLine(
+                    { x: startPoint.x, y: endPoint.y },
+                    { ...startPoint },
+                    width,
+                    colour,
+                    context
+                ),
+            ]);
+
+            //ZPOINT
+            coordinates = new Set([
+                ...coordinates,
+                ...drawBresenhamsLine(
+                    { ...zPoint },
+                    { ...endPoint },
+                    width,
+                    colour,
+                    context
+                ),
+            ]);
+
+            coordinates = new Set([
+                ...coordinates,
+                ...drawBresenhamsLine(
+                    { ...zPoint },
+                    { x: zPoint.x, y: zPoint.y + startPoint.y - endPoint.y },
+                    width,
+                    colour,
+                    context
+                ),
+            ]);
+
+            coordinates = new Set([
+                ...coordinates,
+                ...drawBresenhamsLine(
+                    { x: zPoint.x, y: zPoint.y + startPoint.y - endPoint.y },
+                    { x: endPoint.x, y: startPoint.y },
+
+                    width,
+                    colour,
+                    context
+                ),
+            ]);
+
+            coordinates = new Set([
+                ...coordinates,
+                ...drawBresenhamsLine(
+                    { x: zPoint.x, y: zPoint.y + startPoint.y - endPoint.y },
+                    {
+                        x: zPoint.x + startPoint.x - endPoint.x,
+                        y: zPoint.y + startPoint.y - endPoint.y,
+                    },
+
+                    width,
+                    colour,
+                    context
+                ),
+            ]);
+
+            coordinates = new Set([
+                ...coordinates,
+                ...drawBresenhamsLine(
+                    { ...startPoint },
+                    {
+                        x: zPoint.x + startPoint.x - endPoint.x,
+                        y: zPoint.y + startPoint.y - endPoint.y,
+                    },
+
+                    width,
+                    colour,
+                    context
+                ),
+            ]);
+
+            coordinates = new Set([
+                ...coordinates,
+                ...drawBresenhamsLine(
+                    { x: startPoint.x, y: endPoint.y },
+                    { x: zPoint.x + startPoint.x - endPoint.x, y: zPoint.y },
+
+                    width,
+                    colour,
+                    context
+                ),
+            ]);
+            //
+            coordinates = new Set([
+                ...coordinates,
+                ...drawBresenhamsLine(
+                    {
+                        x: zPoint.x + startPoint.x - endPoint.x,
+                        y: zPoint.y + startPoint.y - endPoint.y,
+                    },
+
+                    { x: zPoint.x + startPoint.x - endPoint.x, y: zPoint.y },
+
+                    width,
+                    colour,
+                    context
+                ),
+            ]);
+
+            coordinates = new Set([
+                ...coordinates,
+                ...drawBresenhamsLine(
+                    { ...zPoint },
+
+                    { x: zPoint.x + startPoint.x - endPoint.x, y: zPoint.y },
+
+                    width,
+                    colour,
+                    context
+                ),
+            ]);
+
             break;
 
         case 'parallelogram:':

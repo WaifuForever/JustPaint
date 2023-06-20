@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { FaPencilAlt, FaPaintBrush } from 'react-icons/fa';
 import {
+    BiCube,
     BiRectangle,
     BiFileBlank,
     BiHorizontalCenter,
@@ -9,8 +10,8 @@ import {
 } from 'react-icons/bi';
 import { BsCircle, BsFillLayersFill } from 'react-icons/bs';
 import { FiMousePointer } from 'react-icons/fi';
-import { GiStraightPipe, GiCrosshair } from 'react-icons/gi';
-import { IoIosReturnLeft, IoIosReturnRight } from 'react-icons/io';
+import { GiStraightPipe, GiCrosshair, GiGardeningShears } from 'react-icons/gi';
+import { IoBowlingBallOutline, IoIosReturnLeft, IoIosReturnRight } from 'react-icons/io';
 import { MdOutlineExpand } from 'react-icons/md';
 import { TbOvalVertical, TbRotate2 } from 'react-icons/tb';
 import { VscMirror } from 'react-icons/vsc';
@@ -33,53 +34,6 @@ import ToolButton from '../components/ToolButton';
 import ControlledFigures from '../components/ControlledFigures';
 import { updateElement } from '../utils/element.util';
 import ShowInfo from '../components/ShowInfo';
-
-const drawSelection = (element) => {
-    const { startPoint, endPoint, width, elementType } = element;
-
-    const newElement = {
-        colour: '#3474eb',
-        width: 1,
-        id: 'default',
-        elementType: elementType,
-    };
-
-    switch (elementType) {
-        case 'rectangle':
-            newElement.startPoint = {
-                x: startPoint.x - width,
-                y: startPoint.y - width,
-            };
-            newElement.endPoint = {
-                x: endPoint.x + width,
-                y: endPoint.y + width,
-            };
-            break;
-
-        case 'ddaLine':
-        case 'bresenhamLine':
-            newElement.startPoint = {
-                x: startPoint.x - width + 0.5,
-                y: startPoint.y - 1,
-            };
-            newElement.endPoint = {
-                x: endPoint.x + width - 0.5,
-                y: endPoint.y + 1,
-            };
-            newElement.length = width + 1;
-            break;
-        case 'brush':
-        ////console.log('here');
-        case 'pencil':
-            throw new Error(
-                `Not implemented yet: draw ${elementType} selection`
-            );
-        default:
-            throw new Error(`Type not recognised: ${elementType}`);
-    }
-
-    return newElement;
-};
 
 const DrawScreen = () => {
     const {
@@ -358,10 +312,25 @@ const DrawScreen = () => {
                                         }}
                                     />,
                                     <ToolButton
+                                    icon={<IoBowlingBallOutline />}
+                                    selected={elementType === 'circleTri'}
+                                    action={() => {
+                                        setElementType('circleTri');
+                                    }}
+                                />,
+                                    <ToolButton
                                         icon={<TbOvalVertical />}
                                         selected={elementType === 'ellipse'}
                                         action={() => {
                                             setElementType('ellipse');
+                                        }}
+                                    />,
+
+                                    <ToolButton
+                                        icon={<BiCube />}
+                                        selected={elementType === 'cube'}
+                                        action={() => {
+                                            setElementType('cube');
                                         }}
                                     />,
                                     <ToolButton
@@ -376,6 +345,14 @@ const DrawScreen = () => {
                                         selected={elementType === 'rotate'}
                                         action={() => {
                                             setElementType('rotate');
+                                        }}
+                                    />,
+
+                                    <ToolButton
+                                        icon={<GiGardeningShears />}
+                                        selected={elementType === 'shear'}
+                                        action={() => {
+                                            setElementType('shear');
                                         }}
                                     />,
 
@@ -426,7 +403,20 @@ const DrawScreen = () => {
                                                         y: endPoint.y,
                                                     }
                                                 );
-
+                                            if (newElement.zPoint) {
+                                                let zPoint = computePointInGrid(
+                                                    gridRef,
+                                                    newElement.zPoint
+                                                );
+                                                newElement.zPoint =
+                                                    undoComputePointInGrid(
+                                                        gridRef,
+                                                        {
+                                                            x: -zPoint.x,
+                                                            y: zPoint.y,
+                                                        }
+                                                    );
+                                            }
                                             updateElement(
                                                 newElement,
                                                 elements,
@@ -467,7 +457,20 @@ const DrawScreen = () => {
                                                         y: -endPoint.y,
                                                     }
                                                 );
-
+                                            if (newElement.zPoint) {
+                                                let zPoint = computePointInGrid(
+                                                    gridRef,
+                                                    newElement.zPoint
+                                                );
+                                                newElement.zPoint =
+                                                    undoComputePointInGrid(
+                                                        gridRef,
+                                                        {
+                                                            x: zPoint.x,
+                                                            y: -zPoint.y,
+                                                        }
+                                                    );
+                                            }
                                             updateElement(
                                                 newElement,
                                                 elements,
