@@ -11,6 +11,7 @@ import { BsCircle, BsFillLayersFill } from 'react-icons/bs';
 import { FiMousePointer } from 'react-icons/fi';
 import { GiStraightPipe, GiCrosshair } from 'react-icons/gi';
 import { IoIosReturnLeft, IoIosReturnRight } from 'react-icons/io';
+import { MdOutlineExpand } from 'react-icons/md';
 import { TbOvalVertical, TbRotate2 } from 'react-icons/tb';
 import { VscMirror } from 'react-icons/vsc';
 
@@ -375,6 +376,14 @@ const DrawScreen = () => {
                                         selected={elementType === 'rotate'}
                                         action={() => {
                                             setElementType('rotate');
+                                        }}
+                                    />,
+
+                                    <ToolButton
+                                        icon={<MdOutlineExpand />}
+                                        selected={elementType === 'scale'}
+                                        action={() => {
+                                            setElementType('scale');
                                         }}
                                     />,
                                     <ToolButton

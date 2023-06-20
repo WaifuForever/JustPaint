@@ -416,6 +416,100 @@ const ControlledFigures = ({
                         </Form>
                     )}
                 </Formik>
+            ) : elementType === 'scale' ? (
+                <Formik
+                    initialValues={{ scale: 0 }}
+                    validationSchema={() =>
+                        yup.object().shape({
+                            scale: yup.number().default(0).required(),
+                        })
+                    }
+                    onSubmit={(values, formikHelpers) => {
+                        if (!selectedElement) return;
+
+                        const { elementType, startPoint, endPoint } =
+                            selectedElement.current;
+
+                        values.scale = values.scale ?? 0;
+
+                        let newElement = { ...selectedElement.current };
+
+                        if (selectedElement.current.points)
+                            newElement.points =
+                                selectedElement.current.points.map(
+                                    (
+                                        item //not working
+                                    ) =>
+                                        undoComputePointInGrid(gridRef, {
+                                            x: item.x * values.scale,
+                                            y: item.y * values.scale,
+                                        })
+                                );
+                        else {
+                            newElement.endPoint =
+                                values.scale <= 1
+                                    ? {
+                                          x:
+                                              endPoint.x -
+                                              Math.abs(
+                                                  startPoint.x - endPoint.x
+                                              ) *
+                                                  values.scale,
+                                          y:
+                                              endPoint.y -
+                                              Math.abs(
+                                                  startPoint.y - endPoint.y
+                                              ) *
+                                                  values.scale,
+                                      }
+                                    : {
+                                          x:
+                                              endPoint.x +
+                                              Math.abs(
+                                                  startPoint.x - endPoint.x
+                                              ) *
+                                                  values.scale,
+                                          y:
+                                              endPoint.y +
+                                              Math.abs(
+                                                  startPoint.y - endPoint.y
+                                              ) *
+                                                  values.scale,
+                                      };
+                        }
+
+                        updateElement(
+                            newElement,
+                            elements,
+                            setElements,
+                            `Scaling ${elementType}`,
+                            false
+                        );
+                        setSelectedElement(newElement);
+                        drewElementsRef.current = false;
+                    }}
+                >
+                    {({ errors, touched, resetForm }) => (
+                        <Form className="flex flex-col items-center gap-1">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs">scale</span>
+                                <Field
+                                    className="w-14 text-center"
+                                    type={'number'}
+                                    name={'scale'}
+                                    error={errors.scale}
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                className="px-4 bg-blue-400 rounded hover:bg-blue-600"
+                            >
+                                Scale
+                            </button>
+                        </Form>
+                    )}
+                </Formik>
             ) : [
                   'bresenhamLine',
                   'ddaLine',
