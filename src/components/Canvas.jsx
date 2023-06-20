@@ -64,6 +64,7 @@ const Canvas = ({
     displayGrid,
     drewGridRef,
     setGridRef,
+    setRedraw,
     selectedElement,
     setSelectedElement,
 }) => {
@@ -110,7 +111,7 @@ const Canvas = ({
         }
 
         setElements((prevState) => [...prevState.elements], {
-            description: `Moving ${selectedElement.elementType}`,
+            description: `Moving ${selectedElement.current.elementType}`,
         });
     };
 
@@ -123,7 +124,7 @@ const Canvas = ({
         const { clientX, clientY } = event;
         const index = elements.length - 1;
         const point = computePointInCanvas(canvasRef, clientX, clientY);
-        console.log('point', point);
+
         if (elementType === 'select') {
             /*event.target.style.cursor = selectedElement
                 ? cursorForPosition(element.position)
@@ -139,9 +140,10 @@ const Canvas = ({
                 colour,
                 id,
                 points,
+                coordinates,
                 elementType,
                 isVisible,
-            } = selectedElement;
+            } = selectedElement.current;
 
             updateElement(
                 {
@@ -167,15 +169,15 @@ const Canvas = ({
                     elementType,
                     width,
                     colour,
+                    coordinates,
                     isVisible,
                     id,
                 },
                 elements,
                 setElements
             );
-        } else if(elementType === 'rotate')
-        {}
-        else {
+        } else if (elementType === 'rotate') {
+        } else {
             //const width = sessionStorage.getItem('elementWidth');
             //const colour = sessionStorage.getItem('elementColour');
             ////console.log(width, colour);
@@ -183,6 +185,7 @@ const Canvas = ({
             let temp = element.points
                 ? { points: [...element.points, point] }
                 : { startPoint: element.startPoint, endPoint: point };
+
             updateElement(
                 {
                     ...temp,
@@ -191,6 +194,7 @@ const Canvas = ({
                     colour: element.colour,
                     isVisible: element.isVisible,
                     id: element.id,
+                    coordinates: element.coordinates,
                 },
                 elements,
                 setElements
@@ -206,6 +210,7 @@ const Canvas = ({
         //console.log('lastElement', elements[elements.length - 1]);
 
         setSelectedElement(elements[elements.length - 1]);
+        setRedraw(prevState => !prevState);
         setIsDrawing(false);
     };
 

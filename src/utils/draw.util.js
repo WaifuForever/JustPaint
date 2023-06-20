@@ -513,4 +513,26 @@ const drawDdaLine = (startPoint, endPoint, width, colour, ctx) => {
     return coordinates;
 };
 
-export { drawElement, putPixel, drawAxis };
+const computePointInGrid = (gridRef, figureX, figureY) => {
+    if (!gridRef.current) {
+        return null;
+    }
+
+    return {
+        x: figureX - 384,
+        y: 288 - figureY,
+    };
+};
+
+const undoComputePointInGrid = (gridRef, figureX, figureY) => {
+    if (!gridRef.current) {
+        return null;
+    }
+
+    return {
+        x: Math.abs(figureX + 384),
+        y: Math.abs(288 - figureY),
+    };
+};
+
+export { drawElement, putPixel, drawAxis, computePointInGrid, undoComputePointInGrid };

@@ -20,46 +20,38 @@ const Coordinate = ({ x, y }) => {
     );
 };
 
-const ShowInfo = ({ selectedElement }) => {
+const ShowInfo = ({ selectedElement, redraw }) => {
     const [showInfo, setShowInfo] = useState(true);
-  
+    if (!selectedElement.current || !showInfo) return null;
+    const { elementType, startPoint, endPoint, coordinates, points } =
+        selectedElement.current;
     return (
         <>
-            {showInfo && selectedElement ? (
-                <div className="flex flex-col gap-2">
-                    <div className="flex">{selectedElement.elementType}</div>
+            <div className={`flex flex-col gap-2 ${redraw}`}>
+                <div className="flex">{elementType}</div>
 
-                    {selectedElement.startPoint && (
-                        <div className="flex">
-                            <span className="text-xs">Start Point</span>
-                            <Coordinate
-                                x={selectedElement.startPoint.x}
-                                y={selectedElement.startPoint.y}
-                            />
-                        </div>
-                    )}
-                    {selectedElement.endPoint && (
-                        <div className="flex">
-                            <span className="text-xs pr-1">End Point</span>
-                            <Coordinate
-                                x={selectedElement.endPoint.x}
-                                y={selectedElement.endPoint.y}
-                            />
-                        </div>
-                    )}
-
-                    <div className="flex flex-row flex-wrap h-96 w-32 justify-center overflow-y-auto scrollbar-hide bg-gray-200">
-                        {(['pencil', 'brush'].includes(
-                            selectedElement.elementType
-                        )
-                            ? selectedElement.points
-                            : coordinatesToArray(selectedElement.coordinates)
-                        ).map(({ x, y }, index) => (
-                            <Coordinate key={index + `${x}`} x={x} y={y} />
-                        ))}
+                {startPoint && (
+                    <div className="flex">
+                        <span className="text-xs">Start Point</span>
+                        <Coordinate x={startPoint.x} y={startPoint.y} />
                     </div>
+                )}
+                {endPoint && (
+                    <div className="flex">
+                        <span className="text-xs pr-1">End Point</span>
+                        <Coordinate x={endPoint.x} y={endPoint.y} />
+                    </div>
+                )}
+
+                <div className="flex flex-row flex-wrap h-96 w-32 justify-center overflow-y-auto scrollbar-hide bg-gray-200">
+                    {(['pencil', 'brush'].includes(elementType)
+                        ? points
+                        : coordinatesToArray(coordinates)
+                    ).map(({ x, y }, index) => (
+                        <Coordinate key={index + `${x}`} x={x} y={y} />
+                    ))}
                 </div>
-            ) : null}
+            </div>
         </>
     );
 };

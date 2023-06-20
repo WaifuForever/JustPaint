@@ -1,9 +1,13 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 const useSelectedElement = (initialState) => {
-    const [selectedElement, setSelectedElement] = useState(initialState);
+    //const [selectedElement, setSelectedElement] = useState(initialState);
+    const selectedElement = useRef(initialState);
+    const [redraw, setRedraw] = useState(false);
 
     const handleSetSelectedElement = (element) => {
+        //console.log('before handle element', element);
+
         if (element) {
             sessionStorage.setItem(
                 'selectedElementId',
@@ -31,12 +35,15 @@ const useSelectedElement = (initialState) => {
         }
 
         console.log('handle element', element);
-        setSelectedElement(element);
+        //setSelectedElement(element);
+        selectedElement.current = element;
     };
 
     return {
         selectedElement,
         setSelectedElement: handleSetSelectedElement,
+        redraw: redraw,
+        setRedraw: setRedraw
     };
 };
 

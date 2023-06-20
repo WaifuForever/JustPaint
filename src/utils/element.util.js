@@ -28,6 +28,7 @@ const createFixedElement = (element, setElements, setSelectedElement) => {
     const { startPoint, endPoint, elementType, isVisible } = element;
     const colour = sessionStorage.getItem('globalColour')?.slice(1, -1) ?? null;
     const width = sessionStorage.getItem('globalWidth') ?? null;
+  
     const newElement = {
         startPoint: startPoint,
         endPoint: endPoint,
@@ -39,6 +40,7 @@ const createFixedElement = (element, setElements, setSelectedElement) => {
         isVisible,
     };
 
+    console.log('fixed', newElement);
     setSelectedElement(newElement);
 
     setElements((prevState) => [...prevState.elements, newElement], {
@@ -46,9 +48,15 @@ const createFixedElement = (element, setElements, setSelectedElement) => {
     });
 };
 
-const updateElement = (element, elements, setElements, description, overwrite = true) => {
-    console.log('updatedElement ', element);
-    console.log('elements', elements);
+const updateElement = (
+    element,
+    elements,
+    setElements,
+    description,
+    overwrite = true
+) => {
+    //console.log('updatedElement ', element);
+    //console.log('elements', elements);
 
     setElements([...elements.map((e) => (e.id === element.id ? element : e))], {
         description: description,
@@ -77,6 +85,7 @@ const deleteElement = (id, elements, setElements, drewElementsRef) => {
 
 const hideElement = (id, elements, setElements, drewElementsRef) => {
     let elementDescription = '';
+    console.log('hide element', elements);
     let updatedElements = elements.map((e) => {
         if (e.id === id) {
             e.isVisible = !e.isVisible;
@@ -86,8 +95,8 @@ const hideElement = (id, elements, setElements, drewElementsRef) => {
     });
     drewElementsRef.current = false;
     setElements(updatedElements, {
-        description: 'hide ' + elementDescription,
-        overwrite: true,
+        description: 'Hide ' + elementDescription,
+        overwrite: false,
     });
 };
 

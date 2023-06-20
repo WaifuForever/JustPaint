@@ -22,7 +22,8 @@ const ColourPicker = ({ name, selectedElement, updateElement }) => {
 
     useEffect(() => {
         if (selectedElement) {
-            setColour(selectedElement.colour);
+            if (selectedElement.current)
+                setColour(selectedElement.current.colour);
         }
     }, [selectedElement, name]);
 
@@ -43,7 +44,7 @@ const ColourPicker = ({ name, selectedElement, updateElement }) => {
                         <div
                             className="w-4 h-4 border border-black m-0.5 cursor-pointer"
                             onClick={() => {
-                                if (updateElement && selectedElement) {
+                                if (updateElement && selectedElement.current) {
                                     updateElement(colour.hex, selectedElement);
                                 }
                                 setColour(colour);

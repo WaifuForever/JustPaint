@@ -1,7 +1,12 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { FaPencilAlt, FaPaintBrush } from 'react-icons/fa';
-import { BiRectangle, BiFileBlank } from 'react-icons/bi';
+import {
+    BiRectangle,
+    BiFileBlank,
+    BiHorizontalCenter,
+    BiVerticalCenter,
+} from 'react-icons/bi';
 import { BsCircle, BsFillLayersFill } from 'react-icons/bs';
 import { FiMousePointer } from 'react-icons/fi';
 import { GiStraightPipe, GiCrosshair } from 'react-icons/gi';
@@ -10,7 +15,11 @@ import { TbOvalVertical, TbRotate2 } from 'react-icons/tb';
 
 import { useHistory } from '../hooks/UseHistory';
 import { useSelectedElement } from '../hooks/UseSelectedElement';
-import { drawElement } from '../utils/draw.util';
+import {
+    computePointInGrid,
+    drawElement,
+    undoComputePointInGrid,
+} from '../utils/draw.util';
 
 import Canvas from '../components/Canvas';
 import ColourPicker from '../components/ColourPicker';
@@ -82,7 +91,8 @@ const DrawScreen = () => {
         redo,
     } = useHistory([]);
 
-    const { selectedElement, setSelectedElement } = useSelectedElement(null);
+    const { selectedElement, setSelectedElement, setRedraw, redraw } =
+        useSelectedElement(null);
 
     const { elements, description } = state;
 
@@ -105,15 +115,16 @@ const DrawScreen = () => {
 
     useEffect(() => {
         setSelectedElement(elements[elements.length - 1]);
+
         drewElementsRef.current = false;
         const undoRedoFunction = (event) => {
             if (event.metaKey || event.ctrlKey) {
                 if (event.key === 'z') {
                     undo();
-                    console.log('z', elements);
+                    setRedraw((prevState) => !prevState);
                 } else if (event.key === 'y') {
                     redo();
-                    console.log('y', elements);
+                    setRedraw((prevState) => !prevState);
                 }
             }
         };
@@ -284,7 +295,7 @@ const DrawScreen = () => {
                             <ToolTab
                                 title={'Global Definition'}
                                 tools={[
-                                    <ColourPicker name={'globalColour'} />,
+                                    <ColourPicker name={'globalColour'} selectedElement={selectedElement} />,
                                     <Slider
                                         title={'Width:'}
                                         name={'globalWidth'}
@@ -372,6 +383,84 @@ const DrawScreen = () => {
                                         }}
                                     />,
                                     <ToolButton
+                                        icon={<BiHorizontalCenter />}
+                                        action={() => {
+                                            const newElement = {
+                                                ...selectedElement,
+                                            };
+                                            let startPoint = computePointInGrid(
+                                                gridRef,
+                                                newElement.startPoint.x,
+                                                newElement.startPoint.y
+                                            );
+                                            let endPoint = computePointInGrid(
+                                                gridRef,
+                                                newElement.endPoint.x,
+                                                newElement.endPoint.y
+                                            );
+
+                                            newElement.startPoint =
+                                                undoComputePointInGrid(
+                                                    gridRef,
+                                                    -startPoint.x,
+                                                    startPoint.y
+                                                );
+                                            newElement.endPoint =
+                                                undoComputePointInGrid(
+                                                    gridRef,
+                                                    -endPoint.x,
+                                                    endPoint.y
+                                                );
+
+                                            updateElement(
+                                                newElement,
+                                                elements,
+                                                setElements,
+                                                'Reflect on X',
+                                                false
+                                            );
+                                        }}
+                                    />,
+                                    <ToolButton
+                                        icon={<BiVerticalCenter />}
+                                        action={() => {
+                                            const newElement = {
+                                                ...selectedElement,
+                                            };
+                                            let startPoint = computePointInGrid(
+                                                gridRef,
+                                                newElement.startPoint.x,
+                                                newElement.startPoint.y
+                                            );
+                                            let endPoint = computePointInGrid(
+                                                gridRef,
+                                                newElement.endPoint.x,
+                                                newElement.endPoint.y
+                                            );
+
+                                            newElement.startPoint =
+                                                undoComputePointInGrid(
+                                                    gridRef,
+                                                    startPoint.x,
+                                                    -startPoint.y
+                                                );
+                                            newElement.endPoint =
+                                                undoComputePointInGrid(
+                                                    gridRef,
+                                                    endPoint.x,
+                                                    -endPoint.y
+                                                );
+
+                                            updateElement(
+                                                newElement,
+                                                elements,
+                                                setElements,
+                                                'Reflect on Y',
+                                                false
+                                            );
+                                        }}
+                                    />,
+                                    <ToolButton
                                         icon={<BiFileBlank />}
                                         action={() => {
                                             setElements([], {
@@ -410,6 +499,7 @@ const DrawScreen = () => {
                                 elements={elements}
                                 setElements={setElements}
                                 gridRef={gridRef}
+                                setRedraw={setRedraw}
                                 selectedElement={selectedElement}
                                 setSelectedElement={setSelectedElement}
                                 drewElementsRef={drewElementsRef}
@@ -426,7 +516,10 @@ const DrawScreen = () => {
                             />
                         </div>
                     )}
-                    <ShowInfo selectedElement={selectedElement} />
+                    <ShowInfo
+                        selectedElement={selectedElement}
+                        redraw={redraw}
+                    />
                 </div>
             </div>
 
@@ -440,6 +533,7 @@ const DrawScreen = () => {
                 displayGrid={displayGrid}
                 drewGridRef={drewGridRef}
                 gridRef={gridRef}
+                setRedraw={setRedraw}
                 setGridRef={setGridRef}
                 selectedElement={selectedElement}
                 setSelectedElement={setSelectedElement}
@@ -456,6 +550,7 @@ const DrawScreen = () => {
                 <Layer
                     icon={<BsFillLayersFill />}
                     currentTitle="Layer"
+                    setRedraw={setRedraw}
                     elements={elements}
                     setElements={setElements}
                     setSelectedElement={setSelectedElement}

@@ -10,28 +10,15 @@ import {
 import * as yup from 'yup';
 
 import { createFixedElement, updateElement } from '../utils/element.util';
+import { computePointInGrid, undoComputePointInGrid } from '../utils/draw.util';
 
-const computePointInGrid = (gridRef, figureX, figureY) => {
-    if (!gridRef.current) {
-        return null;
-    }
+function reflectX(point) {
+    return { x: -point.x, y: point.y };
+}
 
-    return {
-        x: figureX - 384,
-        y: 288 - figureY,
-    };
-};
-
-const undoComputePointInGrid = (gridRef, figureX, figureY) => {
-    if (!gridRef.current) {
-        return null;
-    }
-
-    return {
-        x: Math.abs(figureX + 384),
-        y: Math.abs(288 - figureY),
-    };
-};
+function reflectY(point) {
+    return { x: point.x, y: -point.y };
+}
 
 function rotatePoint(gridRef, point, angle, verbose = false) {
     //translate the point back to origin
@@ -47,7 +34,7 @@ function rotatePoint(gridRef, point, angle, verbose = false) {
     // translate it back
     const temp = undoComputePointInGrid(gridRef, newX, newY);
     //console.log('point', point);
-    if(verbose){
+    if (verbose) {
         console.log('point', point);
         console.log('pointInGrid', { x, y });
         console.log('newPointInGrid', { x: newX, y: newY });
@@ -62,6 +49,7 @@ const ElementForm = ({
     elementType,
     setElements,
     setSelectedElement,
+    setRedraw,
     drewElementsRef,
     gridRef,
     buttonName = 'Draw',
@@ -83,11 +71,12 @@ const ElementForm = ({
             validationSchema={() => yup.object().shape(validationSchema)}
             onSubmit={(values, formikHelpers) => {
                 console.log('create new element');
-                const startPoint = computePointInGrid(
+                const startPoint = undoComputePointInGrid(
                     gridRef,
                     values[namespaces[0]],
                     values[namespaces[1]]
                 );
+                console.log('values', values);
                 createFixedElement(
                     {
                         startPoint,
@@ -97,7 +86,7 @@ const ElementForm = ({
                                       x: startPoint.x + values[namespaces[2]],
                                       y: startPoint.y,
                                   }
-                                : computePointInGrid(
+                                : undoComputePointInGrid(
                                       gridRef,
                                       values[namespaces[2]],
                                       values[namespaces[3]]
@@ -109,6 +98,7 @@ const ElementForm = ({
                     setElements,
                     setSelectedElement
                 );
+                setRedraw((prevState) => !prevState);
 
                 drewElementsRef.current = false;
             }}
@@ -149,6 +139,7 @@ const ControlledFigures = ({
     elements,
     setElements,
     setSelectedElement,
+    setRedraw,
     drewElementsRef,
 }) => {
     return (
@@ -165,24 +156,22 @@ const ControlledFigures = ({
                     onSubmit={(values, formikHelpers) => {
                         if (!selectedElement) return;
 
-                        console.log('selectedElement', selectedElement);
                         const { elementType, startPoint, endPoint } =
-                            selectedElement;
+                            selectedElement.current;
 
                         values.x = values.x ?? 0;
                         values.y = values.y ?? 0;
 
-                        let newElement = { ...selectedElement };
+                        let newElement = { ...selectedElement.current };
 
                         if (selectedElement.points)
-                            newElement.points = selectedElement.points.map(
-                                (item) => {
+                            newElement.points =
+                                selectedElement.current.points.map((item) => {
                                     return {
                                         x: item.x - values.x,
                                         y: item.y - values.y,
                                     };
-                                }
-                            );
+                                });
                         else {
                             newElement.startPoint = {
                                 x: startPoint.x + values.x,
@@ -251,19 +240,18 @@ const ControlledFigures = ({
                     onSubmit={(values, formikHelpers) => {
                         if (!selectedElement) return;
 
-                        console.log('selectedElement', selectedElement);
                         const { elementType, startPoint, endPoint } =
-                            selectedElement;
+                            selectedElement.current;
 
                         values.radius = values.radius ?? 0;
 
-                        let newElement = { ...selectedElement };
+                        let newElement = { ...selectedElement.current };
 
-                        if (selectedElement.points)
-                            newElement.points = selectedElement.points.map(
-                                (item) =>
+                        if (selectedElement.current.points)
+                            newElement.points =
+                                selectedElement.current.points.map((item) =>
                                     rotatePoint(gridRef, item, values.radius)
-                            );
+                                );
                         else {
                             newElement.startPoint = rotatePoint(
                                 gridRef,
@@ -326,6 +314,7 @@ const ControlledFigures = ({
                     }
                     elementType={elementType}
                     setElements={setElements}
+                    setRedraw={setRedraw}
                     setSelectedElement={setSelectedElement}
                     drewElementsRef={drewElementsRef}
                     gridRef={gridRef}

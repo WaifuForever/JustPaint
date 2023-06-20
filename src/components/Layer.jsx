@@ -13,10 +13,9 @@ const Item = ({
     isActive,
     setSelectedElement,
     deleteElement,
-    hideElement,
+    hideElementFn,
 }) => {
     const selectedId = sessionStorage.getItem('selectedElementId');
-
     return (
         <div
             className={`${
@@ -28,7 +27,7 @@ const Item = ({
         >
             <div
                 className="cursor-pointer text-sm border"
-                onClick={() => hideElement(elementId)}
+                onClick={() => hideElementFn()}
             >
                 {isActive ? <BsFillEyeFill /> : <BsFillEyeSlashFill />}
             </div>
@@ -47,11 +46,12 @@ const Layer = ({
     currentTitle,
     elements,
     setElements,
+    setRedraw,
     setSelectedElement,
     drewElementsRef,
 }) => {
     const [collapse, setCollapse] = useState(false);
-
+    
     return (
         <div className="flex flex-col">
             <div
@@ -68,8 +68,8 @@ const Layer = ({
                 }`}
             >
                 {elements.map((element, index) => {
-                    ////console.log(element);
-                    ////console.log(element.coordinates);
+                    //console.log('layerItem', element);
+                    //console.log(element.coordinates);
                     return (
                         <Item
                             key={index + element.id}
@@ -77,8 +77,11 @@ const Layer = ({
                             elementId={element.id}
                             elementType={element.elementType}
                             elementCoordinates={element.coordinates}
-                            setSelectedElement={() =>
-                                setSelectedElement(element)
+                            setSelectedElement={() =>{
+                                setRedraw((prevState) => !prevState);
+                                setSelectedElement(element);
+                            }
+                                
                             }
                             isActive={element.isVisible}
                             deleteElement={() =>
@@ -89,13 +92,16 @@ const Layer = ({
                                     drewElementsRef
                                 )
                             }
-                            hideElement={() =>
+                            hideElementFn={() => {
+                                console.log("fn", elements);
                                 hideElement(
                                     element.id,
                                     elements,
                                     setElements,
                                     drewElementsRef
                                 )
+                            }
+                               
                             }
                         />
                     );
